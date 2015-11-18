@@ -10,13 +10,19 @@ namespace ALAExport.Export.Infrastructure
         {
             var container = new Container();
 
+            // Register task runner
             container.Register<TaskRunner>();
+            
+            // Register tasks
             container.RegisterCollection<ITask>(new[]
             {
                 typeof(ALAExportTask)
             });
+
+            // Register factories
             container.Register(typeof(IFactory<>), new[] { typeof(IFactory<>).Assembly });
 
+            // Verify registrations
             container.Verify();
 
             return container;

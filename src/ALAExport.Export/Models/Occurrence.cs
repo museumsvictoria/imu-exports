@@ -1,7 +1,16 @@
-﻿namespace ALAExport.Export.Models
+﻿using System.Collections.Generic;
+
+namespace ALAExport.Export.Models
 {
     public class Occurrence
     {
+        public Occurrence()
+        {
+            this.Images = new List<Image>();
+        }
+
+        public IList<Image> Images { get; set; }
+
         public string DctermsType { get; set; }
 
         public string DctermsModified { get; set; }

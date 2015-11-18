@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using ALAExport.Export.Extensions;
 using ALAExport.Export.Models;
 using IMu;
@@ -79,6 +80,11 @@ namespace ALAExport.Export.Factories
             }
 
             return party;
+        }
+
+        public IEnumerable<Party> Make(IEnumerable<Map> maps)
+        {
+            return maps.Select(Make);
         }
     }
 }
