@@ -22,6 +22,9 @@ namespace ALAExport.Export.Infrastructure
             // Register factories
             container.Register(typeof(IFactory<>), new[] { typeof(IFactory<>).Assembly });
 
+            // Register everything else
+            container.Register<IImuSessionProvider, ImuSessionProvider>();
+
             // Verify registrations
             container.Verify();
 

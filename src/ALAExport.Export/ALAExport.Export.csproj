@@ -61,6 +61,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Drawing" />
@@ -76,6 +77,9 @@
     <Compile Include="Infrastructure\CommandLineConfig.cs" />
     <Compile Include="Infrastructure\CommandLineOptions.cs" />
     <Compile Include="Infrastructure\ContainerConfig.cs" />
+    <Compile Include="Infrastructure\IImuSessionProvider.cs" />
+    <Compile Include="Infrastructure\ImuSession.cs" />
+    <Compile Include="Infrastructure\ImuSessionProvider.cs" />
     <Compile Include="Infrastructure\SerilogConfig.cs" />
     <Compile Include="Infrastructure\TaskRunner.cs" />
     <Compile Include="Models\Image.cs" />
