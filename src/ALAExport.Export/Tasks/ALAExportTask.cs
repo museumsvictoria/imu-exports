@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Text;
 using ALAExport.Export.Extensions;
 using ALAExport.Export.Factories;
 using ALAExport.Export.Infrastructure;
+using ALAExport.Export.Maps;
 using ALAExport.Export.Models;
+using CsvHelper;
 using IMu;
 using Serilog;
 
@@ -92,6 +96,30 @@ namespace ALAExport.Export.Tasks
                         Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset, cachedIrns.Count);
                     }
                 }
+
+                // Save data
+                Log.Logger.Information("Saving occurrence data as csv");
+                using (var csvWriter = new CsvWriter(new StreamWriter(CommandLineConfig.Options.Destination + @"occurrences.csv", false, Encoding.UTF8)))
+                {
+                    csvWriter.Configuration.RegisterClassMap<OccurrenceMap>();
+                    csvWriter.Configuration.HasHeaderRecord = true;
+                    csvWriter.Configuration.DoubleQuoteString = @"\""";
+                    csvWriter.WriteRecords(occurrences);
+                }
+
+                Log.Logger.Information("Saving image data as csv");
+                using (var csvWriter = new CsvWriter(new StreamWriter(CommandLineConfig.Options.Destination + @"images.csv", false, Encoding.UTF8)))
+                {
+                    var images = occurrences.SelectMany(x => x.Images);
+
+                    csvWriter.Configuration.RegisterClassMap<ImageMap>();
+                    csvWriter.Configuration.HasHeaderRecord = true;
+                    csvWriter.Configuration.DoubleQuoteString = @"\""";
+                    csvWriter.WriteRecords(images);
+                }
+
+                // Copy meta.xml
+                File.Copy(@"meta.xml", CommandLineConfig.Options.Destination + @"meta.xml", true);
             }
         }
 
@@ -143,7 +171,7 @@ namespace ALAExport.Export.Tasks
                     "DarDayCollected",
                     "site=SitSiteRef.(SitSiteCode,SitSiteNumber,geo=[LocOcean_tab,LocContinent_tab,LocCountry_tab,LocProvinceStateTerritory_tab,LocDistrictCountyShire_tab,LocTownship_tab],LocPreciseLocation,LocElevationASLFromMt,LocElevationASLToMt,latlong=[LatLongitudeDecimal_nesttab,LatLatitudeDecimal_nesttab,LatRadiusNumeric_tab,LatDatum_tab,determinedBy=LatDeterminedByRef_tab.(NamPartyType,NamFullName,NamOrganisation,NamBranch,NamDepartment,NamOrganisation,NamOrganisationOtherNames_tab,NamSource,AddPhysStreet,AddPhysCity,AddPhysState,AddPhysCountry,ColCollaborationName),LatDetDate0,LatLatLongDetermination_tab,LatDetSource_tab])",
                     "identifications=[IdeTypeStatus_tab,IdeCurrentNameLocal_tab,identifiers=IdeIdentifiedByRef_nesttab.(NamPartyType,NamFullName,NamOrganisation,NamBranch,NamDepartment,NamOrganisation,NamOrganisationOtherNames_tab,NamSource,AddPhysStreet,AddPhysCity,AddPhysState,AddPhysCountry,ColCollaborationName),IdeDateIdentified0,IdeQualifier_tab,IdeQualifierRank_tab,taxa=TaxTaxonomyRef_tab.(irn,ClaScientificName,ClaKingdom,ClaPhylum,ClaSubphylum,ClaSuperclass,ClaClass,ClaSubclass,ClaSuperorder,ClaOrder,ClaSuborder,ClaInfraorder,ClaSuperfamily,ClaFamily,ClaSubfamily,ClaTribe,ClaSubtribe,ClaGenus,ClaSubgenus,ClaSpecies,ClaSubspecies,ClaRank,AutAuthorString,ClaApplicableCode,comname=[ComName_tab,ComStatus_tab])]",
-                    "media=MulMultiMediaRef_tab.(irn,MulTitle,MulDescription,MulCreator_tab,MdaDataSets_tab,credit=<erights:MulMultiMediaRef_tab>.(RigAcknowledgement,RigType),AdmPublishWebNoPassword)"
+                    "media=MulMultiMediaRef_tab.(irn,MulTitle,MulDescription,MulMimeType,MulCreator_tab,MdaDataSets_tab,credit=<erights:MulMultiMediaRef_tab>.(RigAcknowledgement,RigType),AdmPublishWebNoPassword)"
                 };
             }
         }
