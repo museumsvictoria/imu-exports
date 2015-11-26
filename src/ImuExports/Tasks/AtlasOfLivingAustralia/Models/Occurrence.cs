@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ImuExports.Tasks.AlaExport.Models
+namespace ImuExports.Tasks.AtlasOfLivingAustralia.Models
 {
     public class Occurrence
     {

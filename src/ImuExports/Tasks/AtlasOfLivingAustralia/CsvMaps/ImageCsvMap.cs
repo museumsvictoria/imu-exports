@@ -1,11 +1,11 @@
 ﻿using CsvHelper.Configuration;
-using ImuExports.Tasks.AlaExport.Models;
+using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 
-namespace ImuExports.Tasks.AlaExport.Maps
+namespace ImuExports.Tasks.AtlasOfLivingAustralia.CsvMaps
 {
-    public sealed class ImageMap : CsvClassMap<Image>
+    public sealed class ImageCsvMap : CsvClassMap<Image>
     {
-        public ImageMap()
+        public ImageCsvMap()
         {
             Map(m => m.CoreID).Name("coreID");
             Map(m => m.Identifier).Name("identifier");

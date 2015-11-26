@@ -6,10 +6,10 @@ using ImageProcessor.Imaging.Formats;
 using IMu;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
-using ImuExports.Tasks.AlaExport.Models;
+using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 using Serilog;
 
-namespace ImuExports.Tasks.AlaExport.Factories
+namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 {
     public class ImageFactory : IFactory<Image>
     {
@@ -101,7 +101,7 @@ namespace ImuExports.Tasks.AlaExport.Factories
                     var mimeFormat = resource["mimeFormat"] as string;
 
                     using (var imageFactory = new ImageProcessor.ImageFactory())
-                    using (var file = File.OpenWrite(string.Format("{0}{1}.jpg", CommandLineConfig.Options.Destination, irn)))
+                    using (var file = File.OpenWrite(string.Format("{0}{1}.jpg", CommandLineConfig.Options.Ala.Destination, irn)))
                     {
                         if (mimeFormat != null && mimeFormat.ToLower() == "jpeg")
                             fileStream.CopyTo(file);

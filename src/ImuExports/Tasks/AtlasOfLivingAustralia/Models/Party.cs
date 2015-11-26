@@ -1,4 +1,4 @@
-﻿namespace ImuExports.Tasks.AlaExport.Models
+﻿namespace ImuExports.Tasks.AtlasOfLivingAustralia.Models
 {
     public class Party
     {

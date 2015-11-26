@@ -1,36 +1,22 @@
-﻿using System;
-using CommandLine;
+﻿using CommandLine;
 using CommandLine.Text;
+using ImuExports.Tasks.AtlasOfLivingAustralia;
+using ImuExports.Tasks.FieldGuide;
 
 namespace ImuExports.Infrastructure
 {
     public class CommandLineOptions
     {
-        [Option('d', "dest", HelpText = "Destination directory", Required = true)]
-        public string Destination { get; set; }
+        [VerbOption("ala", HelpText = "Export records for the Atlas of Living Australia.")]
+        public AtlasOfLivingAustraliaOptions Ala { get; set; }
 
-        [Option('a', "modified-after", HelpText = "Get all records after modified date >=")]
-        public string ModifiedAfterDate { get; set; }
+        [VerbOption("fieldguide", HelpText = "Export records for Field Guide.")]
+        public FieldGuideOptions FieldGuide { get; set; }
 
-        [Option('b', "modified-before", HelpText = "Get all records before modified date <=")]
-        public string ModifiedBeforeDate { get; set; }
-        
-        [HelpOption(HelpText = "Display this help screen.")]
-        public string GetUsage()
+        [HelpVerbOption]
+        public string GetUsage(string verb)
         {
-            var help = new HelpText("Imu Exports");
-
-            var errors = help.RenderParsingErrorsText(this, 0);
-            if (!string.IsNullOrEmpty(errors))
-            {
-                help.AddPreOptionsLine(string.Concat(Environment.NewLine, "ERROR(S):"));
-                help.AddPreOptionsLine(string.Concat(errors, Environment.NewLine));
-            }
-
-            help.AddPreOptionsLine("Usage: ImuExports.exe [-d|--dest destination] [-a|--modified-after 2015-01-23] [-b|--modified-before 2015-01-23] [-h|--help]");
-            help.AddOptions(this);
-
-            return help;
+            return HelpText.AutoBuild(this, verb);
         }
     }
 }

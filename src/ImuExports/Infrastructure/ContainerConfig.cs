@@ -1,4 +1,4 @@
-﻿using ImuExports.Tasks.AlaExport;
+﻿using ImuExports.Tasks.AtlasOfLivingAustralia;
 using SimpleInjector;
 
 namespace ImuExports.Infrastructure
@@ -15,7 +15,7 @@ namespace ImuExports.Infrastructure
             // Register tasks
             container.RegisterCollection<ITask>(new[]
             {
-                typeof(AlaExportTask)
+                typeof(AtlasOfLivingAustraliaTask)
             });
 
             // Register factories

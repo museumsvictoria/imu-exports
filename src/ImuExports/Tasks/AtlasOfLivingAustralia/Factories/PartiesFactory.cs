@@ -3,9 +3,9 @@ using System.Linq;
 using IMu;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
-using ImuExports.Tasks.AlaExport.Models;
+using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 
-namespace ImuExports.Tasks.AlaExport.Factories
+namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 {
     public class PartiesFactory : IFactory<Party>
     {
