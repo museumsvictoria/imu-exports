@@ -66,20 +66,16 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Constants.cs" />
+    <Compile Include="Infrastructure\Constants.cs" />
     <Compile Include="Extensions\MapExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Factories\IFactory.cs" />
-    <Compile Include="Factories\ImageFactory.cs" />
-    <Compile Include="Factories\OccurrenceFactory.cs" />
-    <Compile Include="Factories\PartiesFactory.cs" />
+    <Compile Include="Infrastructure\IFactory.cs" />
+    <Compile Include="Tasks\AlaExport\Factories\ImageFactory.cs" />
+    <Compile Include="Tasks\AlaExport\Factories\OccurrenceFactory.cs" />
+    <Compile Include="Tasks\AlaExport\Factories\PartiesFactory.cs" />
     <Compile Include="Infrastructure\CommandLineConfig.cs" />
     <Compile Include="Infrastructure\CommandLineOptions.cs" />
     <Compile Include="Infrastructure\ContainerConfig.cs" />
@@ -88,15 +84,15 @@
     <Compile Include="Infrastructure\ImuSessionProvider.cs" />
     <Compile Include="Infrastructure\SerilogConfig.cs" />
     <Compile Include="Infrastructure\TaskRunner.cs" />
-    <Compile Include="Maps\ImageMap.cs" />
-    <Compile Include="Maps\OccurrenceMap.cs" />
-    <Compile Include="Models\Image.cs" />
-    <Compile Include="Models\Occurrence.cs" />
-    <Compile Include="Models\Party.cs" />
+    <Compile Include="Tasks\AlaExport\Maps\ImageMap.cs" />
+    <Compile Include="Tasks\AlaExport\Maps\OccurrenceMap.cs" />
+    <Compile Include="Tasks\AlaExport\Models\Image.cs" />
+    <Compile Include="Tasks\AlaExport\Models\Occurrence.cs" />
+    <Compile Include="Tasks\AlaExport\Models\Party.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tasks\AlaExportTask.cs" />
-    <Compile Include="Tasks\ITask.cs" />
+    <Compile Include="Tasks\AlaExport\AlaExportTask.cs" />
+    <Compile Include="Infrastructure\ITask.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

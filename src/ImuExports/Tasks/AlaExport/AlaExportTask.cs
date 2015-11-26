@@ -7,13 +7,12 @@ using System.Text;
 using CsvHelper;
 using IMu;
 using ImuExports.Extensions;
-using ImuExports.Factories;
 using ImuExports.Infrastructure;
-using ImuExports.Maps;
-using ImuExports.Models;
+using ImuExports.Tasks.AlaExport.Maps;
+using ImuExports.Tasks.AlaExport.Models;
 using Serilog;
 
-namespace ImuExports.Tasks
+namespace ImuExports.Tasks.AlaExport
 {
     public class AlaExportTask : ITask
     {

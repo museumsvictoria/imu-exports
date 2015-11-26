@@ -1,4 +1,4 @@
-﻿namespace ImuExports.Models
+﻿namespace ImuExports.Tasks.AlaExport.Models
 {
     public class Image
     {

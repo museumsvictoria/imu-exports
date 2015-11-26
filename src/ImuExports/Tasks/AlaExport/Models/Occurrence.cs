@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ImuExports.Models
+namespace ImuExports.Tasks.AlaExport.Models
 {
     public class Occurrence
     {

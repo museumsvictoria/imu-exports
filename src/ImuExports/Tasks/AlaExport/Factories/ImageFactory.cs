@@ -6,10 +6,10 @@ using ImageProcessor.Imaging.Formats;
 using IMu;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
-using ImuExports.Models;
+using ImuExports.Tasks.AlaExport.Models;
 using Serilog;
 
-namespace ImuExports.Factories
+namespace ImuExports.Tasks.AlaExport.Factories
 {
     public class ImageFactory : IFactory<Image>
     {
@@ -24,7 +24,7 @@ namespace ImuExports.Factories
         {
             if (map != null &&
                 string.Equals(map.GetEncodedString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase) &&
-                map.GetEncodedStrings("MdaDataSets_tab").Any(x => x.Contains(Constants.ImuMultimediaQueryString)) &&
+                map.GetEncodedStrings("MdaDataSets_tab").Any(x => x.Contains("Atlas of Living Australia")) &&
                 string.Equals(map.GetEncodedString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
             {
                 var irn = long.Parse(map.GetString("irn"));

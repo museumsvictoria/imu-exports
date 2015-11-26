@@ -1,4 +1,4 @@
-﻿namespace ImuExports.Tasks
+﻿namespace ImuExports.Infrastructure
 {
     public interface ITask
     {

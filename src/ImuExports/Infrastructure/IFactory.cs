@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using IMu;
 
-namespace ImuExports.Factories
+namespace ImuExports.Infrastructure
 {
-    public interface IFactory<T>
+    public interface IFactory<out T>
     {
         T Make(Map map);
 

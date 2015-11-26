@@ -2,9 +2,10 @@
 using System.Linq;
 using IMu;
 using ImuExports.Extensions;
-using ImuExports.Models;
+using ImuExports.Infrastructure;
+using ImuExports.Tasks.AlaExport.Models;
 
-namespace ImuExports.Factories
+namespace ImuExports.Tasks.AlaExport.Factories
 {
     public class PartiesFactory : IFactory<Party>
     {

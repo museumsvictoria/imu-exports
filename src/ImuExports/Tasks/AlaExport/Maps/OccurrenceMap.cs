@@ -1,7 +1,7 @@
 ﻿using CsvHelper.Configuration;
-using ImuExports.Models;
+using ImuExports.Tasks.AlaExport.Models;
 
-namespace ImuExports.Maps
+namespace ImuExports.Tasks.AlaExport.Maps
 {
     public sealed class OccurrenceMap : CsvClassMap<Occurrence>
     {
