@@ -1,7 +1,7 @@
 ﻿using System;
 using Serilog;
 
-namespace ImuExports.Infrastructure
+namespace ImuExports.Config
 {
     public static class SerilogConfig
     {

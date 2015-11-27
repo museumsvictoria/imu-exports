@@ -2,9 +2,9 @@
 
 namespace ImuExports.Infrastructure
 {
-    public class ImuSessionProvider : IImuSessionProvider
+    public static class ImuSessionProvider
     {
-        public ImuSession CreateInstance(string moduleName)
+        public static ImuSession CreateInstance(string moduleName)
         {
             return new ImuSession(moduleName, ConfigurationManager.AppSettings["EmuServerHost"], int.Parse(ConfigurationManager.AppSettings["EmuServerPort"]));
         }

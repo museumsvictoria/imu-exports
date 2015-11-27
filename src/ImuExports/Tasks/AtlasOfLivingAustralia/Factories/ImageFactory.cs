@@ -13,13 +13,6 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 {
     public class ImageFactory : IFactory<Image>
     {
-        private readonly IImuSessionProvider imuSessionProvider;
-
-        public ImageFactory(IImuSessionProvider imuSessionProvider)
-        {
-            this.imuSessionProvider = imuSessionProvider;
-        }
-       
         public Image Make(Map map)
         {
             if (map != null &&
@@ -89,7 +82,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
         {
             try
             {
-                using (var imuSession = imuSessionProvider.CreateInstance("emultimedia"))
+                using (var imuSession = ImuSessionProvider.CreateInstance("emultimedia"))
                 {
                     imuSession.FindKey(irn);
                     var resource = imuSession.Fetch("start", 0, -1, new[] { "resource" }).Rows[0].GetMap("resource");
@@ -101,7 +94,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     var mimeFormat = resource["mimeFormat"] as string;
 
                     using (var imageFactory = new ImageProcessor.ImageFactory())
-                    using (var file = File.OpenWrite(string.Format("{0}{1}.jpg", CommandLineConfig.Options.Ala.Destination, irn)))
+                    using (var file = File.OpenWrite(string.Format("{0}{1}.jpg", Config.Config.Options.Ala.Destination, irn)))
                     {
                         if (mimeFormat != null && mimeFormat.ToLower() == "jpeg")
                             fileStream.CopyTo(file);

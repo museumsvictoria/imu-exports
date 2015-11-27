@@ -69,22 +69,21 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Infrastructure\Constants.cs" />
+    <Compile Include="Config\Constants.cs" />
     <Compile Include="Extensions\MapExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Infrastructure\IFactory.cs" />
-    <Compile Include="Infrastructure\IInitializable.cs" />
+    <Compile Include="Infrastructure\ITaskOptions.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\AtlasOfLivingAustraliaOptions.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\ImageFactory.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\OccurrenceFactory.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\PartiesFactory.cs" />
-    <Compile Include="Infrastructure\CommandLineConfig.cs" />
-    <Compile Include="Infrastructure\CommandLineOptions.cs" />
-    <Compile Include="Infrastructure\ContainerConfig.cs" />
-    <Compile Include="Infrastructure\IImuSessionProvider.cs" />
+    <Compile Include="Config\Config.cs" />
+    <Compile Include="Config\Options.cs" />
+    <Compile Include="Config\ContainerConfig.cs" />
     <Compile Include="Infrastructure\ImuSession.cs" />
     <Compile Include="Infrastructure\ImuSessionProvider.cs" />
-    <Compile Include="Infrastructure\SerilogConfig.cs" />
+    <Compile Include="Config\SerilogConfig.cs" />
     <Compile Include="Infrastructure\TaskRunner.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\CsvMaps\ImageCsvMap.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\CsvMaps\OccurrenceCsvMap.cs" />
@@ -95,8 +94,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\AtlasOfLivingAustraliaTask.cs" />
     <Compile Include="Infrastructure\ITask.cs" />
-    <Compile Include="Tasks\FieldGuide\FieldGuideOptions.cs" />
-    <Compile Include="Tasks\FieldGuide\FieldGuideTask.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\FieldGuideGippslandOptions.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\FieldGuideGippslandTask.cs" />
+    <Compile Include="Tasks\ImuTaskBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

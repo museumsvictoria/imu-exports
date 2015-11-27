@@ -4,20 +4,14 @@ using CommandLine;
 using ImuExports.Infrastructure;
 using Serilog;
 
-namespace ImuExports.Tasks.AtlasOfLivingAustralia
+namespace ImuExports.Tasks.FieldGuideGippsland
 {
-    public class AtlasOfLivingAustraliaOptions : ITaskOptions
+    public class FieldGuideGippslandOptions : ITaskOptions
     {
-        [Option('d', "dest", HelpText = "Destination directory for csv and images.", Required = true)]
+        [Option('d', "dest", HelpText = "Destination directory for json and images.", Required = true)]
         public string Destination { get; set; }
 
-        [Option('a', "modified-after", HelpText = "Get all records after modified date >=")]
-        public string ModifiedAfterDate { get; set; }
-
-        [Option('b', "modified-before", HelpText = "Get all records before modified date <=")]
-        public string ModifiedBeforeDate { get; set; }
-
-        public Type TypeOfTask { get { return typeof (AtlasOfLivingAustraliaTask); }}
+        public Type TypeOfTask { get { return typeof(FieldGuideGippslandTask); } }
 
         public void Initialize()
         {

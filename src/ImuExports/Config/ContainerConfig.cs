@@ -1,7 +1,10 @@
-﻿using ImuExports.Tasks.AtlasOfLivingAustralia;
+﻿using System;
+using System.Collections.Generic;
+using ImuExports.Infrastructure;
+using ImuExports.Tasks.AtlasOfLivingAustralia;
 using SimpleInjector;
 
-namespace ImuExports.Infrastructure
+namespace ImuExports.Config
 {
     public static class ContainerConfig
     {
@@ -12,17 +15,18 @@ namespace ImuExports.Infrastructure
             // Register task runner
             container.Register<TaskRunner>();
             
-            // Register tasks
-            container.RegisterCollection<ITask>(new[]
-            {
-                typeof(AtlasOfLivingAustraliaTask)
-            });
+            // Register all tasks
+            var serviceTasks = new List<Type>();
+
+            // Add invoked task
+            var taskOptions = Config.TaskOptions as ITaskOptions;
+            if (taskOptions != null)
+                serviceTasks.Add(taskOptions.TypeOfTask);
+
+            container.RegisterCollection<ITask>(serviceTasks);
 
             // Register factories
             container.Register(typeof(IFactory<>), new[] { typeof(IFactory<>).Assembly });
-
-            // Register everything else
-            container.Register<IImuSessionProvider, ImuSessionProvider>();
 
             // Verify registrations
             container.Verify();

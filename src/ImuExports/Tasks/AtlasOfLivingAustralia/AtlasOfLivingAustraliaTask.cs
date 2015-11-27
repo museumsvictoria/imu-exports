@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using CsvHelper;
 using IMu;
-using ImuExports.Extensions;
+using ImuExports.Config;
 using ImuExports.Infrastructure;
 using ImuExports.Tasks.AtlasOfLivingAustralia.CsvMaps;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
@@ -14,65 +14,32 @@ using Serilog;
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia
 {
-    public class AtlasOfLivingAustraliaTask : ITask
+    public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
     {
         private readonly IFactory<Occurrence> occurrenceFactory;
-        private readonly IImuSessionProvider imuSessionProvider;
 
-        public AtlasOfLivingAustraliaTask(IFactory<Occurrence> occurrenceFactory,
-            IImuSessionProvider imuSessionProvider)
+        public AtlasOfLivingAustraliaTask(IFactory<Occurrence> occurrenceFactory)
         {
             this.occurrenceFactory = occurrenceFactory;
-            this.imuSessionProvider = imuSessionProvider;
         }
 
         public void Run()
         {
-            using (Log.Logger.BeginTimedOperation(string.Format("{0} starting", GetType().Name), "AtlasOfLivingAustraliaTask.Run"))
+            using (Log.Logger.BeginTimedOperation(string.Format("{0} starting", GetType().Name), string.Format("{0}.Run", GetType().Name)))
             {
-                var cachedIrns = new List<long>();
-                var occurrences = new List<Occurrence>();
-                var offset = 0;
-
                 // Cache Irns
-                using (var imuSession = imuSessionProvider.CreateInstance("ecatalogue"))
-                {
-                    Log.Logger.Information("Caching data");
-
-                    var terms = BuildTerms();
-                    var hits = imuSession.FindTerms(terms);
-
-                    Log.Logger.Information("Found {Hits} records where {@Terms}", hits, terms.List);
-                    
-                    while (true)
-                    {
-                        if (Program.ImportCanceled)
-                            return;
-
-                        var results = imuSession.Fetch("start", offset, Constants.CachedDataBatchSize, new[] { "irn" });
-
-                        if (results.Count == 0)
-                            break;
-
-                        var irns = results.Rows.Select(x => long.Parse(x.GetEncodedString("irn"))).ToList();
-                        
-                        cachedIrns.AddRange(irns);
-
-                        offset += results.Count;
-
-                        Log.Logger.Information("AtlasOfLivingAustraliaTask cache progress... {Offset}/{TotalResults}", offset, hits);
-                    }
-                }
+                var cachedIrns = this.CacheIrns("ecatalogue", BuildSearchTerms());
 
                 // Fetch data
-                offset = 0;
+                var occurrences = new List<Occurrence>();
+                var offset = 0;
                 Log.Logger.Information("Fetching data");
                 while (true)
                 {
                     if (Program.ImportCanceled)
                         return;
 
-                    using (var imuSession = imuSessionProvider.CreateInstance("ecatalogue"))
+                    using (var imuSession = ImuSessionProvider.CreateInstance("ecatalogue"))
                     {
                         var cachedIrnsBatch = cachedIrns
                             .Skip(offset)
@@ -98,7 +65,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
 
                 // Save data
                 Log.Logger.Information("Saving occurrence data as csv");
-                using (var csvWriter = new CsvWriter(new StreamWriter(CommandLineConfig.Options.Ala.Destination + @"occurrences.csv", false, Encoding.UTF8)))
+                using (var csvWriter = new CsvWriter(new StreamWriter(Config.Config.Options.Ala.Destination + @"occurrences.csv", false, Encoding.UTF8)))
                 {
                     csvWriter.Configuration.RegisterClassMap<OccurrenceCsvMap>();
                     csvWriter.Configuration.HasHeaderRecord = true;
@@ -107,7 +74,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                 }
 
                 Log.Logger.Information("Saving image data as csv");
-                using (var csvWriter = new CsvWriter(new StreamWriter(CommandLineConfig.Options.Ala.Destination + @"images.csv", false, Encoding.UTF8)))
+                using (var csvWriter = new CsvWriter(new StreamWriter(Config.Config.Options.Ala.Destination + @"images.csv", false, Encoding.UTF8)))
                 {
                     var images = occurrences.SelectMany(x => x.Images);
 
@@ -118,31 +85,29 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                 }
 
                 // Copy meta.xml
-                File.Copy(@"meta.xml", CommandLineConfig.Options.Ala.Destination + @"meta.xml", true);
+                File.Copy(@"meta.xml", Config.Config.Options.Ala.Destination + @"meta.xml", true);
             }
         }
 
-        private Terms BuildTerms()
+        private Terms BuildSearchTerms()
         {
-            var terms = new Terms();
-            terms.Add("ColCategory", "Natural Sciences");
-            terms.Add("MdaDataSets_tab", "Website - Atlas of Living Australia");
+            var searchTerms = new Terms();
+            searchTerms.Add("ColCategory", "Natural Sciences");
+            searchTerms.Add("MdaDataSets_tab", "Website - Atlas of Living Australia");
 
             DateTime modifiedAfterDate;
-            if (!string.IsNullOrWhiteSpace(CommandLineConfig.Options.Ala.ModifiedAfterDate) &&
-                DateTime.TryParseExact(CommandLineConfig.Options.Ala.ModifiedAfterDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out modifiedAfterDate))
+            if (!string.IsNullOrWhiteSpace(Config.Config.Options.Ala.ModifiedAfterDate) && DateTime.TryParseExact(Config.Config.Options.Ala.ModifiedAfterDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out modifiedAfterDate))
             {
-                terms.Add("AdmDateModified", modifiedAfterDate.ToString("MMM dd yyyy"), ">=");
+                searchTerms.Add("AdmDateModified", modifiedAfterDate.ToString("MMM dd yyyy"), ">=");
             }
 
             DateTime modifiedBeforeDate;
-            if (!string.IsNullOrWhiteSpace(CommandLineConfig.Options.Ala.ModifiedBeforeDate) &&
-                DateTime.TryParseExact(CommandLineConfig.Options.Ala.ModifiedBeforeDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out modifiedBeforeDate))
+            if (!string.IsNullOrWhiteSpace(Config.Config.Options.Ala.ModifiedBeforeDate) && DateTime.TryParseExact(Config.Config.Options.Ala.ModifiedBeforeDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out modifiedBeforeDate))
             {
-                terms.Add("AdmDateModified", modifiedBeforeDate.ToString("MMM dd yyyy"), "<=");
+                searchTerms.Add("AdmDateModified", modifiedBeforeDate.ToString("MMM dd yyyy"), "<=");
             }
 
-            return terms;
+            return searchTerms;
         }
 
         private string[] Columns

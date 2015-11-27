@@ -1,17 +1,17 @@
 ﻿using CommandLine;
 using CommandLine.Text;
 using ImuExports.Tasks.AtlasOfLivingAustralia;
-using ImuExports.Tasks.FieldGuide;
+using ImuExports.Tasks.FieldGuideGippsland;
 
-namespace ImuExports.Infrastructure
+namespace ImuExports.Config
 {
-    public class CommandLineOptions
+    public class Options
     {
         [VerbOption("ala", HelpText = "Export records for the Atlas of Living Australia.")]
         public AtlasOfLivingAustraliaOptions Ala { get; set; }
 
-        [VerbOption("fieldguide", HelpText = "Export records for Field Guide.")]
-        public FieldGuideOptions FieldGuide { get; set; }
+        [VerbOption("fgg", HelpText = "Export records for Gippsland Field Guide.")]
+        public FieldGuideGippslandOptions Fgg { get; set; }
 
         [HelpVerbOption]
         public string GetUsage(string verb)

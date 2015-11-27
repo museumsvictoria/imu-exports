@@ -1,4 +1,5 @@
 ﻿using System;
+using ImuExports.Config;
 using ImuExports.Infrastructure;
 using Serilog;
 
@@ -11,7 +12,7 @@ namespace ImuExports
         static void Main(string[] args)
         {
             // Parse command line options
-            CommandLineConfig.Initialize(args);
+            Config.Config.Initialize(args);
 
             // Configure serilog
             SerilogConfig.Initialize();
