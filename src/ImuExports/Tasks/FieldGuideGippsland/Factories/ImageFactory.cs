@@ -6,10 +6,10 @@ using ImageProcessor.Imaging.Formats;
 using IMu;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
-using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
+using ImuExports.Tasks.FieldGuideGippsland.Models;
 using Serilog;
 
-namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
+namespace ImuExports.Tasks.FieldGuideGippsland.Factories
 {
     public class ImageFactory : IFactory<Image>
     {
@@ -17,36 +17,38 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
         {
             if (map != null &&
                 string.Equals(map.GetEncodedString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase) &&
-                map.GetEncodedStrings("MdaDataSets_tab").Any(x => x.Contains("Atlas of Living Australia")) &&
+                map.GetEncodedStrings("MdaDataSets_tab").Any(x => x.Contains("App: Gippsland")) &&
                 string.Equals(map.GetEncodedString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
             {
                 var irn = long.Parse(map.GetString("irn"));
-                var fileName = string.Format("{0}.jpg", irn);
-                var title = map.GetString("MulTitle");
-                var description = map.GetString("MulDescription");
-                var creator = map.GetStrings("MulCreator_tab").Concatenate(";");
-                var rigAcknowledgement = string.Empty;
-                var rigType = string.Empty;
 
-                var credit = map.GetMaps("credit").FirstOrDefault();
-                if (credit != null)
-                {
-                    rigAcknowledgement = credit.GetString("RigAcknowledgement");
-                    rigType = credit.GetString("RigType");
-                }
+                var image = new Image();
+
+                var captionMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetEncodedString("MdaElement_tab"), "dcDescription", StringComparison.OrdinalIgnoreCase) && string.Equals(x.GetEncodedString("MdaQualifier_tab"), "Caption.AppGippsland"));
+                if (captionMap != null)
+                    image.Caption = captionMap.GetEncodedString("MdaFreeText_tab");
+
+                image.AlternateText = map.GetEncodedString("DetAlternateText");
+                image.Creators = map.GetEncodedStrings("RigCreator_tab");
+                image.Sources = map.GetEncodedStrings("RigSource_tab");
+                image.Acknowledgment = map.GetEncodedString("RigAcknowledgementCredit");
+                image.CopyrightStatus = map.GetEncodedString("RigCopyrightStatus");
+                image.CopyrightStatement = map.GetEncodedString("RigCopyrightStatement");
+                image.Licence = map.GetEncodedString("RigLicence");
+                image.LicenceDetails = map.GetEncodedString("RigLicenceDetails");
+                image.Filename = string.Format("{0}.jpg", irn);
+
+                var repositories = map.GetEncodedStrings("ChaRepository_tab");
+                if (repositories.Any(x => string.Equals(x, "NS Online Images Live Hero", StringComparison.OrdinalIgnoreCase)))
+                    image.Type = ImageType.Hero;
+                else if (repositories.Any(x => string.Equals(x, "NS Online Images Square", StringComparison.OrdinalIgnoreCase)))
+                    image.Type = ImageType.Thumbnail;
+                else
+                    image.Type = ImageType.General;
 
                 if (TrySaveImage(irn))
                 {
-                    return new Image
-                    {
-                        Identifier = fileName,
-                        Title = title,
-                        Description = description,
-                        Format = "jpeg",
-                        Creator = creator,
-                        License = rigType,
-                        RightsHolder = rigAcknowledgement
-                    };
+                    return image;
                 }
             }
 
@@ -89,20 +91,18 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 
                     if (resource == null)
                         throw new IMuException("MultimediaResourceNotFound");
-                    
-                    var mimeFormat = resource["mimeFormat"] as string;
 
                     using (var fileStream = resource["file"] as FileStream)
                     using (var imageFactory = new ImageProcessor.ImageFactory())
-                    using (var file = File.OpenWrite(string.Format("{0}{1}.jpg", Config.Config.Options.Ala.Destination, irn)))
+                    using (var file = File.OpenWrite(string.Format("{0}{1}.jpg", Config.Config.Options.Fgg.Destination, irn)))
                     {
-                        if (mimeFormat != null && mimeFormat.ToLower() == "jpeg")
+                        if (string.Equals(resource["mimeFormat"] as string, "jpeg", StringComparison.OrdinalIgnoreCase))
                             fileStream.CopyTo(file);
                         else
                             imageFactory
                                 .Load(fileStream)
                                 .Format(new JpegFormat())
-                                .Quality(90)
+                                .Quality(95)
                                 .Save(file);
                     }
                 }

@@ -47,6 +47,10 @@
     <Reference Include="imu-1.0.03">
       <HintPath>..\..\lib\IMu\imu-1.0.03.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Serilog, Version=1.5.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\packages\Serilog.1.5.14\lib\net45\Serilog.dll</HintPath>
       <Private>True</Private>
@@ -94,8 +98,15 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\AtlasOfLivingAustraliaTask.cs" />
     <Compile Include="Infrastructure\ITask.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\Factories\AudioFactory.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\Factories\ImageFactory.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\Factories\SpeciesFactory.cs" />
     <Compile Include="Tasks\FieldGuideGippsland\FieldGuideGippslandOptions.cs" />
     <Compile Include="Tasks\FieldGuideGippsland\FieldGuideGippslandTask.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\Models\Audio.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\Models\Image.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\Models\Media.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\Models\Species.cs" />
     <Compile Include="Tasks\ImuTaskBase.cs" />
   </ItemGroup>
   <ItemGroup>
