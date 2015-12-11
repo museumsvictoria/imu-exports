@@ -23,6 +23,8 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
         public Species Make(Map map)
         {
             var species = new Species();
+
+            species.Irn = long.Parse(map.GetString("irn"));
             
             var taxonomyInformationMap = map.GetMaps("taxa").FirstOrDefault();
             if (taxonomyInformationMap != null)

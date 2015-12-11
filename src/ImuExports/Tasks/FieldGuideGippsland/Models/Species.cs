@@ -13,6 +13,8 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Models
             Authors = new List<string>();
         }
 
+        public long Irn { get; set; }
+
         public string Lsid { get; set; }
 
         public string CommonName { get; set; }

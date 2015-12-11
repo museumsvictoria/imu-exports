@@ -101,6 +101,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
                         else
                             imageFactory
                                 .Load(fileStream)
+                                .Brightness(0)
                                 .Format(new JpegFormat())
                                 .Quality(95)
                                 .Save(file);
