@@ -35,7 +35,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
                 audio.CopyrightStatement = map.GetEncodedString("RigCopyrightStatement");
                 audio.Licence = map.GetEncodedString("RigLicence");
                 audio.LicenceDetails = map.GetEncodedString("RigLicenceDetails");
-                audio.Filename = string.Format("{0}.{1}", irn, Path.GetExtension(map.GetEncodedString("MulIdentifier")));
+                audio.Filename = string.Format("{0}{1}", irn, Path.GetExtension(map.GetEncodedString("MulIdentifier")));
 
                 if (TrySaveAudio(irn, audio.Filename))
                 {
