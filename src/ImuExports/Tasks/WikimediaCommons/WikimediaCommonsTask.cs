@@ -53,6 +53,8 @@ namespace ImuExports.Tasks.WikimediaCommons
                 var utf8WithoutBom = new System.Text.UTF8Encoding(false);
                 var metadataElement = new XElement("metadata");
 
+                var titleHash = new Dictionary<string, int>();
+
                 foreach (var item in items)
                 {
                     var itemElement = new XElement("record");
@@ -79,13 +81,22 @@ namespace ImuExports.Tasks.WikimediaCommons
                     itemElement.Add(sourceElement);
 
                     itemElement.Add(new XElement("permission", "{{PD-scan|PD-Australia}}"));
-                    itemElement.Add(new XElement("toolsettitle", item.ObjectName));
-                    
 
+                    if (titleHash.ContainsKey(item.ObjectName))
+                    {
+                        titleHash[item.ObjectName] += 1;
+                        itemElement.Add(new XElement("toolsettitle", string.Format("{0} ({1})", item.ObjectName, titleHash[item.ObjectName])));
+                    }
+                    else
+                    {
+                        titleHash.Add(item.ObjectName, 1);
+                        itemElement.Add(new XElement("toolsettitle", item.ObjectName));
+                    }
+                    
                     metadataElement.Add(itemElement);
                 }
 
-                // Save sitemap index
+                // Save xml
                 using (var fileWriter = new StreamWriter(string.Format("{0}export.xml", Config.Config.Options.Wmc.Destination), false, utf8WithoutBom))
                 {
                     metadataElement.Save(fileWriter);
