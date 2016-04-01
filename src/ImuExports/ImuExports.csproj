@@ -40,6 +40,10 @@
     <Reference Include="CsvHelper">
       <HintPath>..\..\lib\CsvHelper\CsvHelper.dll</HintPath>
     </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.4.9.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.4.9\lib\Net45\HtmlAgilityPack.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="ImageProcessor, Version=2.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ImageProcessor.2.3.0.0\lib\net45\ImageProcessor.dll</HintPath>
       <Private>True</Private>
@@ -85,7 +89,7 @@
     <Compile Include="Infrastructure\IFactory.cs" />
     <Compile Include="Infrastructure\ITaskOptions.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\AtlasOfLivingAustraliaOptions.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\ImageFactory.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\MultimediaFactory.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\OccurrenceFactory.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\PartiesFactory.cs" />
     <Compile Include="Config\Config.cs" />
@@ -95,9 +99,9 @@
     <Compile Include="Infrastructure\ImuSessionProvider.cs" />
     <Compile Include="Config\SerilogConfig.cs" />
     <Compile Include="Infrastructure\TaskRunner.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\CsvMaps\ImageCsvMap.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\CsvMaps\MultimediaCsvMap.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\CsvMaps\OccurrenceCsvMap.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Image.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Multimedia.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Occurrence.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Party.cs" />
     <Compile Include="Program.cs" />
@@ -118,13 +122,16 @@
     <Compile Include="Tasks\WikimediaCommons\Models\Media.cs" />
     <Compile Include="Tasks\WikimediaCommons\WikimediaCommonsOptions.cs" />
     <Compile Include="Tasks\WikimediaCommons\WikimediaCommonsTask.cs" />
+    <Compile Include="Utilities\HtmlConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="meta.xml" />
+    <Content Include="meta.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

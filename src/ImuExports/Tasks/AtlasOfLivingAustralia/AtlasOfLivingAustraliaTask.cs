@@ -74,11 +74,11 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                 }
 
                 Log.Logger.Information("Saving image data as csv");
-                using (var csvWriter = new CsvWriter(new StreamWriter(Config.Config.Options.Ala.Destination + @"images.csv", false, Encoding.UTF8)))
+                using (var csvWriter = new CsvWriter(new StreamWriter(Config.Config.Options.Ala.Destination + @"multimedia.csv", false, Encoding.UTF8)))
                 {
                     var images = occurrences.SelectMany(x => x.Images);
 
-                    csvWriter.Configuration.RegisterClassMap<ImageCsvMap>();
+                    csvWriter.Configuration.RegisterClassMap<MultimediaCsvMap>();
                     csvWriter.Configuration.HasHeaderRecord = true;
                     csvWriter.Configuration.DoubleQuoteString = @"\""";
                     csvWriter.WriteRecords(images);
@@ -93,7 +93,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
         {
             var searchTerms = new Terms();
             searchTerms.Add("ColCategory", "Natural Sciences");
-            searchTerms.Add("MdaDataSets_tab", "Website - Atlas of Living Australia");
+            searchTerms.Add("MdaDataSets_tab", "Atlas of Living Australia");
 
             DateTime modifiedAfterDate;
             if (!string.IsNullOrWhiteSpace(Config.Config.Options.Ala.ModifiedAfterDate) && DateTime.TryParseExact(Config.Config.Options.Ala.ModifiedAfterDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out modifiedAfterDate))
@@ -135,7 +135,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                     "DarDayCollected",
                     "site=SitSiteRef.(SitSiteCode,SitSiteNumber,geo=[LocOcean_tab,LocContinent_tab,LocCountry_tab,LocProvinceStateTerritory_tab,LocDistrictCountyShire_tab,LocTownship_tab],LocPreciseLocation,LocElevationASLFromMt,LocElevationASLToMt,latlong=[LatLongitudeDecimal_nesttab,LatLatitudeDecimal_nesttab,LatRadiusNumeric_tab,LatDatum_tab,determinedBy=LatDeterminedByRef_tab.(NamPartyType,NamFullName,NamOrganisation,NamBranch,NamDepartment,NamOrganisation,NamOrganisationOtherNames_tab,NamSource,AddPhysStreet,AddPhysCity,AddPhysState,AddPhysCountry,ColCollaborationName),LatDetDate0,LatLatLongDetermination_tab,LatDetSource_tab])",
                     "identifications=[IdeTypeStatus_tab,IdeCurrentNameLocal_tab,identifiers=IdeIdentifiedByRef_nesttab.(NamPartyType,NamFullName,NamOrganisation,NamBranch,NamDepartment,NamOrganisation,NamOrganisationOtherNames_tab,NamSource,AddPhysStreet,AddPhysCity,AddPhysState,AddPhysCountry,ColCollaborationName),IdeDateIdentified0,IdeQualifier_tab,IdeQualifierRank_tab,taxa=TaxTaxonomyRef_tab.(irn,ClaScientificName,ClaKingdom,ClaPhylum,ClaSubphylum,ClaSuperclass,ClaClass,ClaSubclass,ClaSuperorder,ClaOrder,ClaSuborder,ClaInfraorder,ClaSuperfamily,ClaFamily,ClaSubfamily,ClaTribe,ClaSubtribe,ClaGenus,ClaSubgenus,ClaSpecies,ClaSubspecies,ClaRank,AutAuthorString,ClaApplicableCode,comname=[ComName_tab,ComStatus_tab])]",
-                    "media=MulMultiMediaRef_tab.(irn,MulTitle,MulDescription,MulMimeType,MulCreator_tab,MdaDataSets_tab,credit=<erights:MulMultiMediaRef_tab>.(RigAcknowledgement,RigType),AdmPublishWebNoPassword)"
+                    "media=MulMultiMediaRef_tab.(irn,MulTitle,MulIdentifier,MulMimeType,MulCreator_tab,MdaDataSets_tab,metadata=[MdaElement_tab,MdaQualifier_tab,MdaFreeText_tab],DetAlternateText,RigCreator_tab,RigSource_tab,RigAcknowledgementCredit,RigCopyrightStatement,RigCopyrightStatus,RigLicence,RigLicenceDetails,ChaRepository_tab,ChaMd5Sum,AdmPublishWebNoPassword,AdmDateModified,AdmTimeModified)"
                 };
             }
         }

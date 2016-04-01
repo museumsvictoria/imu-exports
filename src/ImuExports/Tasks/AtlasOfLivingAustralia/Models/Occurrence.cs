@@ -6,10 +6,10 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Models
     {
         public Occurrence()
         {
-            this.Images = new List<Image>();
+            this.Images = new List<Multimedia>();
         }
 
-        public IList<Image> Images { get; set; }
+        public IList<Multimedia> Images { get; set; }
 
         public string DctermsType { get; set; }
 
@@ -17,7 +17,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Models
 
         public string DctermsLanguage { get; set; }
 
-        public string DctermsRights { get; set; }
+        public string DctermsLicense { get; set; }
 
         public string DctermsRightsHolder { get; set; }
 

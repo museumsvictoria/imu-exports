@@ -12,10 +12,10 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
     public class OccurrenceFactory : IFactory<Occurrence>
     {
         private readonly IFactory<Party> partyFactory;
-        private readonly IFactory<Image> imageFactory;
+        private readonly IFactory<Multimedia> imageFactory;
 
         public OccurrenceFactory(IFactory<Party> partyFactory,
-            IFactory<Image> imageFactory)
+            IFactory<Multimedia> imageFactory)
         {
             this.partyFactory = partyFactory;
             this.imageFactory = imageFactory;
@@ -23,7 +23,20 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 
         public Occurrence Make(Map map)
         {
-            var occurrence = new Occurrence();
+            var irn = long.Parse(map.GetEncodedString("irn"));
+
+            var occurrence = new Occurrence
+            {
+                OccurrenceID = (string.IsNullOrWhiteSpace(map.GetEncodedString("ColRegPart")))
+                    ? string.Format(
+                        "urn:lsid:ozcam.taxonomy.org.au:NMV:{0}:PreservedSpecimen:{1}{2}",
+                        map.GetEncodedString("ColDiscipline"), map.GetEncodedString("ColRegPrefix"),
+                        map.GetEncodedString("ColRegNumber"))
+                    : string.Format(
+                        "urn:lsid:ozcam.taxonomy.org.au:NMV:{0}:PreservedSpecimen:{1}{2}-{3}",
+                        map.GetEncodedString("ColDiscipline"), map.GetEncodedString("ColRegPrefix"),
+                        map.GetEncodedString("ColRegNumber"), map.GetEncodedString("ColRegPart"))
+            };
 
             if (map.GetEncodedString("ColTypeOfItem") == "Specimen")
                 occurrence.DctermsType = "PhysicalObject";
@@ -40,7 +53,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             }
 
             occurrence.DctermsLanguage = "en";
-            occurrence.DctermsRights = "Dataset licensed under Creative Commons Attribution (CC-BY) 4.0 Australian license. Use of data of individual specimen occurrences does not require attribution on a per record basis.";
+            occurrence.DctermsLicense = "Dataset licensed under Creative Commons Attribution 4.0 International (CC BY 4.0) license. Use of data of individual specimen occurrences does not require attribution on a per record basis.";
             occurrence.DctermsRightsHolder = "Museum Victoria";
             occurrence.InstitutionId = occurrence.InstitutionCode = occurrence.OwnerInstitutionCode = "NMV";
             occurrence.CollectionId = "urn:lsid:biocol.org:col:34978";
@@ -53,27 +66,18 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 
             if (map.GetEncodedString("ColTypeOfItem") == "Specimen")
                 occurrence.BasisOfRecord = "PreservedSpecimen";
-
-            occurrence.OccurrenceID = (string.IsNullOrWhiteSpace(map.GetEncodedString("ColRegPart")))
-                                      ? string.Format(
-                                          "urn:lsid:ozcam.taxonomy.org.au:NMV:{0}:PreservedSpecimen:{1}{2}",
-                                          map.GetEncodedString("ColDiscipline"), map.GetEncodedString("ColRegPrefix"),
-                                          map.GetEncodedString("ColRegNumber"))
-                                      : string.Format(
-                                          "urn:lsid:ozcam.taxonomy.org.au:NMV:{0}:PreservedSpecimen:{1}{2}-{3}",
-                                          map.GetEncodedString("ColDiscipline"), map.GetEncodedString("ColRegPrefix"),
-                                          map.GetEncodedString("ColRegNumber"), map.GetEncodedString("ColRegPart"));
             
             occurrence.CatalogNumber = (string.IsNullOrWhiteSpace(map.GetEncodedString("ColRegPart")))
                                       ? string.Format("{0}{1}", map.GetEncodedString("ColRegPrefix"), map.GetEncodedString("ColRegNumber"))
                                       : string.Format("{0}{1}-{2}", map.GetEncodedString("ColRegPrefix"), map.GetEncodedString("ColRegNumber"), map.GetEncodedString("ColRegPart"));
 
-            occurrence.IndividualCount = map.GetEncodedString("SpeNoSpecimens");
-
+            var individualCount = 0;
+            if (!string.IsNullOrWhiteSpace(map.GetEncodedString("SpeNoSpecimens")))
+                individualCount += int.Parse(map.GetEncodedString("SpeNoSpecimens"));
             if (!string.IsNullOrWhiteSpace(map.GetEncodedString("BirTotalClutchSize")))
-            {
-                occurrence.IndividualCount = (int.Parse(map.GetEncodedString("SpeNoSpecimens")) + int.Parse(map.GetEncodedString("BirTotalClutchSize"))).ToString();
-            }
+                individualCount += int.Parse(map.GetEncodedString("BirTotalClutchSize"));
+            if (individualCount > 0)
+                occurrence.IndividualCount = individualCount.ToString();
 
             occurrence.Sex = map.GetEncodedStrings("SpeSex_tab").Concatenate(";");
             occurrence.LifeStage = map.GetEncodedStrings("SpeStageAge_tab").Concatenate(";");
@@ -308,6 +312,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             foreach (var image in occurrence.Images)
             {
                 image.CoreID = occurrence.OccurrenceID;
+                image.References = string.Format("http://collections.museumvictoria.com.au/specimens/{0}", irn);
             }
 
             occurrence.AssociatedMedia = occurrence.Images.Select(x => x.Identifier).Concatenate(";");
