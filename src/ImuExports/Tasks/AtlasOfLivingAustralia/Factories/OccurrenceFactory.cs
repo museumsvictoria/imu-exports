@@ -53,7 +53,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             }
 
             occurrence.DctermsLanguage = "en";
-            occurrence.DctermsLicense = "Dataset licensed under Creative Commons Attribution 4.0 International (CC BY 4.0) license. Use of data of individual specimen occurrences does not require attribution on a per record basis.";
+            occurrence.DctermsLicense = "https://creativecommons.org/publicdomain/zero/1.0/legalcode";
             occurrence.DctermsRightsHolder = "Museum Victoria";
             occurrence.InstitutionId = occurrence.InstitutionCode = occurrence.OwnerInstitutionCode = "NMV";
             occurrence.CollectionId = "urn:lsid:biocol.org:col:34978";

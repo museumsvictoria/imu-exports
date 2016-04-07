@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using ImageProcessor.Imaging.Formats;
@@ -85,8 +86,10 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
         {
             try
             {
+                var stopwatch = Stopwatch.StartNew();
+
                 using (var imuSession = ImuSessionProvider.CreateInstance("emultimedia"))
-                {
+                {                    
                     imuSession.FindKey(irn);
                     var resource = imuSession.Fetch("start", 0, -1, new[] { "resource" }).Rows[0].GetMap("resource");
 
@@ -105,10 +108,14 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                             imageFactory
                                 .Load(fileStream)
                                 .Format(new JpegFormat())
+                                .Brightness(0)
                                 .Quality(90)
                                 .Save(file);
                     }
                 }
+
+                stopwatch.Stop();
+                Log.Logger.Debug("Completed image {irn} creation in {ElapsedMilliseconds}", irn, stopwatch.ElapsedMilliseconds);
 
                 return true;
             }
