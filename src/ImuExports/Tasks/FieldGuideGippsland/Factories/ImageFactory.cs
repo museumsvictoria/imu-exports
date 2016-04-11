@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ImageProcessor.Imaging.Formats;
+using ImageMagick;
 using IMu;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
@@ -93,18 +93,19 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
                         throw new IMuException("MultimediaResourceNotFound");
 
                     using (var fileStream = resource["file"] as FileStream)
-                    using (var imageFactory = new ImageProcessor.ImageFactory())
-                    using (var file = File.OpenWrite(string.Format("{0}{1}.jpg", Config.Config.Options.Fgg.Destination, irn)))
+                    using (var file = File.Open(string.Format("{0}{1}.jpg", Config.Config.Options.Fgg.Destination, irn), FileMode.Create, FileAccess.Write))
                     {
                         if (string.Equals(resource["mimeFormat"] as string, "jpeg", StringComparison.OrdinalIgnoreCase))
                             fileStream.CopyTo(file);
                         else
-                            imageFactory
-                                .Load(fileStream)
-                                .Brightness(0)
-                                .Format(new JpegFormat())
-                                .Quality(95)
-                                .Save(file);
+                        {
+                            using (var image = new MagickImage(fileStream))
+                            {
+                                image.Format = MagickFormat.Jpg;
+                                image.Quality = 95;
+                                image.Write(file);
+                            }
+                        }
                     }
                 }
 

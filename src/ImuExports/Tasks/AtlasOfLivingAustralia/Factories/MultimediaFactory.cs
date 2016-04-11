@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using ImageProcessor.Imaging.Formats;
+//using ImageProcessor.Imaging.Formats;
+using ImageMagick;
 using IMu;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
@@ -97,20 +98,21 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                         throw new IMuException("MultimediaResourceNotFound");
                     
                     var mimeFormat = resource["mimeFormat"] as string;
-
+                    
                     using (var fileStream = resource["file"] as FileStream)
-                    using (var imageFactory = new ImageProcessor.ImageFactory())
-                    using (var file = File.OpenWrite(string.Format("{0}{1}.jpg", Config.Config.Options.Ala.Destination, irn)))
+                    using (var file = File.Open(string.Format("{0}{1}.jpg", Config.Config.Options.Ala.Destination, irn), FileMode.Create, FileAccess.Write))
                     {
                         if (mimeFormat != null && mimeFormat.ToLower() == "jpeg")
                             fileStream.CopyTo(file);
                         else
-                            imageFactory
-                                .Load(fileStream)
-                                .Format(new JpegFormat())
-                                .Brightness(0)
-                                .Quality(90)
-                                .Save(file);
+                        {
+                            using (var image = new MagickImage(fileStream))
+                            {
+                                image.Format = MagickFormat.Jpg;
+                                image.Quality = 90;
+                                image.Write(file);
+                            }
+                        }
                     }
                 }
 

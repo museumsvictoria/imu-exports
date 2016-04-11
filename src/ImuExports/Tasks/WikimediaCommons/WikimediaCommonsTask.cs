@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Runtime.InteropServices;
 using System.Xml.Linq;
-using ImageProcessor.Processors;
 using ImuExports.Infrastructure;
 using ImuExports.Tasks.WikimediaCommons.Models;
 using RestSharp;
@@ -16,10 +11,6 @@ namespace ImuExports.Tasks.WikimediaCommons
 {
     public class WikimediaCommonsTask : ImuTaskBase, ITask
     {
-        public WikimediaCommonsTask()
-        {
-        }
-
         public void Run()
         {
             using (Log.Logger.BeginTimedOperation(string.Format("{0} starting", GetType().Name), string.Format("{0}.Run", GetType().Name)))

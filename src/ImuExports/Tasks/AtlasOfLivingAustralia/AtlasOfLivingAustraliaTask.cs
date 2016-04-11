@@ -94,7 +94,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
             var searchTerms = new Terms();
             searchTerms.Add("ColCategory", "Natural Sciences");
             searchTerms.Add("MdaDataSets_tab", "Atlas of Living Australia");
-
+            
             DateTime modifiedAfterDate;
             if (!string.IsNullOrWhiteSpace(Config.Config.Options.Ala.ModifiedAfterDate) && DateTime.TryParseExact(Config.Config.Options.Ala.ModifiedAfterDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out modifiedAfterDate))
             {
