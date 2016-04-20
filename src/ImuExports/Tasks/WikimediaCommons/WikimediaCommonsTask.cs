@@ -88,7 +88,7 @@ namespace ImuExports.Tasks.WikimediaCommons
                 }
 
                 // Save xml
-                using (var fileWriter = new StreamWriter(string.Format("{0}export.xml", Config.Config.Options.Wmc.Destination), false, utf8WithoutBom))
+                using (var fileWriter = new StreamWriter(string.Format("{0}export.xml", Config.Config.Options.Wc.Destination), false, utf8WithoutBom))
                 {
                     metadataElement.Save(fileWriter);
                 }
