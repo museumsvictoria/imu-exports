@@ -53,8 +53,7 @@ namespace ImuExports.Tasks.ExtractImages
         {
             var searchTerms = new Terms();
 
-            searchTerms.Add("MdaDataSets_tab", "");
-            searchTerms.Add("AdmPublishWebNoPassword", "Yes");
+            searchTerms.Add("MdaDataSets_tab", "Google Cultural Institute");
 
             return searchTerms;
         }
