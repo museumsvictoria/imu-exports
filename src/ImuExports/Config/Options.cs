@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using CommandLine.Text;
 using ImuExports.Tasks.AtlasOfLivingAustralia;
+using ImuExports.Tasks.ExtractImages;
 using ImuExports.Tasks.FieldGuideGippsland;
 using ImuExports.Tasks.WikimediaCommons;
 
@@ -18,7 +19,7 @@ namespace ImuExports.Config
         public WikimediaCommonsOptions Wc { get; set; }
 
         [VerbOption("ei", HelpText = "Extract images for the Ursula.")]
-        public WikimediaCommonsOptions Ei { get; set; }
+        public ExtractImagesOptions Ei { get; set; }
 
         [HelpVerbOption]
         public string GetUsage(string verb)

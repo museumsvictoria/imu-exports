@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using ImageMagick;
 using IMu;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
@@ -24,27 +26,52 @@ namespace ImuExports.Tasks.ExtractImages
                 {
                     if (Program.ImportCanceled)
                         return;
-                    
-                    using (var imuSession = ImuSessionProvider.CreateInstance("emultimedia"))
+
+                    try
                     {
-                        imuSession.FindKey(cachedIrn);
-
-                        var result = imuSession.Fetch("start", 0, -1, Columns).Rows[0];
-
-                        var fileName = result.GetEncodedString("MulIdentifier");
-                        var resource = result.GetMap("resource");
-
-                        if (resource == null)
-                            throw new IMuException("MultimediaResourceNotFound");
-
-                        using (var fileStream = resource["file"] as FileStream)
-                        using (var file = File.Open(string.Format("{0}{1}", Config.Config.Options.Ei.Destination, fileName), FileMode.Create, FileAccess.Write))
+                        using (var imuSession = ImuSessionProvider.CreateInstance("emultimedia"))
                         {
-                            fileStream.CopyTo(file);
-                        }
+                            imuSession.FindKey(cachedIrn);
+                            var result = imuSession.Fetch("start", 0, -1, Columns).Rows[0];
+                            var fileName = string.Format("{0}{1}.jpg", Config.Config.Options.Ei.Destination, Path.GetFileNameWithoutExtension(result.GetEncodedString("MulIdentifier")));
+                            var resource = result.GetMap("resource");
 
-                        Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset++, cachedIrns.Count);
+                            if (File.Exists(fileName) && new FileInfo(fileName).Length > 0)
+                            {
+                                Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset++, cachedIrns.Count);
+                                continue;
+                            }
+
+                            using (var fileStream = resource["file"] as FileStream)
+                            using (var file = File.Open(fileName, FileMode.Create, FileAccess.Write))
+                            using (var image = new MagickImage(fileStream))
+                            {
+                                image.Format = MagickFormat.Jpg;
+                                image.Quality = 96;
+                                image.Write(file);
+                            }
+                        }
                     }
+                    catch (Exception ex)
+                    {
+                        using (var imuSession = ImuSessionProvider.CreateInstance("emultimedia"))
+                        {
+                            imuSession.FindKey(cachedIrn);
+                            var result = imuSession.Fetch("start", 0, -1, Columns).Rows[0];
+                            var fileName = string.Format("{0}{1}", Config.Config.Options.Ei.Destination, result.GetEncodedString("MulIdentifier"));
+                            var resource = result.GetMap("resource");
+
+                            Log.Logger.Error("Error converting image with filename {fileName} saving image to disk instead {ex}", fileName, ex);
+
+                            using (var fileStream = resource["file"] as FileStream)
+                            using (var file = File.Open(fileName, FileMode.Create, FileAccess.Write))
+                            {
+                                fileStream.CopyTo(file);
+                            }
+                        }                        
+                    }
+
+                    Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset++, cachedIrns.Count);
                 }
             }
         }
