@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using CommandLine.Text;
 using ImuExports.Tasks.AtlasOfLivingAustralia;
+using ImuExports.Tasks.AtlasOfLivingAustraliaTissueData;
 using ImuExports.Tasks.ExtractImages;
 using ImuExports.Tasks.FieldGuideGippsland;
 using ImuExports.Tasks.WikimediaCommons;
@@ -11,6 +12,9 @@ namespace ImuExports.Config
     {
         [VerbOption("ala", HelpText = "Export records for the Atlas of Living Australia.")]
         public AtlasOfLivingAustraliaOptions Ala { get; set; }
+
+        [VerbOption("atd", HelpText = "Export records for the Atlas of Living Australia (Tissue data).")]
+        public AtlasOfLivingAustraliaTissueDataOptions Atd { get; set; }
 
         [VerbOption("fgg", HelpText = "Export records for Gippsland Field Guide.")]
         public FieldGuideGippslandOptions Fgg { get; set; }

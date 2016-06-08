@@ -93,6 +93,11 @@
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Infrastructure\IFactory.cs" />
     <Compile Include="Infrastructure\ITaskOptions.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\AtlasOfLivingAustraliaTissueDataOptions.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\AtlasOfLivingAustraliaTissueDataTask.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\CsvMaps\OccurrenceTissueDataCsvMap.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\Factories\OccurrenceTissueDataFactory.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\Models\OccurrenceTissueData.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\AtlasOfLivingAustraliaOptions.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\MultimediaFactory.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\OccurrenceFactory.cs" />

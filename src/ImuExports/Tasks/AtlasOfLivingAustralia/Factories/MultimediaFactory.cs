@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-//using ImageProcessor.Imaging.Formats;
 using ImageMagick;
 using IMu;
 using ImuExports.Extensions;
