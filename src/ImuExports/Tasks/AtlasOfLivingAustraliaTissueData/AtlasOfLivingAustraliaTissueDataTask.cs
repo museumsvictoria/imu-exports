@@ -46,7 +46,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustraliaTissueData
                             .Take(Constants.DataBatchSize)
                             .ToList();
 
-                        if (cachedIrnsBatch.Count == 0 || occurrences.Count >= 2000)
+                        if (cachedIrnsBatch.Count == 0)
                             break;
 
                         imuSession.FindKeys(cachedIrnsBatch);
@@ -81,7 +81,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustraliaTissueData
             searchTerms.Add("ColRegPrefix", "Z");
             searchTerms.Add("TisAvailableForLoan", "Yes");
             searchTerms.Add("AdmPublishWebNoPassword", "Yes");
-            
+
             DateTime modifiedAfterDate;
             if (!string.IsNullOrWhiteSpace(Config.Config.Options.Atd.ModifiedAfterDate) && DateTime.TryParseExact(Config.Config.Options.Atd.ModifiedAfterDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out modifiedAfterDate))
             {
