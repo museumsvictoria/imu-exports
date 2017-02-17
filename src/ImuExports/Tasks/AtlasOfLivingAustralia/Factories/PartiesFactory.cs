@@ -15,47 +15,47 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 
             if (map != null)
             {
-                switch (map.GetEncodedString("NamPartyType"))
+                switch (map.GetTrimString("NamPartyType"))
                 {
                     case "Collaboration":
                         party.Name = new[]
                         {
-                            map.GetEncodedString("ColCollaborationName")
+                            map.GetTrimString("ColCollaborationName")
                         }.Concatenate(", ");
                         break;
                     case "Cutter Number":
                         party.Name = new[]
                         {
-                            map.GetEncodedString("NamBranch"),
-                            map.GetEncodedString("NamDepartment"),
-                            map.GetEncodedString("NamOrganisation"),
-                            map.GetEncodedString("AddPhysStreet"),
-                            map.GetEncodedString("AddPhysCity"),
-                            map.GetEncodedString("AddPhysState"),
-                            map.GetEncodedString("AddPhysCountry")
+                            map.GetTrimString("NamBranch"),
+                            map.GetTrimString("NamDepartment"),
+                            map.GetTrimString("NamOrganisation"),
+                            map.GetTrimString("AddPhysStreet"),
+                            map.GetTrimString("AddPhysCity"),
+                            map.GetTrimString("AddPhysState"),
+                            map.GetTrimString("AddPhysCountry")
                         }.Concatenate(", ");
                         break;
                     case "Organisation":
                         party.Name = new[]
                         {
-                            map.GetEncodedString("NamBranch"),
-                            map.GetEncodedString("NamDepartment"),
-                            map.GetEncodedString("NamOrganisation")
+                            map.GetTrimString("NamBranch"),
+                            map.GetTrimString("NamDepartment"),
+                            map.GetTrimString("NamOrganisation")
                         }.Concatenate(", ");
                         break;
                     case "Person":
                         party.Name = new[]
                         {
-                            map.GetEncodedString("NamFullName"),
-                            map.GetEncodedString("NamOrganisation")
+                            map.GetTrimString("NamFullName"),
+                            map.GetTrimString("NamOrganisation")
                         }.Concatenate(" - ");
                         break;
                     case "Position":
                         break;
                     case "Transport":
                         var name = string.Empty;
-                        var organisationOtherName = map.GetEncodedStrings("NamOrganisationOtherNames_tab").FirstOrDefault();
-                        var source = map.GetEncodedString("NamSource");
+                        var organisationOtherName = map.GetTrimStrings("NamOrganisationOtherNames_tab").FirstOrDefault();
+                        var source = map.GetTrimString("NamSource");
 
                         if (string.IsNullOrWhiteSpace(organisationOtherName) && !string.IsNullOrWhiteSpace(source))
                         {
@@ -73,8 +73,8 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                         party.Name = new[]
                         {
                             name,
-                            map.GetEncodedString("NamFullName"),
-                            map.GetEncodedString("NamOrganisation")
+                            map.GetTrimString("NamFullName"),
+                            map.GetTrimString("NamOrganisation")
                         }.Concatenate(", ");
                         break;
                 }

@@ -17,29 +17,29 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
         public Image Make(Map map)
         {
             if (map != null &&
-                string.Equals(map.GetEncodedString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase) &&
-                map.GetEncodedStrings("MdaDataSets_tab").Any(x => x.Contains("App: Gippsland")) &&
-                string.Equals(map.GetEncodedString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
+                string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase) &&
+                map.GetTrimStrings("MdaDataSets_tab").Any(x => x.Contains("App: Gippsland")) &&
+                string.Equals(map.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
             {
-                var irn = long.Parse(map.GetString("irn"));
+                var irn = map.GetLong("irn");
 
                 var image = new Image();
 
-                var captionMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetEncodedString("MdaElement_tab"), "dcDescription", StringComparison.OrdinalIgnoreCase) && string.Equals(x.GetEncodedString("MdaQualifier_tab"), "Caption.AppGippsland"));
+                var captionMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaElement_tab"), "dcDescription", StringComparison.OrdinalIgnoreCase) && string.Equals(x.GetTrimString("MdaQualifier_tab"), "Caption.AppGippsland"));
                 if (captionMap != null)
-                    image.Caption = captionMap.GetEncodedString("MdaFreeText_tab");
+                    image.Caption = captionMap.GetTrimString("MdaFreeText_tab");
 
-                image.AlternateText = map.GetEncodedString("DetAlternateText");
-                image.Creators = map.GetEncodedStrings("RigCreator_tab");
-                image.Sources = map.GetEncodedStrings("RigSource_tab");
-                image.Acknowledgment = map.GetEncodedString("RigAcknowledgementCredit");
-                image.CopyrightStatus = map.GetEncodedString("RigCopyrightStatus");
-                image.CopyrightStatement = map.GetEncodedString("RigCopyrightStatement");
-                image.Licence = map.GetEncodedString("RigLicence");
-                image.LicenceDetails = map.GetEncodedString("RigLicenceDetails");
+                image.AlternateText = map.GetTrimString("DetAlternateText");
+                image.Creators = map.GetTrimStrings("RigCreator_tab");
+                image.Sources = map.GetTrimStrings("RigSource_tab");
+                image.Acknowledgment = map.GetTrimString("RigAcknowledgementCredit");
+                image.CopyrightStatus = map.GetTrimString("RigCopyrightStatus");
+                image.CopyrightStatement = map.GetTrimString("RigCopyrightStatement");
+                image.Licence = map.GetTrimString("RigLicence");
+                image.LicenceDetails = map.GetTrimString("RigLicenceDetails");
                 image.Filename = string.Format("{0}.jpg", irn);
 
-                var repositories = map.GetEncodedStrings("ChaRepository_tab");
+                var repositories = map.GetTrimStrings("ChaRepository_tab");
                 if (repositories.Any(x => string.Equals(x, "NS Online Images Live Hero", StringComparison.OrdinalIgnoreCase)))
                     image.Type = ImageType.Hero;
                 else if (repositories.Any(x => string.Equals(x, "NS Online Images Square", StringComparison.OrdinalIgnoreCase)))
@@ -62,7 +62,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
 
             var groupedMediaMaps = maps
                 .Where(x => x != null)
-                .GroupBy(x => x.GetEncodedString("irn"))
+                .GroupBy(x => x.GetLong("irn"))
                 .ToList();
 
             // Find and log duplicate mmr irns

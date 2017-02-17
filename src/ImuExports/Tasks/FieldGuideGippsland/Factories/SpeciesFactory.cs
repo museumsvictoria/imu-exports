@@ -24,7 +24,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
         {
             var species = new Species();
 
-            species.Irn = long.Parse(map.GetString("irn"));
+            species.Irn = map.GetLong("irn");
             
             var taxonomyInformationMap = map.GetMaps("taxa").FirstOrDefault();
             if (taxonomyInformationMap != null)
@@ -37,8 +37,8 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
 
                     foreach (var name in names)
                     {
-                        var status = name.GetEncodedString("ComStatus_tab");
-                        var vernacularName = name.GetEncodedString("ComName_tab");
+                        var status = name.GetTrimString("ComStatus_tab");
+                        var vernacularName = name.GetTrimString("ComName_tab");
 
                         if (string.Equals(status, "preferred", StringComparison.OrdinalIgnoreCase))
                         {
@@ -53,26 +53,26 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
                     species.OtherCommonNames = otherCommonNames.Concatenate(", ");
                 }
 
-                species.Lsid = taxonomyInformationMap.GetEncodedString("TaxTaxaNotes_tab");
+                species.Lsid = taxonomyInformationMap.GetTrimString("TaxTaxaNotes_tab");
             }
 
-            species.AnimalType = map.GetEncodedString("SpeTaxonGroup");
-            species.AnimalSubType = map.GetEncodedString("SpeTaxonSubGroup");
-            species.BriefDescription = map.GetEncodedString("SpeBriefID");
-            species.IdentifyingCharacteristics = map.GetEncodedString("SpeIdentifyingCharacters");
-            species.Habitat = map.GetEncodedString("SpeHabitatNotes");
-            species.Distribution = map.GetEncodedString("SpeDistribution");
-            species.Biology = map.GetEncodedString("SpeBiology");
-            species.Diet = map.GetEncodedString("SpeDiet");
-            species.LocalKnowledge = map.GetEncodedString("SpeFastFact");
-            species.HazardousToHumans = map.GetEncodedString("SpeHazards");
-            species.FlightMonthFrom = map.GetEncodedString("SpeFlightStart");
-            species.FlightMonthTo = map.GetEncodedString("SpeFlightEnd");
-            species.Depths = map.GetEncodedStrings("SpeDepth_tab").Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            species.WaterColumnLocations = map.GetEncodedStrings("SpeWaterColumnLocation_tab").Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            species.Colours = map.GetEncodedStrings("SpeColour_tab").Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            species.Habitats = map.GetEncodedStrings("SpeHabitat_tab").Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            species.MaximumSize = map.GetEncodedString("SpeMaximumSize");
+            species.AnimalType = map.GetTrimString("SpeTaxonGroup");
+            species.AnimalSubType = map.GetTrimString("SpeTaxonSubGroup");
+            species.BriefDescription = map.GetTrimString("SpeBriefID");
+            species.IdentifyingCharacteristics = map.GetTrimString("SpeIdentifyingCharacters");
+            species.Habitat = map.GetTrimString("SpeHabitatNotes");
+            species.Distribution = map.GetTrimString("SpeDistribution");
+            species.Biology = map.GetTrimString("SpeBiology");
+            species.Diet = map.GetTrimString("SpeDiet");
+            species.LocalKnowledge = map.GetTrimString("SpeFastFact");
+            species.HazardousToHumans = map.GetTrimString("SpeHazards");
+            species.FlightMonthFrom = map.GetTrimString("SpeFlightStart");
+            species.FlightMonthTo = map.GetTrimString("SpeFlightEnd");
+            species.Depths = map.GetTrimStrings("SpeDepth_tab").Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            species.WaterColumnLocations = map.GetTrimStrings("SpeWaterColumnLocation_tab").Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            species.Colours = map.GetTrimStrings("SpeColour_tab").Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            species.Habitats = map.GetTrimStrings("SpeHabitat_tab").Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+            species.MaximumSize = map.GetTrimString("SpeMaximumSize");
 
             var authorsMap = map.GetMaps("authors");
             
@@ -80,20 +80,20 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
             {
                 string author = null;
 
-                switch (authorMap.GetEncodedString("NamPartyType"))
+                switch (authorMap.GetTrimString("NamPartyType"))
                 {
                     case "Person":
                         author = new[]
                         {
-                            authorMap.GetEncodedString("NamFullName"),
-                            authorMap.GetEncodedString("NamOrganisation")
+                            authorMap.GetTrimString("NamFullName"),
+                            authorMap.GetTrimString("NamOrganisation")
                         }.Concatenate(" / ");
                         break;
                     case "Organisation":
-                        author =  authorMap.GetEncodedString("NamOrganisation");
+                        author =  authorMap.GetTrimString("NamOrganisation");
                         break;
                     case "Collaboration":
-                        author = authorMap.GetEncodedString("ColCollaborationName");
+                        author = authorMap.GetTrimString("ColCollaborationName");
                         break;
                 }
 

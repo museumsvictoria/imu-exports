@@ -38,13 +38,13 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
 
         Func<Map, IEnumerable<long>> IModuleSearchConfig.IrnSelectFunc => map => map
             .GetMaps("cat")
-            .Where(x => x != null && x.GetEncodedStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.QueryString) && string.Equals(x.GetEncodedString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase))
-            .Select(x => long.Parse(x.GetString("irn")))
+            .Where(x => x != null && x.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.QueryString) && string.Equals(x.GetTrimString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase))
+            .Select(x => x.GetLong("irn"))
             .Concat(map
                 .GetMaps("colevent")
                 .SelectMany(x => x.GetMaps("cat"))
-                .Where( x => x != null && x.GetEncodedStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.QueryString) && string.Equals(x.GetEncodedString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase))
-                .Select(x => long.Parse(x.GetString("irn"))))
+                .Where( x => x != null && x.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.QueryString) && string.Equals(x.GetTrimString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.GetLong("irn")))
             .Distinct();
     }
 }

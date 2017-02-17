@@ -326,7 +326,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustraliaTissueData.Factories
             var locationMap = map.GetMap("location");
             if (map.GetString("ManOnLoan") == "Yes")
                 occurrenceTissueData.Disposition = "On Loan";
-            if (locationMap != null && (locationMap.GetString("irn") == "294982" || locationMap.GetString("irn") == "294981"))
+            if (locationMap != null && (locationMap.GetLong("irn") == 294982 || locationMap.GetLong("irn") == 294981))
                 occurrenceTissueData.Disposition = "Missing";
             else if (map.GetString("TisTissueUsedUp") == "Yes" || map.GetString("GneDnaUsedUp") == "Yes")
                 occurrenceTissueData.Disposition = "Used";
@@ -354,7 +354,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustraliaTissueData.Factories
             occurrenceTissueData.SampleSize = map.GetMaps("tissue").FirstOrDefault()?.GetString("TisInitialQuantity_tab");
 
             var parentMap = map.GetMap("parent");
-            if (parentMap != null && parentMap.GetEncodedStrings("MdaDataSets_tab").Contains("Atlas of Living Australia"))
+            if (parentMap != null && parentMap.GetTrimStrings("MdaDataSets_tab").Contains("Atlas of Living Australia"))
             {
                 occurrenceTissueData.RelatedResourceCollectionCode = parentMap.GetString("ColDiscipline");
                 occurrenceTissueData.RelatedResourceInstitutionCode = "NMV";

@@ -16,27 +16,27 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
         public Audio Make(Map map)
         {
             if (map != null &&
-                string.Equals(map.GetEncodedString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase) &&
-                map.GetEncodedStrings("MdaDataSets_tab").Any(x => x.Contains("App: Gippsland")) &&
-                string.Equals(map.GetEncodedString("MulMimeType"), "audio", StringComparison.OrdinalIgnoreCase))
+                string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase) &&
+                map.GetTrimStrings("MdaDataSets_tab").Any(x => x.Contains("App: Gippsland")) &&
+                string.Equals(map.GetTrimString("MulMimeType"), "audio", StringComparison.OrdinalIgnoreCase))
             {
-                var irn = long.Parse(map.GetString("irn"));
+                var irn = map.GetLong("irn");
 
                 var audio = new Audio();
 
-                var captionMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetEncodedString("MdaElement_tab"), "dcDescription", StringComparison.OrdinalIgnoreCase) && string.Equals(x.GetEncodedString("MdaQualifier_tab"), "Caption.AppGippsland"));
+                var captionMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaElement_tab"), "dcDescription", StringComparison.OrdinalIgnoreCase) && string.Equals(x.GetTrimString("MdaQualifier_tab"), "Caption.AppGippsland"));
                 if (captionMap != null)
-                    audio.Caption = captionMap.GetEncodedString("MdaFreeText_tab");
+                    audio.Caption = captionMap.GetTrimString("MdaFreeText_tab");
 
-                audio.AlternateText = map.GetEncodedString("DetAlternateText");
-                audio.Creators = map.GetEncodedStrings("RigCreator_tab");
-                audio.Sources = map.GetEncodedStrings("RigSource_tab");
-                audio.Acknowledgment = map.GetEncodedString("RigAcknowledgementCredit");
-                audio.CopyrightStatus = map.GetEncodedString("RigCopyrightStatus");
-                audio.CopyrightStatement = map.GetEncodedString("RigCopyrightStatement");
-                audio.Licence = map.GetEncodedString("RigLicence");
-                audio.LicenceDetails = map.GetEncodedString("RigLicenceDetails");
-                audio.Filename = string.Format("{0}{1}", irn, Path.GetExtension(map.GetEncodedString("MulIdentifier")));
+                audio.AlternateText = map.GetTrimString("DetAlternateText");
+                audio.Creators = map.GetTrimStrings("RigCreator_tab");
+                audio.Sources = map.GetTrimStrings("RigSource_tab");
+                audio.Acknowledgment = map.GetTrimString("RigAcknowledgementCredit");
+                audio.CopyrightStatus = map.GetTrimString("RigCopyrightStatus");
+                audio.CopyrightStatement = map.GetTrimString("RigCopyrightStatement");
+                audio.Licence = map.GetTrimString("RigLicence");
+                audio.LicenceDetails = map.GetTrimString("RigLicenceDetails");
+                audio.Filename = string.Format("{0}{1}", irn, Path.GetExtension(map.GetTrimString("MulIdentifier")));
 
                 if (TrySaveAudio(irn, audio.Filename))
                 {
@@ -53,7 +53,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
 
             var groupedMediaMaps = maps
                 .Where(x => x != null)
-                .GroupBy(x => x.GetEncodedString("irn"))
+                .GroupBy(x => x.GetLong("irn"))
                 .ToList();
 
             // Find and log duplicate mmr irns

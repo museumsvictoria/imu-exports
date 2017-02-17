@@ -39,7 +39,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
 
         Func<Map, IEnumerable<long>> IModuleSearchConfig.IrnSelectFunc => map => map
             .GetMaps("cat")
-            .Where(x => x != null && x.GetEncodedStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.QueryString))
-            .Select(x => long.Parse(x.GetString("irn")));
+            .Where(x => x != null && x.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.QueryString))
+            .Select(x => x.GetLong("irn"));
     }
 }

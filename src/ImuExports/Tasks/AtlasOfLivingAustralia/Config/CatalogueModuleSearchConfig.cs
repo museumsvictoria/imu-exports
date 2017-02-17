@@ -37,6 +37,6 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
             }
         }
 
-        Func<Map, IEnumerable<long>> IModuleSearchConfig.IrnSelectFunc => map => new[] { long.Parse(map.GetString("irn")) }.ToList();
+        Func<Map, IEnumerable<long>> IModuleSearchConfig.IrnSelectFunc => map => new[] { map.GetLong("irn") }.ToList();
     }
 }

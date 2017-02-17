@@ -19,36 +19,36 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
         public Multimedia Make(Map map)
         {
             if (map != null &&
-                string.Equals(map.GetEncodedString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase) &&
-                map.GetEncodedStrings("MdaDataSets_tab").Any(x => x.Contains("Atlas of Living Australia")) &&
-                string.Equals(map.GetEncodedString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
+                string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase) &&
+                map.GetTrimStrings("MdaDataSets_tab").Any(x => x.Contains("Atlas of Living Australia")) &&
+                string.Equals(map.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
             {
-                var irn = long.Parse(map.GetEncodedString("irn"));
+                var irn = map.GetLong("irn");
 
                 var multimedia = new Multimedia
                 {
                     Type = "StillImage",
                     Format = "image/jpeg",
                     Identifier = string.Format("{0}.jpg", irn),
-                    Title = map.GetEncodedString("MulTitle"),
-                    Creator = map.GetEncodedStrings("MulCreator_tab").Concatenate(";"),
+                    Title = map.GetTrimString("MulTitle"),
+                    Creator = map.GetTrimStrings("MulCreator_tab").Concatenate(";"),
                     Publisher = "Museum Victoria",
-                    Source = map.GetEncodedStrings("RigSource_tab").Concatenate(";"),
+                    Source = map.GetTrimStrings("RigSource_tab").Concatenate(";"),
                     RightsHolder = "Museum Victoria",
-                    AltText = map.GetEncodedString("DetAlternateText")
+                    AltText = map.GetTrimString("DetAlternateText")
                 };
                 
                 var captionMap = map
                     .GetMaps("metadata")
-                    .FirstOrDefault(x => string.Equals(x.GetEncodedString("MdaElement_tab"), "dcTitle", StringComparison.OrdinalIgnoreCase) && 
-                        string.Equals(x.GetEncodedString("MdaQualifier_tab"), "Caption.COL"));
+                    .FirstOrDefault(x => string.Equals(x.GetTrimString("MdaElement_tab"), "dcTitle", StringComparison.OrdinalIgnoreCase) && 
+                        string.Equals(x.GetTrimString("MdaQualifier_tab"), "Caption.COL"));
 
                 if(captionMap != null)
-                    multimedia.Description = HtmlConverter.HtmlToText(captionMap.GetEncodedString("MdaFreeText_tab"));
+                    multimedia.Description = HtmlConverter.HtmlToText(captionMap.GetTrimString("MdaFreeText_tab"));
 
-                if (map.GetEncodedString("RigLicence").Equals("CC BY", StringComparison.OrdinalIgnoreCase))
+                if (map.GetTrimString("RigLicence").Equals("CC BY", StringComparison.OrdinalIgnoreCase))
                     multimedia.License = "https://creativecommons.org/licenses/by/4.0/";
-                else if (map.GetEncodedString("RigLicence").Equals("CC BY-NC", StringComparison.OrdinalIgnoreCase))
+                else if (map.GetTrimString("RigLicence").Equals("CC BY-NC", StringComparison.OrdinalIgnoreCase))
                     multimedia.License = "https://creativecommons.org/licenses/by-nc/4.0/";
 
                 if (TrySaveMultimedia(irn))
@@ -64,7 +64,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 
             var groupedMediaMaps = maps
                 .Where(x => x != null)
-                .GroupBy(x => x.GetEncodedString("irn"))
+                .GroupBy(x => x.GetLong("irn"))
                 .ToList();
 
             // Find and log duplicate mmr irns

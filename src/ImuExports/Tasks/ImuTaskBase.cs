@@ -35,7 +35,7 @@ namespace ImuExports.Tasks
                     if (results.Count == 0)
                         break;
 
-                    var irns = results.Rows.Select(x => long.Parse(x.GetEncodedString("irn"))).ToList();
+                    var irns = results.Rows.Select(x => x.GetLong("irn")).ToList();
 
                     cachedIrns.AddRange(irns);
 
