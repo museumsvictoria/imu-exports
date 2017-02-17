@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using CsvHelper;
 using IMu;
 using ImuExports.Config;
+using ImuExports.Extensions;
 using ImuExports.Infrastructure;
+using ImuExports.Tasks.AtlasOfLivingAustralia.Config;
 using ImuExports.Tasks.AtlasOfLivingAustralia.CsvMaps;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 using Serilog;
@@ -17,18 +17,23 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
     public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
     {
         private readonly IFactory<Occurrence> occurrenceFactory;
+        private readonly IEnumerable<IModuleSearchConfig> moduleSearchConfigs;
 
-        public AtlasOfLivingAustraliaTask(IFactory<Occurrence> occurrenceFactory)
+        public AtlasOfLivingAustraliaTask(
+            IFactory<Occurrence> occurrenceFactory,
+            IEnumerable<IModuleSearchConfig> moduleSearchConfigs)
         {
             this.occurrenceFactory = occurrenceFactory;
+            this.moduleSearchConfigs = moduleSearchConfigs;
         }
 
         public void Run()
-        {
+        {            
             using (Log.Logger.BeginTimedOperation(string.Format("{0} starting", GetType().Name), string.Format("{0}.Run", GetType().Name)))
             {
-                // Cache Irns
-                var cachedIrns = this.CacheIrns("ecatalogue", BuildSearchTerms());
+                var cachedIrns = (GlobalOptions.Options.Ala.ParsedModifiedAfterDate.HasValue || GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.HasValue) ?
+                    this.moduleSearchConfigs.SelectMany(msc => this.CacheIrns(msc.ModuleName, msc.Terms, msc.Columns, msc.IrnSelectFunc)).Distinct().ToList() :
+                    this.CacheIrns("ecatalogue", this.BuildFullExportSearchTerms());
 
                 // Fetch data
                 var occurrences = new List<Occurrence>();
@@ -51,7 +56,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
 
                         imuSession.FindKeys(cachedIrnsBatch);
 
-                        var results = imuSession.Fetch("start", 0, -1, Columns);
+                        var results = imuSession.Fetch("start", 0, -1, this.ExportColumns);
 
                         Log.Logger.Debug("Fetched {RecordCount} records from Imu", cachedIrnsBatch.Count);
 
@@ -65,7 +70,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
 
                 // Save data
                 Log.Logger.Information("Saving occurrence data as csv");
-                using (var csvWriter = new CsvWriter(new StreamWriter(Config.Config.Options.Ala.Destination + @"occurrences.csv", false, Encoding.UTF8)))
+                using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"occurrences.csv", false, Encoding.UTF8)))
                 {
                     csvWriter.Configuration.RegisterClassMap<OccurrenceCsvMap>();
                     csvWriter.Configuration.HasHeaderRecord = true;
@@ -74,7 +79,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                 }
 
                 Log.Logger.Information("Saving image data as csv");
-                using (var csvWriter = new CsvWriter(new StreamWriter(Config.Config.Options.Ala.Destination + @"multimedia.csv", false, Encoding.UTF8)))
+                using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"multimedia.csv", false, Encoding.UTF8)))
                 {
                     var images = occurrences.SelectMany(x => x.Images);
 
@@ -85,32 +90,31 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                 }
 
                 // Copy meta.xml
-                File.Copy(@"meta.xml", Config.Config.Options.Ala.Destination + @"meta.xml", true);
+                File.Copy(@"meta.xml", GlobalOptions.Options.Ala.Destination + @"meta.xml", true);
             }
         }
 
-        private Terms BuildSearchTerms()
+        private Terms BuildFullExportSearchTerms()
         {
             var searchTerms = new Terms();
             searchTerms.Add("ColCategory", "Natural Sciences");
             searchTerms.Add("MdaDataSets_tab", "Atlas of Living Australia");
-            
-            DateTime modifiedAfterDate;
-            if (!string.IsNullOrWhiteSpace(Config.Config.Options.Ala.ModifiedAfterDate) && DateTime.TryParseExact(Config.Config.Options.Ala.ModifiedAfterDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out modifiedAfterDate))
+            searchTerms.Add("AdmPublishWebNoPassword", "Yes");
+
+            if (GlobalOptions.Options.Ala.ParsedModifiedAfterDate.HasValue)
             {
-                searchTerms.Add("AdmDateModified", modifiedAfterDate.ToString("MMM dd yyyy"), ">=");
+                searchTerms.Add("AdmDateModified", GlobalOptions.Options.Ala.ParsedModifiedAfterDate.Value.ToString("MMM dd yyyy"), ">=");
             }
 
-            DateTime modifiedBeforeDate;
-            if (!string.IsNullOrWhiteSpace(Config.Config.Options.Ala.ModifiedBeforeDate) && DateTime.TryParseExact(Config.Config.Options.Ala.ModifiedBeforeDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out modifiedBeforeDate))
+            if (GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.HasValue)
             {
-                searchTerms.Add("AdmDateModified", modifiedBeforeDate.ToString("MMM dd yyyy"), "<=");
+                searchTerms.Add("AdmDateModified", GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.Value.ToString("MMM dd yyyy"), "<=");
             }
 
             return searchTerms;
         }
-
-        private string[] Columns
+        
+        private string[] ExportColumns
         {
             get
             {

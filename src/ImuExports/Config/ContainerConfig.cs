@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ImuExports.Infrastructure;
+using ImuExports.Tasks.AtlasOfLivingAustralia.Config;
 using SimpleInjector;
 
 namespace ImuExports.Config
@@ -18,11 +19,14 @@ namespace ImuExports.Config
             var serviceTasks = new List<Type>();
 
             // Add invoked task
-            var taskOptions = Config.TaskOptions as ITaskOptions;
+            var taskOptions = GlobalOptions.TaskOptions as ITaskOptions;
             if (taskOptions != null)
                 serviceTasks.Add(taskOptions.TypeOfTask);
 
             container.RegisterCollection<ITask>(serviceTasks);
+
+            // Register module search configs
+            container.RegisterCollection<IModuleSearchConfig>(new[] { typeof(IModuleSearchConfig).Assembly });
 
             // Register factories
             container.Register(typeof(IFactory<>), new[] { typeof(IFactory<>).Assembly });

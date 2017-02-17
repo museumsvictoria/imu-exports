@@ -3,7 +3,7 @@ using ImuExports.Infrastructure;
 
 namespace ImuExports.Config
 {
-    public static class Config
+    public static class GlobalOptions
     {
         public static Options Options;
         public static object TaskOptions;

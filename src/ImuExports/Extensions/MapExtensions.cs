@@ -25,9 +25,9 @@ namespace ImuExports.Extensions
             return new List<string>();
         }
 
-        public static string GetCleanEncodedString(this Map map, string name)
+        public static string GetCleanString(this Map map, string name)
         {
-            return EncodeString(map.GetString(name)).RemoveNonWordCharacters();
+            return map.GetString(name).RemoveNonWordCharacters();
         }
 
         private static string EncodeString(string value)

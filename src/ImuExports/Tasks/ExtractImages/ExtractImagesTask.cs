@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using ImageMagick;
+using ImuExports.Config;
 using IMu;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
@@ -33,7 +34,7 @@ namespace ImuExports.Tasks.ExtractImages
                         {
                             imuSession.FindKey(cachedIrn);
                             var result = imuSession.Fetch("start", 0, -1, Columns).Rows[0];
-                            var fileName = string.Format("{0}{1}.jpg", Config.Config.Options.Ei.Destination, Path.GetFileNameWithoutExtension(result.GetEncodedString("MulIdentifier")));
+                            var fileName = string.Format("{0}{1}.jpg", GlobalOptions.Options.Ei.Destination, Path.GetFileNameWithoutExtension(result.GetEncodedString("MulIdentifier")));
                             var resource = result.GetMap("resource");
 
                             if (File.Exists(fileName) && new FileInfo(fileName).Length > 0)
@@ -58,7 +59,7 @@ namespace ImuExports.Tasks.ExtractImages
                         {
                             imuSession.FindKey(cachedIrn);
                             var result = imuSession.Fetch("start", 0, -1, Columns).Rows[0];
-                            var fileName = string.Format("{0}{1}", Config.Config.Options.Ei.Destination, result.GetEncodedString("MulIdentifier"));
+                            var fileName = string.Format("{0}{1}", GlobalOptions.Options.Ei.Destination, result.GetEncodedString("MulIdentifier"));
                             var resource = result.GetMap("resource");
 
                             Log.Logger.Error("Error converting image with filename {fileName} saving image to disk instead {ex}", fileName, ex);

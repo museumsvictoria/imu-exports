@@ -60,7 +60,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland
                 }
 
                 // Save data
-                File.WriteAllText(string.Format("{0}export.json", Config.Config.Options.Fgg.Destination), JsonConvert.SerializeObject(species, Formatting.Indented));
+                File.WriteAllText(string.Format("{0}export.json", GlobalOptions.Options.Fgg.Destination), JsonConvert.SerializeObject(species, Formatting.Indented));
             }
         }
 

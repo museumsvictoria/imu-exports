@@ -91,6 +91,7 @@
     <Compile Include="Config\Constants.cs" />
     <Compile Include="Extensions\MapExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Infrastructure\IModuleSearchConfig.cs" />
     <Compile Include="Infrastructure\IFactory.cs" />
     <Compile Include="Infrastructure\ITaskOptions.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\AtlasOfLivingAustraliaTissueDataOptions.cs" />
@@ -99,10 +100,16 @@
     <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\Factories\OccurrenceTissueDataFactory.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\Models\OccurrenceTissueData.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\AtlasOfLivingAustraliaOptions.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Config\AtlasOfLivingAustraliaConstants.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Config\MultimediaModuleSearchConfig.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Config\CollectionEventModuleSearchConfig.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Config\CatalogueModuleSearchConfig.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Config\TaxonomyModuleSearchConfig.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Config\SiteModuleSearchConfig.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\MultimediaFactory.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\OccurrenceFactory.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\PartiesFactory.cs" />
-    <Compile Include="Config\Config.cs" />
+    <Compile Include="Config\GlobalOptions.cs" />
     <Compile Include="Config\Options.cs" />
     <Compile Include="Config\ContainerConfig.cs" />
     <Compile Include="Infrastructure\ImuSession.cs" />

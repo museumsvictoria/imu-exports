@@ -12,7 +12,7 @@ namespace ImuExports
         static void Main(string[] args)
         {
             // Parse command line options
-            Config.Config.Initialize(args);
+            GlobalOptions.Initialize(args);
 
             // Configure serilog
             SerilogConfig.Initialize();

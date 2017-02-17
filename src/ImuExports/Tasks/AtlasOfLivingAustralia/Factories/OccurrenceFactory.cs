@@ -54,7 +54,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 
             occurrence.DctermsLanguage = "en";
             occurrence.DctermsLicense = "https://creativecommons.org/publicdomain/zero/1.0/legalcode";
-            occurrence.DctermsRightsHolder = "Museum Victoria";
+            occurrence.DctermsRightsHolder = "Museums Victoria";
             occurrence.InstitutionId = occurrence.InstitutionCode = occurrence.OwnerInstitutionCode = "NMV";
             occurrence.CollectionId = "urn:lsid:biocol.org:col:34978";
             occurrence.DatasetId = occurrence.CollectionCode = map.GetEncodedString("ColDiscipline");
@@ -66,7 +66,9 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 
             if (map.GetEncodedString("ColTypeOfItem") == "Specimen")
                 occurrence.BasisOfRecord = "PreservedSpecimen";
-            
+            if (map.GetEncodedString("ColTypeOfItem") == "Audiovisual" || map.GetEncodedString("ColTypeOfItem") == "Image")
+                occurrence.BasisOfRecord = "HumanObservation";
+
             occurrence.CatalogNumber = (string.IsNullOrWhiteSpace(map.GetEncodedString("ColRegPart")))
                                       ? string.Format("{0}{1}", map.GetEncodedString("ColRegPrefix"), map.GetEncodedString("ColRegNumber"))
                                       : string.Format("{0}{1}-{2}", map.GetEncodedString("ColRegPrefix"), map.GetEncodedString("ColRegNumber"), map.GetEncodedString("ColRegPart"));
@@ -233,60 +235,60 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 {
                     occurrence.ScientificName = new[]
                             {
-                                taxonomy.GetCleanEncodedString("ClaGenus"),
-                                string.IsNullOrWhiteSpace(taxonomy.GetCleanEncodedString("ClaSubgenus"))
+                                taxonomy.GetCleanString("ClaGenus"),
+                                string.IsNullOrWhiteSpace(taxonomy.GetCleanString("ClaSubgenus"))
                                     ? null
-                                    : string.Format("({0})", taxonomy.GetCleanEncodedString("ClaSubgenus")),
-                                taxonomy.GetCleanEncodedString("ClaSpecies"),
-                                taxonomy.GetCleanEncodedString("ClaSubspecies"),
+                                    : string.Format("({0})", taxonomy.GetCleanString("ClaSubgenus")),
+                                taxonomy.GetCleanString("ClaSpecies"),
+                                taxonomy.GetCleanString("ClaSubspecies"),
                                 taxonomy.GetEncodedString("AutAuthorString")
                             }.Concatenate(" ");
 
-                    occurrence.Kingdom = taxonomy.GetCleanEncodedString("ClaKingdom");
-                    occurrence.Phylum = taxonomy.GetCleanEncodedString("ClaPhylum");
-                    occurrence.Class = taxonomy.GetCleanEncodedString("ClaClass");
-                    occurrence.Order = taxonomy.GetCleanEncodedString("ClaOrder");
-                    occurrence.Family = taxonomy.GetCleanEncodedString("ClaFamily");
-                    occurrence.Genus = taxonomy.GetCleanEncodedString("ClaGenus");
-                    occurrence.Subgenus = taxonomy.GetCleanEncodedString("ClaSubgenus");
-                    occurrence.SpecificEpithet = taxonomy.GetCleanEncodedString("ClaSpecies");
-                    occurrence.InfraspecificEpithet = taxonomy.GetCleanEncodedString("ClaSubspecies");
+                    occurrence.Kingdom = taxonomy.GetCleanString("ClaKingdom");
+                    occurrence.Phylum = taxonomy.GetCleanString("ClaPhylum");
+                    occurrence.Class = taxonomy.GetCleanString("ClaClass");
+                    occurrence.Order = taxonomy.GetCleanString("ClaOrder");
+                    occurrence.Family = taxonomy.GetCleanString("ClaFamily");
+                    occurrence.Genus = taxonomy.GetCleanString("ClaGenus");
+                    occurrence.Subgenus = taxonomy.GetCleanString("ClaSubgenus");
+                    occurrence.SpecificEpithet = taxonomy.GetCleanString("ClaSpecies");
+                    occurrence.InfraspecificEpithet = taxonomy.GetCleanString("ClaSubspecies");
                     occurrence.HigherClassification = new[]
                                 {
-                                    taxonomy.GetCleanEncodedString("ClaKingdom"), 
-                                    taxonomy.GetCleanEncodedString("ClaPhylum"),
-                                    taxonomy.GetCleanEncodedString("ClaSubphylum"),
-                                    taxonomy.GetCleanEncodedString("ClaSuperclass"),
-                                    taxonomy.GetCleanEncodedString("ClaClass"),
-                                    taxonomy.GetCleanEncodedString("ClaSubclass"),
-                                    taxonomy.GetCleanEncodedString("ClaSuperorder"),
-                                    taxonomy.GetCleanEncodedString("ClaOrder"),
-                                    taxonomy.GetCleanEncodedString("ClaSuborder"),
-                                    taxonomy.GetCleanEncodedString("ClaInfraorder"),
-                                    taxonomy.GetCleanEncodedString("ClaSuperfamily"),
-                                    taxonomy.GetCleanEncodedString("ClaFamily"),
-                                    taxonomy.GetCleanEncodedString("ClaSubfamily")
+                                    taxonomy.GetCleanString("ClaKingdom"), 
+                                    taxonomy.GetCleanString("ClaPhylum"),
+                                    taxonomy.GetCleanString("ClaSubphylum"),
+                                    taxonomy.GetCleanString("ClaSuperclass"),
+                                    taxonomy.GetCleanString("ClaClass"),
+                                    taxonomy.GetCleanString("ClaSubclass"),
+                                    taxonomy.GetCleanString("ClaSuperorder"),
+                                    taxonomy.GetCleanString("ClaOrder"),
+                                    taxonomy.GetCleanString("ClaSuborder"),
+                                    taxonomy.GetCleanString("ClaInfraorder"),
+                                    taxonomy.GetCleanString("ClaSuperfamily"),
+                                    taxonomy.GetCleanString("ClaFamily"),
+                                    taxonomy.GetCleanString("ClaSubfamily")
                                 }.Concatenate(";");
 
                     occurrence.TaxonRank = new Dictionary<string, string>
                             {
-                                {"Kingdom", taxonomy.GetCleanEncodedString("ClaKingdom")},
-                                {"Phylum", taxonomy.GetCleanEncodedString("ClaPhylum")},
-                                {"Subphylum", taxonomy.GetCleanEncodedString("ClaSubphylum")},
-                                {"Superclass", taxonomy.GetCleanEncodedString("ClaSuperclass")},
-                                {"Class", taxonomy.GetCleanEncodedString("ClaClass")},
-                                {"Subclass", taxonomy.GetCleanEncodedString("ClaSubclass")},
-                                {"Superorder", taxonomy.GetCleanEncodedString("ClaSuperorder")},
-                                {"Order", taxonomy.GetCleanEncodedString("ClaOrder")},
-                                {"Suborder", taxonomy.GetCleanEncodedString("ClaSuborder")},
-                                {"Infraorder", taxonomy.GetCleanEncodedString("ClaInfraorder")},
-                                {"Superfamily", taxonomy.GetCleanEncodedString("ClaSuperfamily")},
-                                {"Family", taxonomy.GetCleanEncodedString("ClaFamily")},
-                                {"Subfamily", taxonomy.GetCleanEncodedString("ClaSubfamily")},
-                                {"Genus", taxonomy.GetCleanEncodedString("ClaGenus")},
-                                {"Subgenus", taxonomy.GetCleanEncodedString("ClaSubgenus")},
-                                {"Species", taxonomy.GetCleanEncodedString("ClaSpecies")},
-                                {"Subspecies", taxonomy.GetCleanEncodedString("ClaSubspecies")}
+                                {"Kingdom", taxonomy.GetCleanString("ClaKingdom")},
+                                {"Phylum", taxonomy.GetCleanString("ClaPhylum")},
+                                {"Subphylum", taxonomy.GetCleanString("ClaSubphylum")},
+                                {"Superclass", taxonomy.GetCleanString("ClaSuperclass")},
+                                {"Class", taxonomy.GetCleanString("ClaClass")},
+                                {"Subclass", taxonomy.GetCleanString("ClaSubclass")},
+                                {"Superorder", taxonomy.GetCleanString("ClaSuperorder")},
+                                {"Order", taxonomy.GetCleanString("ClaOrder")},
+                                {"Suborder", taxonomy.GetCleanString("ClaSuborder")},
+                                {"Infraorder", taxonomy.GetCleanString("ClaInfraorder")},
+                                {"Superfamily", taxonomy.GetCleanString("ClaSuperfamily")},
+                                {"Family", taxonomy.GetCleanString("ClaFamily")},
+                                {"Subfamily", taxonomy.GetCleanString("ClaSubfamily")},
+                                {"Genus", taxonomy.GetCleanString("ClaGenus")},
+                                {"Subgenus", taxonomy.GetCleanString("ClaSubgenus")},
+                                {"Species", taxonomy.GetCleanString("ClaSpecies")},
+                                {"Subspecies", taxonomy.GetCleanString("ClaSubspecies")}
                             }.Where(x => !string.IsNullOrWhiteSpace(x.Value)).Select(x => x.Key).LastOrDefault();
 
                     occurrence.ScientificNameAuthorship = taxonomy.GetEncodedString("AutAuthorString");

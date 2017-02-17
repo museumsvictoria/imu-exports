@@ -65,7 +65,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustraliaTissueData
 
                 // Save data
                 Log.Logger.Information("Saving occurrence data as csv");
-                using (var csvWriter = new CsvWriter(new StreamWriter(Config.Config.Options.Atd.Destination + @"occurrences.csv", false, Encoding.UTF8)))
+                using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Atd.Destination + @"occurrences.csv", false, Encoding.UTF8)))
                 {
                     csvWriter.Configuration.RegisterClassMap<OccurrenceTissueDataCsvMap>();
                     csvWriter.Configuration.HasHeaderRecord = true;
@@ -83,13 +83,13 @@ namespace ImuExports.Tasks.AtlasOfLivingAustraliaTissueData
             searchTerms.Add("AdmPublishWebNoPassword", "Yes");
 
             DateTime modifiedAfterDate;
-            if (!string.IsNullOrWhiteSpace(Config.Config.Options.Atd.ModifiedAfterDate) && DateTime.TryParseExact(Config.Config.Options.Atd.ModifiedAfterDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out modifiedAfterDate))
+            if (!string.IsNullOrWhiteSpace(GlobalOptions.Options.Atd.ModifiedAfterDate) && DateTime.TryParseExact(GlobalOptions.Options.Atd.ModifiedAfterDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out modifiedAfterDate))
             {
                 searchTerms.Add("AdmDateModified", modifiedAfterDate.ToString("MMM dd yyyy"), ">=");
             }
 
             DateTime modifiedBeforeDate;
-            if (!string.IsNullOrWhiteSpace(Config.Config.Options.Atd.ModifiedBeforeDate) && DateTime.TryParseExact(Config.Config.Options.Atd.ModifiedBeforeDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out modifiedBeforeDate))
+            if (!string.IsNullOrWhiteSpace(GlobalOptions.Options.Atd.ModifiedBeforeDate) && DateTime.TryParseExact(GlobalOptions.Options.Atd.ModifiedBeforeDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out modifiedBeforeDate))
             {
                 searchTerms.Add("AdmDateModified", modifiedBeforeDate.ToString("MMM dd yyyy"), "<=");
             }

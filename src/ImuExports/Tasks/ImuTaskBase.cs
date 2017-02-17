@@ -11,7 +11,7 @@ namespace ImuExports.Tasks
 {
     public abstract class ImuTaskBase
     {
-        public IList<long> CacheIrns(string moduleName, Terms searchTerms)
+        protected IList<long> CacheIrns(string moduleName, Terms searchTerms)
         {
             var cachedIrns = new List<long>();
             var offset = 0;
@@ -19,11 +19,11 @@ namespace ImuExports.Tasks
             // Cache Irns
             using (var imuSession = ImuSessionProvider.CreateInstance(moduleName))
             {
-                Log.Logger.Information("Caching irns");
+                Log.Logger.Information("Caching {moduleName} irns", moduleName);
 
                 var hits = imuSession.FindTerms(searchTerms);
 
-                Log.Logger.Information("Found {Hits} records where {@Terms}", hits, searchTerms.List);
+                Log.Logger.Information("Found {Hits} {moduleName} records where {@Terms}", hits, moduleName, searchTerms.List);
 
                 while (true)
                 {
@@ -41,7 +41,44 @@ namespace ImuExports.Tasks
 
                     offset += results.Count;
 
-                    Log.Logger.Information("{Name} cache progress... {Offset}/{TotalResults}", this.GetType().Name, offset, hits);
+                    Log.Logger.Information("{Name} {moduleName} cache progress... {Offset}/{TotalResults}", this.GetType().Name, moduleName, offset, hits);
+                }
+            }
+
+            return cachedIrns;
+        }
+
+        protected IList<long> CacheIrns(string moduleName, Terms searchTerms, string[] columns, Func<Map, IEnumerable<long>> irnSelectFunc)
+        {
+            var cachedIrns = new List<long>();
+            var offset = 0;
+
+            // Cache Irns
+            using (var imuSession = ImuSessionProvider.CreateInstance(moduleName))
+            {
+                Log.Logger.Information("Caching {moduleName} irns", moduleName);
+
+                var hits = imuSession.FindTerms(searchTerms);
+
+                Log.Logger.Information("Found {Hits} {moduleName} records where {@Terms}", hits, moduleName, searchTerms.List);
+
+                while (true)
+                {
+                    if (Program.ImportCanceled)
+                        return cachedIrns;
+
+                    var results = imuSession.Fetch("start", offset, Constants.CachedDataBatchSize, columns);
+
+                    if (results.Count == 0)
+                        break;
+
+                    var irns = results.Rows.SelectMany(irnSelectFunc);
+
+                    cachedIrns.AddRange(irns);
+
+                    offset += results.Count;
+
+                    Log.Logger.Information("{Name} {moduleName} cache progress... {Offset}/{TotalResults}", this.GetType().Name, moduleName, offset, hits);
                 }
             }
 

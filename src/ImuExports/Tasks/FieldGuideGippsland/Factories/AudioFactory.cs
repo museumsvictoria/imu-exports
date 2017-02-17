@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ImuExports.Config;
 using IMu;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
@@ -84,7 +85,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
                         throw new IMuException("MultimediaResourceNotFound");
                     
                     using (var fileStream = resource["file"] as FileStream)
-                    using (var file = File.OpenWrite(string.Format("{0}{1}", Config.Config.Options.Fgg.Destination, filename)))
+                    using (var file = File.OpenWrite(string.Format("{0}{1}", GlobalOptions.Options.Fgg.Destination, filename)))
                     {
                         fileStream.CopyTo(file);
                     }
