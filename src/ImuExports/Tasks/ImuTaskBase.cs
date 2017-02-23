@@ -82,6 +82,8 @@ namespace ImuExports.Tasks
                 }
             }
 
+            Log.Logger.Information("Found {CachedIrns} Cached irns in {moduleName}", cachedIrns.Count, moduleName);
+
             return cachedIrns;
         }
     }

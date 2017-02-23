@@ -10,7 +10,7 @@
 
         public string DctermsLicense { get; } = "https://creativecommons.org/publicdomain/zero/1.0/legalcode";
 
-        public string DctermsRightsHolder { get; }  = "Museum Victoria";
+        public string DctermsRightsHolder { get; }  = "Museums Victoria";
 
         public string InstitutionId { get; } = "NMV";
 

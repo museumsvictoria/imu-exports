@@ -56,7 +56,7 @@ namespace ImuExports.Tasks.WikimediaCommons
                     itemElement.Add(new XElement("depictedpeople", item.IsdPeopleDepicted));
                     itemElement.Add(new XElement("medium", item.IsdFormat));
                     itemElement.Add(new XElement("dimensions", "{{Size|unit=mm|width=83|height=83|depth=3}}"));
-                    itemElement.Add(new XElement("institution", "{{Institution:Museum Victoria}}"));
+                    itemElement.Add(new XElement("institution", "{{Institution:Museums Victoria}}"));
                     itemElement.Add(new XElement("department", "[http://collections.museumvictoria.com.au/search?collection=Tangyes+Lantern+Slide+Collection Tangyes Lantern Slide Collection]"));
                     itemElement.Add(new XElement("objecthistory", item.ObjectSummary));
                     itemElement.Add(new XElement("creditline", item.AcquisitionInformation));

@@ -32,9 +32,9 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     Identifier = string.Format("{0}.jpg", irn),
                     Title = map.GetTrimString("MulTitle"),
                     Creator = map.GetTrimStrings("MulCreator_tab").Concatenate(";"),
-                    Publisher = "Museum Victoria",
+                    Publisher = "Museums Victoria",
                     Source = map.GetTrimStrings("RigSource_tab").Concatenate(";"),
-                    RightsHolder = "Museum Victoria",
+                    RightsHolder = "Museums Victoria",
                     AltText = map.GetTrimString("DetAlternateText")
                 };
                 

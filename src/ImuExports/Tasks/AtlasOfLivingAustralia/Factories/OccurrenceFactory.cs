@@ -185,6 +185,8 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     occurrence.WaterBody = geo.GetTrimString("LocOcean_tab");
                     occurrence.Country = geo.GetTrimString("LocCountry_tab");
                     occurrence.StateProvince = geo.GetTrimString("LocProvinceStateTerritory_tab");
+                    occurrence.IslandGroup = geo.GetTrimString("LocIslandGroup");
+                    occurrence.Island = geo.GetTrimString("LocIsland");
                     occurrence.County = geo.GetTrimString("LocDistrictCountyShire_tab");
                     occurrence.Municipality = geo.GetTrimString("LocTownship_tab");
                 }

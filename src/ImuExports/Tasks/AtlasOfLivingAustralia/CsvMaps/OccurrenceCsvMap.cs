@@ -44,6 +44,8 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.CsvMaps
             Map(m => m.WaterBody).Name("waterBody");
             Map(m => m.Country).Name("country");
             Map(m => m.StateProvince).Name("stateProvince");
+            Map(m => m.IslandGroup).Name("islandGroup");
+            Map(m => m.Island).Name("island");
             Map(m => m.County).Name("county");
             Map(m => m.Municipality).Name("municipality");
             Map(m => m.Locality).Name("locality");
