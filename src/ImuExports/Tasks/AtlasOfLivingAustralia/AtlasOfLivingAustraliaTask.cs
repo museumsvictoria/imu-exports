@@ -83,7 +83,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
 
                     csvWriter.Configuration.RegisterClassMap<MultimediaCsvMap>();
                     csvWriter.Configuration.HasHeaderRecord = true;
-                    csvWriter.Configuration.DoubleQuoteString = @"\""";
+                    csvWriter.Configuration.DoubleQuoteString = @"""";
                     csvWriter.WriteRecords(images);
                 }
 
