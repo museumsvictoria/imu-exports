@@ -1,22 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using IMu;
 using ImuExports.Config;
 using ImuExports.Infrastructure;
-using ImuExports.Tasks.FieldGuideGippsland.Models;
+using ImuExports.Tasks.FieldGuideGunditjmara.Models;
+using IMu;
 using Newtonsoft.Json;
 using Serilog;
 
-namespace ImuExports.Tasks.FieldGuideGippsland
+namespace ImuExports.Tasks.FieldGuideGunditjmara
 {
-    public class FieldGuideGippslandTask : ImuTaskBase, ITask
+    public class FieldGuideGunditjmaraTask : ImuTaskBase, ITask
     {
-        private readonly IFactory<GippslandSpecies> gippslandSpeciesFactory;
+        private readonly IFactory<GunditjmaraSpecies> gunditjmaraSpeciesFactory;
 
-        public FieldGuideGippslandTask(IFactory<GippslandSpecies> gippslandSpeciesFactory)
+        public FieldGuideGunditjmaraTask(IFactory<GunditjmaraSpecies> gunditjmaraSpeciesFactory)
         {
-            this.gippslandSpeciesFactory = gippslandSpeciesFactory;
+            this.gunditjmaraSpeciesFactory = gunditjmaraSpeciesFactory;
         }
 
         public void Run()
@@ -27,7 +27,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland
                 var cachedIrns = this.CacheIrns("enarratives", BuildSearchTerms());
 
                 // Fetch data
-                var species = new List<GippslandSpecies>();
+                var species = new List<GunditjmaraSpecies>();
                 var offset = 0;
                 Log.Logger.Information("Fetching data");
                 while (true)
@@ -51,7 +51,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland
 
                         Log.Logger.Debug("Fetched {RecordCount} records from Imu", cachedIrnsBatch.Count);
 
-                        species.AddRange(results.Rows.Select(gippslandSpeciesFactory.Make));
+                        species.AddRange(results.Rows.Select(gunditjmaraSpeciesFactory.Make));
 
                         offset += results.Count;
 
@@ -60,7 +60,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland
                 }
 
                 // Save data
-                File.WriteAllText($"{GlobalOptions.Options.Gip.Destination}export.json", JsonConvert.SerializeObject(species, Formatting.Indented));
+                File.WriteAllText($"{GlobalOptions.Options.Gun.Destination}export.json", JsonConvert.SerializeObject(species, Formatting.Indented));
             }
         }
 
@@ -68,7 +68,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland
         {
             var searchTerms = new Terms();
             
-            searchTerms.Add("DetPurpose_tab", "App: Gippsland");
+            searchTerms.Add("DetPurpose_tab", "App: Gunditjmara");
             searchTerms.Add("AdmPublishWebNoPassword", "Yes");
 
             return searchTerms;
@@ -81,6 +81,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland
             "AdmDateModified",
             "AdmTimeModified",                    
             "taxa=[TaxTaxaRef_tab.(comname=[ComName_tab,ComStatus_tab]),TaxTaxaNotes_tab]",
+            "SpeGroup",
             "SpeTaxonGroup",
             "SpeTaxonSubGroup",
             "SpeBriefID",
@@ -91,6 +92,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland
             "SpeDiet",
             "SpeFastFact",
             "SpeHazards",
+            "SpeCallTimeFromTo_tab",
             "SpeFlightStart",
             "SpeFlightEnd",
             "SpeDepth_tab",

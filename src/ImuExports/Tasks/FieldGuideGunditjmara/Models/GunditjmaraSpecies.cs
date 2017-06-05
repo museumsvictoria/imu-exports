@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace ImuExports.Tasks.FieldGuideGippsland.Models
+namespace ImuExports.Tasks.FieldGuideGunditjmara.Models
 {
-    public class Species
+    public class GunditjmaraSpecies
     {
-        public Species()
+        public GunditjmaraSpecies()
         {
             Depths = new List<string>();
             WaterColumnLocations = new List<string>();
@@ -20,6 +20,8 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Models
         public string CommonName { get; set; }
 
         public string OtherCommonNames { get; set; }
+
+        public string Group { get; set; }
 
         public string AnimalType { get; set; }
 
@@ -37,9 +39,11 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Models
         
         public string Diet { get; set; }
         
-        public string LocalKnowledge { get; set; }
+        public string TraditionalKnowledge { get; set; }
         
         public string HazardousToHumans { get; set; }
+
+        public IList<string> CallingMonths { get; set; }
         
         public string FlightMonthFrom { get; set; }
         
@@ -57,8 +61,8 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Models
 
         public IList<string> Authors { get; set; }
 
-        public IList<Image> Images { get; set; }
+        public IList<GunditjmaraImage> Images { get; set; }
 
-        public IList<Audio> Audios { get; set; }
+        public IList<GunditjmaraAudio> Audios { get; set; }
     }
 }

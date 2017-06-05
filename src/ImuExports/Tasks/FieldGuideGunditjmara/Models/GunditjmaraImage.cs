@@ -1,6 +1,6 @@
-﻿namespace ImuExports.Tasks.FieldGuideGippsland.Models
+﻿namespace ImuExports.Tasks.FieldGuideGunditjmara.Models
 {
-    public class Image : Media
+    public class GunditjmaraImage : GunditjmaraMedia
     {
         public ImageType Type { get; set; }
     }

@@ -8,21 +8,21 @@ using ImuExports.Tasks.FieldGuideGippsland.Models;
 
 namespace ImuExports.Tasks.FieldGuideGippsland.Factories
 {
-    public class SpeciesFactory : IFactory<Species>
+    public class GippslandSpeciesFactory : IFactory<GippslandSpecies>
     {        
-        private readonly IFactory<Image> imageFactory;
-        private readonly IFactory<Audio> audioFactory;
+        private readonly IFactory<GippslandImage> gippslandImageFactory;
+        private readonly IFactory<GippslandAudio> gippslandAudioFactory;
 
-        public SpeciesFactory(IFactory<Image> imageFactory,
-            IFactory<Audio> audioFactory)
+        public GippslandSpeciesFactory(IFactory<GippslandImage> gippslandImageFactory,
+            IFactory<GippslandAudio> gippslandAudioFactory)
         {
-            this.imageFactory = imageFactory;
-            this.audioFactory = audioFactory;
+            this.gippslandImageFactory = gippslandImageFactory;
+            this.gippslandAudioFactory = gippslandAudioFactory;
         }
 
-        public Species Make(Map map)
+        public GippslandSpecies Make(Map map)
         {
-            var species = new Species();
+            var species = new GippslandSpecies();
 
             species.Irn = map.GetLong("irn");
             
@@ -101,13 +101,13 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
                     species.Authors.Add(author);
             }
 
-            species.Images = imageFactory.Make(map.GetMaps("media")).ToList();            
-            species.Audios = audioFactory.Make(map.GetMaps("media")).ToList();
+            species.Images = gippslandImageFactory.Make(map.GetMaps("media")).ToList();            
+            species.Audios = gippslandAudioFactory.Make(map.GetMaps("media")).ToList();
 
             return species;
         }
 
-        public IEnumerable<Species> Make(IEnumerable<Map> maps)
+        public IEnumerable<GippslandSpecies> Make(IEnumerable<Map> maps)
         {
             return maps.Select(Make);
         }

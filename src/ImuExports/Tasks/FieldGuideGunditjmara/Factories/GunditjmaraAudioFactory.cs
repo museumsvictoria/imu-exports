@@ -3,28 +3,28 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ImuExports.Config;
-using IMu;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
-using ImuExports.Tasks.FieldGuideGippsland.Models;
+using ImuExports.Tasks.FieldGuideGunditjmara.Models;
+using IMu;
 using Serilog;
 
-namespace ImuExports.Tasks.FieldGuideGippsland.Factories
+namespace ImuExports.Tasks.FieldGuideGunditjmara.Factories
 {
-    public class AudioFactory : IFactory<Audio>
+    public class GunditjmaraAudioFactory : IFactory<GunditjmaraAudio>
     {
-        public Audio Make(Map map)
+        public GunditjmaraAudio Make(Map map)
         {
             if (map != null &&
                 string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase) &&
-                map.GetTrimStrings("MdaDataSets_tab").Any(x => x.Contains("App: Gippsland")) &&
+                map.GetTrimStrings("MdaDataSets_tab").Any(x => x.Contains("App: Gunditjmara")) &&
                 string.Equals(map.GetTrimString("MulMimeType"), "audio", StringComparison.OrdinalIgnoreCase))
             {
                 var irn = map.GetLong("irn");
 
-                var audio = new Audio();
+                var audio = new GunditjmaraAudio();
 
-                var captionMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaElement_tab"), "dcDescription", StringComparison.OrdinalIgnoreCase) && string.Equals(x.GetTrimString("MdaQualifier_tab"), "Caption.AppGippsland"));
+                var captionMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaElement_tab"), "dcDescription", StringComparison.OrdinalIgnoreCase) && string.Equals(x.GetTrimString("MdaQualifier_tab"), "Caption.AppGunditjmara"));
                 if (captionMap != null)
                     audio.Caption = captionMap.GetTrimString("MdaFreeText_tab");
 
@@ -36,7 +36,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
                 audio.CopyrightStatement = map.GetTrimString("RigCopyrightStatement");
                 audio.Licence = map.GetTrimString("RigLicence");
                 audio.LicenceDetails = map.GetTrimString("RigLicenceDetails");
-                audio.Filename = string.Format("{0}{1}", irn, Path.GetExtension(map.GetTrimString("MulIdentifier")));
+                audio.Filename = $"{irn}{Path.GetExtension(map.GetTrimString("MulIdentifier"))}";
 
                 if (TrySaveAudio(irn, audio.Filename))
                 {
@@ -47,9 +47,9 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
             return null;
         }
 
-        public IEnumerable<Audio> Make(IEnumerable<Map> maps)
+        public IEnumerable<GunditjmaraAudio> Make(IEnumerable<Map> maps)
         {
-            var audios = new List<Audio>();
+            var audios = new List<GunditjmaraAudio>();
 
             var groupedMediaMaps = maps
                 .Where(x => x != null)
@@ -85,7 +85,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
                         throw new IMuException("MultimediaResourceNotFound");
                     
                     using (var fileStream = resource["file"] as FileStream)
-                    using (var file = File.OpenWrite(string.Format("{0}{1}", GlobalOptions.Options.Fgg.Destination, filename)))
+                    using (var file = File.OpenWrite($"{GlobalOptions.Options.Gun.Destination}{filename}"))
                     {
                         fileStream.CopyTo(file);
                     }

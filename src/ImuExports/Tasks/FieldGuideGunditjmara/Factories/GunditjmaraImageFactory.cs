@@ -4,28 +4,28 @@ using System.IO;
 using System.Linq;
 using ImageMagick;
 using ImuExports.Config;
-using IMu;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
-using ImuExports.Tasks.FieldGuideGippsland.Models;
+using ImuExports.Tasks.FieldGuideGunditjmara.Models;
+using IMu;
 using Serilog;
 
-namespace ImuExports.Tasks.FieldGuideGippsland.Factories
+namespace ImuExports.Tasks.FieldGuideGunditjmara.Factories
 {
-    public class ImageFactory : IFactory<Image>
+    public class GunditjmaraImageFactory : IFactory<GunditjmaraImage>
     {
-        public Image Make(Map map)
+        public GunditjmaraImage Make(Map map)
         {
             if (map != null &&
                 string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase) &&
-                map.GetTrimStrings("MdaDataSets_tab").Any(x => x.Contains("App: Gippsland")) &&
+                map.GetTrimStrings("MdaDataSets_tab").Any(x => x.Contains("App: Gunditjmara")) &&
                 string.Equals(map.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
             {
                 var irn = map.GetLong("irn");
 
-                var image = new Image();
+                var image = new GunditjmaraImage();
 
-                var captionMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaElement_tab"), "dcDescription", StringComparison.OrdinalIgnoreCase) && string.Equals(x.GetTrimString("MdaQualifier_tab"), "Caption.AppGippsland"));
+                var captionMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaElement_tab"), "dcDescription", StringComparison.OrdinalIgnoreCase) && string.Equals(x.GetTrimString("MdaQualifier_tab"), "Caption.AppGunditjmara"));
                 if (captionMap != null)
                     image.Caption = captionMap.GetTrimString("MdaFreeText_tab");
 
@@ -37,7 +37,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
                 image.CopyrightStatement = map.GetTrimString("RigCopyrightStatement");
                 image.Licence = map.GetTrimString("RigLicence");
                 image.LicenceDetails = map.GetTrimString("RigLicenceDetails");
-                image.Filename = string.Format("{0}.jpg", irn);
+                image.Filename = $"{irn}.jpg";
 
                 var repositories = map.GetTrimStrings("ChaRepository_tab");
                 if (repositories.Any(x => string.Equals(x, "NS Online Images Live Hero", StringComparison.OrdinalIgnoreCase)))
@@ -56,9 +56,9 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
             return null;
         }
 
-        public IEnumerable<Image> Make(IEnumerable<Map> maps)
+        public IEnumerable<GunditjmaraImage> Make(IEnumerable<Map> maps)
         {
-            var images = new List<Image>();
+            var images = new List<GunditjmaraImage>();
 
             var groupedMediaMaps = maps
                 .Where(x => x != null)
@@ -94,7 +94,7 @@ namespace ImuExports.Tasks.FieldGuideGippsland.Factories
                         throw new IMuException("MultimediaResourceNotFound");
 
                     using (var fileStream = resource["file"] as FileStream)
-                    using (var file = File.Open(string.Format("{0}{1}.jpg", GlobalOptions.Options.Fgg.Destination, irn), FileMode.Create, FileAccess.Write))
+                    using (var file = File.Open($"{GlobalOptions.Options.Gun.Destination}{irn}.jpg", FileMode.Create, FileAccess.ReadWrite))
                     {
                         if (string.Equals(resource["mimeFormat"] as string, "jpeg", StringComparison.OrdinalIgnoreCase))
                             fileStream.CopyTo(file);

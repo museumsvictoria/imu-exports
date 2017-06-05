@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace ImuExports.Tasks.FieldGuideGippsland.Models
+namespace ImuExports.Tasks.FieldGuideGunditjmara.Models
 {
-    public abstract class Media
+    public abstract class GunditjmaraMedia
     {
-        protected Media()
+        protected GunditjmaraMedia()
         {
             Creators = new List<string>();
             Sources = new List<string>();

@@ -4,14 +4,14 @@ using CommandLine;
 using ImuExports.Infrastructure;
 using Serilog;
 
-namespace ImuExports.Tasks.FieldGuideGippsland
+namespace ImuExports.Tasks.FieldGuideGunditjmara
 {
-    public class FieldGuideGippslandOptions : ITaskOptions
+    public class FieldGuideGunditjmaraOptions : ITaskOptions
     {
         [Option('d', "dest", HelpText = "Destination directory for json and images.", Required = true)]
         public string Destination { get; set; }
 
-        public Type TypeOfTask => typeof(FieldGuideGippslandTask);
+        public Type TypeOfTask => typeof(FieldGuideGunditjmaraTask);
 
         public void Initialize()
         {

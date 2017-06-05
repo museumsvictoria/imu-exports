@@ -23,8 +23,7 @@ namespace ImuExports.Config
 
             var taskOptions = TaskOptions as ITaskOptions;
 
-            if (taskOptions != null)
-                taskOptions.Initialize();
+            taskOptions?.Initialize();
         }
     }
 }
