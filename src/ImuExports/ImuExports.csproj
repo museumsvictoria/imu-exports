@@ -128,6 +128,17 @@
     <Compile Include="Infrastructure\ITask.cs" />
     <Compile Include="Tasks\ExtractImages\ExtractImagesOptions.cs" />
     <Compile Include="Tasks\ExtractImages\ExtractImagesTask.cs" />
+    <Compile Include="Tasks\FieldMIO\Factories\MIOAudioFactory.cs" />
+    <Compile Include="Tasks\FieldMIO\Factories\MIOThumbnailFactory.cs" />
+    <Compile Include="Tasks\FieldMIO\Factories\MIOImageFactory.cs" />
+    <Compile Include="Tasks\FieldMIO\Factories\MIOSpeciesFactory.cs" />
+    <Compile Include="Tasks\FieldMIO\FieldMIOOptions.cs" />
+    <Compile Include="Tasks\FieldMIO\FieldMIOTask.cs" />
+    <Compile Include="Tasks\FieldMIO\Models\MIOThumbnail.cs" />
+    <Compile Include="Tasks\FieldMIO\Models\MIOAudio.cs" />
+    <Compile Include="Tasks\FieldMIO\Models\MIOImage.cs" />
+    <Compile Include="Tasks\FieldMIO\Models\MIOMedia.cs" />
+    <Compile Include="Tasks\FieldMIO\Models\MIOSpecies.cs" />
     <Compile Include="Tasks\FieldGuideGunditjmara\Factories\GunditjmaraAudioFactory.cs" />
     <Compile Include="Tasks\FieldGuideGunditjmara\Factories\GunditjmaraImageFactory.cs" />
     <Compile Include="Tasks\FieldGuideGunditjmara\Factories\GunditjmaraSpeciesFactory.cs" />
