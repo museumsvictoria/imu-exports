@@ -6,34 +6,29 @@ using ImageMagick;
 using ImuExports.Config;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
-using ImuExports.Tasks.FieldMIO.Models;
+using ImuExports.Tasks.InsideOut.Models;
 using IMu;
 using Serilog;
 
-namespace ImuExports.Tasks.FieldMIO.Factories
+namespace ImuExports.Tasks.InsideOut.Factories
 {
-    public class MIOThumbnailFactory : IFactory<MIOThumbnail>
+    public class ImageFactory : IFactory<Image>
     {
-        public MIOThumbnail Make(Map map)
+        public Image Make(Map map)
         {
             if (map != null)
             {
                 var CropMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaQualifier_tab"), "MIOAct1Crop"));
                 var FullMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaQualifier_tab"), "MIOAct1Full"));
-                if (CropMap != null &&
+                if (CropMap == null &&
                         string.Equals(map.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase)
                     )
                 {
                     var irn = map.GetLong("irn");
 
-                    var image = new MIOThumbnail();
+                    var image = new Image();
 
                     image.Filename = $"{irn}.jpg";
-
-                    var thumbnailClassMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaQualifer_tab"), "MIOAct1Crop", StringComparison.OrdinalIgnoreCase));
-                    if (thumbnailClassMap != null)
-                        image.ThumbnailClass = thumbnailClassMap.GetTrimString("MdaFreeText_tab");
-
 
                     if (TrySaveImage(irn))
                     {
@@ -43,9 +38,10 @@ namespace ImuExports.Tasks.FieldMIO.Factories
             }
             return null;
         }
-        public IEnumerable<MIOThumbnail> Make(IEnumerable<Map> maps)
+
+        public IEnumerable<Image> Make(IEnumerable<Map> maps)
         {
-            var images = new List<MIOThumbnail>();
+            var images = new List<Image>();
 
             var groupedMediaMaps = maps
                 .Where(x => x != null)
@@ -81,7 +77,7 @@ namespace ImuExports.Tasks.FieldMIO.Factories
                         throw new IMuException("MultimediaResourceNotFound");
 
                     using (var fileStream = resource["file"] as FileStream)
-                    using (var file = File.Open($"{GlobalOptions.Options.Mio.Destination}{irn}.jpg", FileMode.Create, FileAccess.ReadWrite))
+                    using (var file = File.Open($"{GlobalOptions.Options.Io.Destination}{irn}.jpg", FileMode.Create, FileAccess.ReadWrite))
                     {
                         if (string.Equals(resource["mimeFormat"] as string, "jpeg", StringComparison.OrdinalIgnoreCase))
                             fileStream.CopyTo(file);

@@ -3,20 +3,21 @@ using System.IO;
 using System.Linq;
 using ImuExports.Config;
 using ImuExports.Infrastructure;
-using ImuExports.Tasks.FieldMIO.Models;
+using ImuExports.Tasks.InsideOut.Models;
 using IMu;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Serilog;
 
-namespace ImuExports.Tasks.FieldMIO
+namespace ImuExports.Tasks.InsideOut
 {
-    public class FieldMIOTask : ImuTaskBase, ITask
+    public class InsideOutTask : ImuTaskBase, ITask
     {
-        private readonly IFactory<MIOSpecies> MIOSpeciesFactory;
+        private readonly IFactory<Species> speciesFactory;
 
-        public FieldMIOTask(IFactory<MIOSpecies> MIOSpeciesFactory)
+        public InsideOutTask(IFactory<Species> speciesFactory)
         {
-            this.MIOSpeciesFactory = MIOSpeciesFactory;
+            this.speciesFactory = speciesFactory;
         }
 
         public void Run()
@@ -27,7 +28,7 @@ namespace ImuExports.Tasks.FieldMIO
                 var cachedIrns = this.CacheIrns("enarratives", BuildSearchTerms());
 
                 // Fetch data
-                var species = new List<MIOSpecies>();
+                var species = new List<Species>();
                 var offset = 0;
                 Log.Logger.Information("Fetching data");
                 while (true)
@@ -51,7 +52,7 @@ namespace ImuExports.Tasks.FieldMIO
 
                         Log.Logger.Debug("Fetched {RecordCount} records from Imu", cachedIrnsBatch.Count);
 
-                        species.AddRange(results.Rows.Select(MIOSpeciesFactory.Make));
+                        species.AddRange(results.Rows.Select(speciesFactory.Make));
 
                         offset += results.Count;
 
@@ -60,7 +61,7 @@ namespace ImuExports.Tasks.FieldMIO
                 }
 
                 // Save data
-                File.WriteAllText($"{GlobalOptions.Options.Mio.Destination}export.json", JsonConvert.SerializeObject(species, Formatting.Indented));
+                File.WriteAllText($"{GlobalOptions.Options.Io.Destination}export.json", JsonConvert.SerializeObject(species, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() }));
             }
         }
 
@@ -68,7 +69,7 @@ namespace ImuExports.Tasks.FieldMIO
         {
             var searchTerms = new Terms();
             
-            searchTerms.Add("DetPurpose_tab", "Exhibition: MIO Act 1");//changed 10-04
+            searchTerms.Add("DetPurpose_tab", "Exhibition: MIO Act 1");
             searchTerms.Add("AdmPublishWebNoPassword", "Yes");
 
             return searchTerms;

@@ -5,22 +5,22 @@ using System.Linq;
 using ImuExports.Config;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
-using ImuExports.Tasks.FieldMIO.Models;
+using ImuExports.Tasks.InsideOut.Models;
 using IMu;
 using Serilog;
 
-namespace ImuExports.Tasks.FieldMIO.Factories
+namespace ImuExports.Tasks.InsideOut.Factories
 {
-    public class MIOAudioFactory : IFactory<MIOAudio>
+    public class AudioFactory : IFactory<Audio>
     {
-        public MIOAudio Make(Map map)
+        public Audio Make(Map map)
         {
             if (map != null &&
                 string.Equals(map.GetTrimString("MulMimeType"), "audio", StringComparison.OrdinalIgnoreCase))
             {
                 var irn = map.GetLong("irn");
 
-                var audio = new MIOAudio();
+                var audio = new Audio();
 
                 audio.Filename = $"{irn}{Path.GetExtension(map.GetTrimString("MulIdentifier"))}";
 
@@ -33,9 +33,9 @@ namespace ImuExports.Tasks.FieldMIO.Factories
             return null;
         }
 
-        public IEnumerable<MIOAudio> Make(IEnumerable<Map> maps)
+        public IEnumerable<Audio> Make(IEnumerable<Map> maps)
         {
-            var audios = new List<MIOAudio>();
+            var audios = new List<Audio>();
 
             var groupedMediaMaps = maps
                 .Where(x => x != null)
@@ -71,7 +71,7 @@ namespace ImuExports.Tasks.FieldMIO.Factories
                         throw new IMuException("MultimediaResourceNotFound");
                     
                     using (var fileStream = resource["file"] as FileStream)
-                    using (var file = File.OpenWrite($"{GlobalOptions.Options.Mio.Destination}{filename}"))
+                    using (var file = File.OpenWrite($"{GlobalOptions.Options.Io.Destination}{filename}"))
                     {
                         fileStream.CopyTo(file);
                     }

@@ -14,6 +14,21 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -128,17 +143,17 @@
     <Compile Include="Infrastructure\ITask.cs" />
     <Compile Include="Tasks\ExtractImages\ExtractImagesOptions.cs" />
     <Compile Include="Tasks\ExtractImages\ExtractImagesTask.cs" />
-    <Compile Include="Tasks\FieldMIO\Factories\MIOAudioFactory.cs" />
-    <Compile Include="Tasks\FieldMIO\Factories\MIOThumbnailFactory.cs" />
-    <Compile Include="Tasks\FieldMIO\Factories\MIOImageFactory.cs" />
-    <Compile Include="Tasks\FieldMIO\Factories\MIOSpeciesFactory.cs" />
-    <Compile Include="Tasks\FieldMIO\FieldMIOOptions.cs" />
-    <Compile Include="Tasks\FieldMIO\FieldMIOTask.cs" />
-    <Compile Include="Tasks\FieldMIO\Models\MIOThumbnail.cs" />
-    <Compile Include="Tasks\FieldMIO\Models\MIOAudio.cs" />
-    <Compile Include="Tasks\FieldMIO\Models\MIOImage.cs" />
-    <Compile Include="Tasks\FieldMIO\Models\MIOMedia.cs" />
-    <Compile Include="Tasks\FieldMIO\Models\MIOSpecies.cs" />
+    <Compile Include="Tasks\InsideOut\Factories\AudioFactory.cs" />
+    <Compile Include="Tasks\InsideOut\Factories\ThumbnailFactory.cs" />
+    <Compile Include="Tasks\InsideOut\Factories\ImageFactory.cs" />
+    <Compile Include="Tasks\InsideOut\Factories\SpeciesFactory.cs" />
+    <Compile Include="Tasks\InsideOut\InsideOutOptions.cs" />
+    <Compile Include="Tasks\InsideOut\InsideOutTask.cs" />
+    <Compile Include="Tasks\InsideOut\Models\Thumbnail.cs" />
+    <Compile Include="Tasks\InsideOut\Models\Audio.cs" />
+    <Compile Include="Tasks\InsideOut\Models\Image.cs" />
+    <Compile Include="Tasks\InsideOut\Models\Media.cs" />
+    <Compile Include="Tasks\InsideOut\Models\Species.cs" />
     <Compile Include="Tasks\FieldGuideGunditjmara\Factories\GunditjmaraAudioFactory.cs" />
     <Compile Include="Tasks\FieldGuideGunditjmara\Factories\GunditjmaraImageFactory.cs" />
     <Compile Include="Tasks\FieldGuideGunditjmara\Factories\GunditjmaraSpeciesFactory.cs" />
@@ -173,6 +188,13 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

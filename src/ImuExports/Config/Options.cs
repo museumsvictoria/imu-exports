@@ -6,7 +6,7 @@ using ImuExports.Tasks.ExtractImages;
 using ImuExports.Tasks.FieldGuideGippsland;
 using ImuExports.Tasks.FieldGuideGunditjmara;
 using ImuExports.Tasks.WikimediaCommons;
-using ImuExports.Tasks.FieldMIO;
+using ImuExports.Tasks.InsideOut;
 
 namespace ImuExports.Config
 {
@@ -30,8 +30,8 @@ namespace ImuExports.Config
         [VerbOption("ei", HelpText = "Extract images for the Ursula.")]
         public ExtractImagesOptions Ei { get; set; }
 
-        [VerbOption("mio", HelpText = "Extract records for the Museum Inside Out.")]
-        public FieldMIOOptions Mio { get; set; }
+        [VerbOption("io", HelpText = "Extract records for Inside Out.")]
+        public InsideOutOptions Io { get; set; }
 
         [HelpVerbOption]
         public string GetUsage(string verb)

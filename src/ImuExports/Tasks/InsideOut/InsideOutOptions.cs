@@ -4,14 +4,14 @@ using CommandLine;
 using ImuExports.Infrastructure;
 using Serilog;
 
-namespace ImuExports.Tasks.FieldMIO
+namespace ImuExports.Tasks.InsideOut
 {
-    public class FieldMIOOptions : ITaskOptions
+    public class InsideOutOptions : ITaskOptions
     {
         [Option('d', "dest", HelpText = "Destination directory for json and images.", Required = true)]
         public string Destination { get; set; }
 
-        public Type TypeOfTask => typeof(FieldMIOTask);
+        public Type TypeOfTask => typeof(InsideOutTask);
 
         public void Initialize()
         {
