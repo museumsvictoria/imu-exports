@@ -6,6 +6,7 @@ using ImageMagick;
 using ImuExports.Config;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
+using ImuExports.Tasks.InsideOut.Config;
 using ImuExports.Tasks.InsideOut.Models;
 using IMu;
 using Serilog;
@@ -16,26 +17,24 @@ namespace ImuExports.Tasks.InsideOut.Factories
     {
         public Image Make(Map map)
         {
-            if (map != null)
+            if (map != null &&
+                map.GetMaps("metadata").Any(metadata => string.Equals(metadata.GetTrimString("MdaQualifier_tab"), "MIOAct1Full", StringComparison.OrdinalIgnoreCase)) &&
+                string.Equals(map.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
             {
-                var CropMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaQualifier_tab"), "MIOAct1Crop"));
-                var FullMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaQualifier_tab"), "MIOAct1Full"));
-                if (CropMap == null &&
-                        string.Equals(map.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase)
-                    )
+                var irn = map.GetLong("irn");
+
+                var image = new Image
                 {
-                    var irn = map.GetLong("irn");
+                    Filename = $"{irn}.jpg",
+                    AlternateText = map.GetTrimString("DetAlternateText")
+                };
 
-                    var image = new Image();
-
-                    image.Filename = $"{irn}.jpg";
-
-                    if (TrySaveImage(irn))
-                    {
-                        return image;
-                    }
+                if (TrySaveImage(irn))
+                {
+                    return image;
                 }
             }
+
             return null;
         }
 
@@ -78,18 +77,12 @@ namespace ImuExports.Tasks.InsideOut.Factories
 
                     using (var fileStream = resource["file"] as FileStream)
                     using (var file = File.Open($"{GlobalOptions.Options.Io.Destination}{irn}.jpg", FileMode.Create, FileAccess.ReadWrite))
+                    using (var magickImage = new MagickImage(fileStream))
                     {
-                        if (string.Equals(resource["mimeFormat"] as string, "jpeg", StringComparison.OrdinalIgnoreCase))
-                            fileStream.CopyTo(file);
-                        else
-                        {
-                            using (var image = new MagickImage(fileStream))
-                            {
-                                image.Format = MagickFormat.Jpg;
-                                image.Quality = 95;
-                                image.Write(file);
-                            }
-                        }
+                        magickImage.Format = MagickFormat.Pjpeg;
+                        magickImage.Resize(new MagickGeometry(InsideOutConstants.MaxImageWidth, InsideOutConstants.MaxImageHeight));
+                        magickImage.Quality = 80;
+                        magickImage.Write(file);
                     }
                 }
 

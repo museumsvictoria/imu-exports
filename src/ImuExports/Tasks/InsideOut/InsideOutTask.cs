@@ -13,11 +13,11 @@ namespace ImuExports.Tasks.InsideOut
 {
     public class InsideOutTask : ImuTaskBase, ITask
     {
-        private readonly IFactory<Species> speciesFactory;
+        private readonly IFactory<Object> objectFactory;
 
-        public InsideOutTask(IFactory<Species> speciesFactory)
+        public InsideOutTask(IFactory<Object> objectFactory)
         {
-            this.speciesFactory = speciesFactory;
+            this.objectFactory = objectFactory;
         }
 
         public void Run()
@@ -28,7 +28,7 @@ namespace ImuExports.Tasks.InsideOut
                 var cachedIrns = this.CacheIrns("enarratives", BuildSearchTerms());
 
                 // Fetch data
-                var species = new List<Species>();
+                var objects = new List<Object>();
                 var offset = 0;
                 Log.Logger.Information("Fetching data");
                 while (true)
@@ -52,7 +52,7 @@ namespace ImuExports.Tasks.InsideOut
 
                         Log.Logger.Debug("Fetched {RecordCount} records from Imu", cachedIrnsBatch.Count);
 
-                        species.AddRange(results.Rows.Select(speciesFactory.Make));
+                        objects.AddRange(results.Rows.Select(objectFactory.Make));
 
                         offset += results.Count;
 
@@ -61,7 +61,7 @@ namespace ImuExports.Tasks.InsideOut
                 }
 
                 // Save data
-                File.WriteAllText($"{GlobalOptions.Options.Io.Destination}export.json", JsonConvert.SerializeObject(species, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() }));
+                File.WriteAllText($"{GlobalOptions.Options.Io.Destination}export.json", JsonConvert.SerializeObject(objects, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() }));
             }
         }
 

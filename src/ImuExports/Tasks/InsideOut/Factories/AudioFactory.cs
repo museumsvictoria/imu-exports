@@ -15,14 +15,16 @@ namespace ImuExports.Tasks.InsideOut.Factories
     {
         public Audio Make(Map map)
         {
-            if (map != null &&
-                string.Equals(map.GetTrimString("MulMimeType"), "audio", StringComparison.OrdinalIgnoreCase))
+            if (map != null && string.Equals(map.GetTrimString("MulMimeType"), "audio", StringComparison.OrdinalIgnoreCase))
             {
                 var irn = map.GetLong("irn");
 
-                var audio = new Audio();
-
-                audio.Filename = $"{irn}{Path.GetExtension(map.GetTrimString("MulIdentifier"))}";
+                var audio = new Audio
+                {
+                    Filename = $"{irn}{Path.GetExtension(map.GetTrimString("MulIdentifier"))}",
+                    Title = map.GetTrimString("MulTitle"),
+                    Transcript = map.GetTrimString("MulDescription")
+                };
 
                 if (TrySaveAudio(irn, audio.Filename))
                 {
@@ -81,7 +83,7 @@ namespace ImuExports.Tasks.InsideOut.Factories
             }
             catch (Exception ex)
             {
-                Log.Logger.Error(ex, "Error saving image {irn}", irn);
+                Log.Logger.Error(ex, "Error saving audio {irn}", irn);
             }
 
             return false;

@@ -1,7 +1,11 @@
 ﻿namespace ImuExports.Tasks.InsideOut.Models
 {
-    public class Thumbnail : Media
+    public class Thumbnail
     {
-        public string ThumbnailClass { get; set; }
+        public string Filename { get; set; }
+
+        public string AlternateText { get; set; }
+
+        public string ClassName { get; set; }
     }
 }

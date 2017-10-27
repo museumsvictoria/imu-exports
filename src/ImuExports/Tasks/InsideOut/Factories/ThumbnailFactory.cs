@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ImageMagick;
 using ImuExports.Config;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
@@ -16,31 +15,24 @@ namespace ImuExports.Tasks.InsideOut.Factories
     {
         public Thumbnail Make(Map map)
         {
-            if (map != null)
+            if (map != null && 
+                map.GetMaps("metadata").Any(metadata => string.Equals(metadata.GetTrimString("MdaQualifier_tab"), "MIOAct1Crop", StringComparison.OrdinalIgnoreCase)) && 
+                string.Equals(map.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
             {
-                var CropMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaQualifier_tab"), "MIOAct1Crop"));
-                var FullMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaQualifier_tab"), "MIOAct1Full"));
-                if (CropMap != null &&
-                        string.Equals(map.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase)
-                    )
+                var irn = map.GetLong("irn");
+                var image = new Thumbnail
                 {
-                    var irn = map.GetLong("irn");
+                    Filename = $"{irn}.jpg",
+                    AlternateText = map.GetTrimString("DetAlternateText"),
+                    ClassName = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaQualifer_tab"), "MIOAct1Crop", StringComparison.OrdinalIgnoreCase))?.GetTrimString("MdaFreeText_tab")
+                };
 
-                    var image = new Thumbnail();
-
-                    image.Filename = $"{irn}.jpg";
-
-                    var thumbnailClassMap = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaQualifer_tab"), "MIOAct1Crop", StringComparison.OrdinalIgnoreCase));
-                    if (thumbnailClassMap != null)
-                        image.ThumbnailClass = thumbnailClassMap.GetTrimString("MdaFreeText_tab");
-
-
-                    if (TrySaveImage(irn))
-                    {
-                        return image;
-                    }
+                if (TrySaveImage(irn))
+                {
+                    return image;
                 }
             }
+
             return null;
         }
         public IEnumerable<Thumbnail> Make(IEnumerable<Map> maps)
@@ -83,17 +75,7 @@ namespace ImuExports.Tasks.InsideOut.Factories
                     using (var fileStream = resource["file"] as FileStream)
                     using (var file = File.Open($"{GlobalOptions.Options.Io.Destination}{irn}.jpg", FileMode.Create, FileAccess.ReadWrite))
                     {
-                        if (string.Equals(resource["mimeFormat"] as string, "jpeg", StringComparison.OrdinalIgnoreCase))
-                            fileStream.CopyTo(file);
-                        else
-                        {
-                            using (var image = new MagickImage(fileStream))
-                            {
-                                image.Format = MagickFormat.Jpg;
-                                image.Quality = 95;
-                                image.Write(file);
-                            }
-                        }
+                        fileStream.CopyTo(file);
                     }
                 }
 
