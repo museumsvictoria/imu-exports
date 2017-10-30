@@ -48,8 +48,8 @@ namespace ImuExports.Tasks.InsideOut.Factories
                 }
             }
 
-            @object.Thumbnail = thumbnailFactory.Make(map.GetMaps("media")).FirstOrDefault();
-            @object.Image = imageFactory.Make(map.GetMaps("media")).FirstOrDefault();
+            @object.Thumbnail = thumbnailFactory.Make(map.GetMaps("media").FirstOrDefault());
+            @object.Image = imageFactory.Make(map.GetMaps("media").FirstOrDefault());
             @object.Audio = audioFactory.Make(map.GetMaps("media")).ToList();
 
             return @object;
