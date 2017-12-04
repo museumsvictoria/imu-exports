@@ -29,7 +29,7 @@ namespace ImuExports.Tasks.InsideOut.Factories
                     AlternateText = map.GetTrimString("DetAlternateText")
                 };
 
-                if (TrySaveImage(irn))
+                if (TrySaveImage(irn, ref image))
                 {
                     return image;
                 }
@@ -63,7 +63,7 @@ namespace ImuExports.Tasks.InsideOut.Factories
             return images;
         }
 
-        private bool TrySaveImage(long irn)
+        private bool TrySaveImage(long irn, ref Image image)
         {
             try
             {
@@ -83,6 +83,9 @@ namespace ImuExports.Tasks.InsideOut.Factories
                         magickImage.Resize(new MagickGeometry(InsideOutConstants.MaxImageWidth, InsideOutConstants.MaxImageHeight));
                         magickImage.Quality = 80;
                         magickImage.Write(file);
+
+                        image.Width = magickImage.Width;
+                        image.Height = magickImage.Height;
                     }
                 }
 

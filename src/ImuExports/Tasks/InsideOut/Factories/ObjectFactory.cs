@@ -35,7 +35,7 @@ namespace ImuExports.Tasks.InsideOut.Factories
                 Description = map.GetTrimString("NarNarrative")
             };
 
-            var linkedObject = map.GetMaps("emv")?.First();
+            var linkedObject = map.GetMaps("emv")?.FirstOrDefault();
             if (linkedObject != null)
             {
                 if (string.Equals(linkedObject.GetTrimString("ColCategory"), "Natural Sciences", StringComparison.OrdinalIgnoreCase))
@@ -48,8 +48,8 @@ namespace ImuExports.Tasks.InsideOut.Factories
                 }
             }
 
-            @object.Thumbnail = thumbnailFactory.Make(map.GetMaps("media").FirstOrDefault());
-            @object.Image = imageFactory.Make(map.GetMaps("media").FirstOrDefault());
+            @object.Thumbnail = thumbnailFactory.Make(map.GetMaps("media")).FirstOrDefault();
+            @object.Image = imageFactory.Make(map.GetMaps("media")).FirstOrDefault();
             @object.Audio = audioFactory.Make(map.GetMaps("media")).ToList();
 
             return @object;

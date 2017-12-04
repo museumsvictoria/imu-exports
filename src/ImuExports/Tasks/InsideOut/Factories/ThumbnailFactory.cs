@@ -24,7 +24,7 @@ namespace ImuExports.Tasks.InsideOut.Factories
                 {
                     Filename = $"{irn}.jpg",
                     AlternateText = map.GetTrimString("DetAlternateText"),
-                    ClassName = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaQualifer_tab"), "MIOAct1Crop", StringComparison.OrdinalIgnoreCase))?.GetTrimString("MdaFreeText_tab")
+                    ClassName = map.GetMaps("metadata").FirstOrDefault(x => string.Equals(x.GetTrimString("MdaQualifier_tab"), "MIOAct1Crop", StringComparison.OrdinalIgnoreCase))?.GetTrimString("MdaFreeText_tab")
                 };
 
                 if (TrySaveImage(irn))

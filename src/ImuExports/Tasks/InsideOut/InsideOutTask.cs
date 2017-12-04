@@ -52,7 +52,7 @@ namespace ImuExports.Tasks.InsideOut
 
                         Log.Logger.Debug("Fetched {RecordCount} records from Imu", cachedIrnsBatch.Count);
 
-                        objects.AddRange(results.Rows.Select(objectFactory.Make));
+                        objects.AddRange(results.Rows.Select(objectFactory.Make).Where(x => x.Thumbnail != null));
 
                         offset += results.Count;
 
@@ -88,7 +88,7 @@ namespace ImuExports.Tasks.InsideOut
             "NarNarrative",
             "IntInterviewNotes_tab",
             "emv=ObjObjectsRef_tab.(irn,ColCategory)",
-            "media=MulMultiMediaRef_tab.(irn,MulTitle,MulIdentifier,MulMimeType,MdaDataSets_tab,metadata=[MdaElement_tab,MdaQualifier_tab,MdaFreeText_tab],DetAlternateText,RigCreator_tab,RigSource_tab,RigAcknowledgementCredit,RigCopyrightStatement,RigCopyrightStatus,RigLicence,RigLicenceDetails,ChaRepository_tab,ChaMd5Sum,AdmPublishWebNoPassword,AdmDateModified,AdmTimeModified)"
+            "media=MulMultiMediaRef_tab.(irn,MulTitle,MulIdentifier,MulMimeType,MulDescription,MdaDataSets_tab,metadata=[MdaElement_tab,MdaQualifier_tab,MdaFreeText_tab],DetAlternateText,RigCreator_tab,RigSource_tab,RigAcknowledgementCredit,RigCopyrightStatement,RigCopyrightStatus,RigLicence,RigLicenceDetails,ChaRepository_tab,ChaMd5Sum,AdmPublishWebNoPassword,AdmDateModified,AdmTimeModified)"
         };
     }
 }
