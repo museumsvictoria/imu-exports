@@ -75,8 +75,10 @@ namespace ImuExports.Tasks.InsideOut.Factories
                     if (resource == null)
                         throw new IMuException("MultimediaResourceNotFound");
 
+                    var filename = $"{GlobalOptions.Options.Io.Destination}{irn}.jpg";
+
                     using (var fileStream = resource["file"] as FileStream)
-                    using (var file = File.Open($"{GlobalOptions.Options.Io.Destination}{irn}.jpg", FileMode.Create, FileAccess.ReadWrite))
+                    using (var file = File.Open(filename, FileMode.Create, FileAccess.ReadWrite))
                     using (var magickImage = new MagickImage(fileStream))
                     {
                         magickImage.Format = MagickFormat.Pjpeg;
@@ -87,6 +89,9 @@ namespace ImuExports.Tasks.InsideOut.Factories
                         image.Width = magickImage.Width;
                         image.Height = magickImage.Height;
                     }
+
+                    var imageOptimizer = new ImageOptimizer();
+                    imageOptimizer.Compress(filename);
                 }
 
                 return true;
