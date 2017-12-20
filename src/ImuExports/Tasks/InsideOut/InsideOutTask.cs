@@ -61,7 +61,9 @@ namespace ImuExports.Tasks.InsideOut
                 }
 
                 // Save data
-                File.WriteAllText($"{GlobalOptions.Options.Io.Destination}export.json", JsonConvert.SerializeObject(objects, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() }));
+                var filename = $"{GlobalOptions.Options.Io.Destination}export.json";
+                File.SetAttributes(filename, FileAttributes.Normal);
+                File.WriteAllText(filename, JsonConvert.SerializeObject(objects, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() }));
             }
         }
 

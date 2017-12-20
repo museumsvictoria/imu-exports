@@ -178,9 +178,12 @@
     <Compile Include="Tasks\WikimediaCommons\WikimediaCommonsOptions.cs" />
     <Compile Include="Tasks\WikimediaCommons\WikimediaCommonsTask.cs" />
     <Compile Include="Utilities\HtmlConverter.cs" />
+    <Compile Include="Utilities\NetworkShareAccesser.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
