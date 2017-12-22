@@ -74,7 +74,10 @@ namespace ImuExports.Tasks.InsideOut.Factories
 
                     var filename = $"{GlobalOptions.Options.Io.Destination}{irn}.jpg";
 
-                    File.SetAttributes(filename, FileAttributes.Normal);
+                    if (File.Exists(filename))
+                    {
+                        File.SetAttributes(filename, FileAttributes.Normal);
+                    }
 
                     using (var fileStream = resource["file"] as FileStream)
                     using (var file = File.Open(filename, FileMode.Create, FileAccess.ReadWrite))

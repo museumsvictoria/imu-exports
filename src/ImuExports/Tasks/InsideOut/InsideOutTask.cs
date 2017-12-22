@@ -52,7 +52,7 @@ namespace ImuExports.Tasks.InsideOut
 
                         Log.Logger.Debug("Fetched {RecordCount} records from Imu", cachedIrnsBatch.Count);
 
-                        objects.AddRange(results.Rows.Select(objectFactory.Make).Where(x => x.Thumbnail != null));
+                        objects.AddRange(results.Rows.Select(objectFactory.Make));
 
                         offset += results.Count;
 
@@ -62,7 +62,11 @@ namespace ImuExports.Tasks.InsideOut
 
                 // Save data
                 var filename = $"{GlobalOptions.Options.Io.Destination}export.json";
-                File.SetAttributes(filename, FileAttributes.Normal);
+                if (File.Exists(filename))
+                {
+                    File.SetAttributes(filename, FileAttributes.Normal);
+                }
+
                 File.WriteAllText(filename, JsonConvert.SerializeObject(objects, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() }));
             }
         }
