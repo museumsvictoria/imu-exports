@@ -218,3 +218,4 @@ env/
 packages/
 logs/
 git-update-index-*-files.ps1
+.vs
