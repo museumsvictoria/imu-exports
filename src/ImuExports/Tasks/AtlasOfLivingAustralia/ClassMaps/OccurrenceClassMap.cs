@@ -1,11 +1,11 @@
 ﻿using CsvHelper.Configuration;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 
-namespace ImuExports.Tasks.AtlasOfLivingAustralia.CsvMaps
+namespace ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps
 {
-    public sealed class OccurrenceCsvMap : CsvClassMap<Occurrence>
+    public sealed class OccurrenceClassMap : ClassMap<Occurrence>
     {
-        public OccurrenceCsvMap()
+        public OccurrenceClassMap()
         {
             Map(m => m.OccurrenceID).Name("occurrenceID");
             Map(m => m.DctermsType).Name("dcterms:type");

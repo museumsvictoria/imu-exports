@@ -6,7 +6,7 @@ using CsvHelper;
 using IMu;
 using ImuExports.Config;
 using ImuExports.Infrastructure;
-using ImuExports.Tasks.AtlasOfLivingAustralia.CsvMaps;
+using ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 using Serilog;
 
@@ -70,9 +70,9 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                 Log.Logger.Information("Saving occurrence data as csv");
                 using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"occurrences.csv", false, Encoding.UTF8)))
                 {
-                    csvWriter.Configuration.RegisterClassMap<OccurrenceCsvMap>();
+                    csvWriter.Configuration.RegisterClassMap<OccurrenceClassMap>();
                     csvWriter.Configuration.HasHeaderRecord = true;
-                    csvWriter.Configuration.DoubleQuoteString = @"""";
+                    csvWriter.Configuration.SanitizeForInjection = false;
                     csvWriter.WriteRecords(occurrences);
                 }
 
@@ -81,9 +81,9 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                 {
                     var images = occurrences.SelectMany(x => x.Images);
 
-                    csvWriter.Configuration.RegisterClassMap<MultimediaCsvMap>();
+                    csvWriter.Configuration.RegisterClassMap<MultimediaClassMap>();
                     csvWriter.Configuration.HasHeaderRecord = true;
-                    csvWriter.Configuration.DoubleQuoteString = @"""";
+                    csvWriter.Configuration.SanitizeForInjection = false;
                     csvWriter.WriteRecords(images);
                 }
 

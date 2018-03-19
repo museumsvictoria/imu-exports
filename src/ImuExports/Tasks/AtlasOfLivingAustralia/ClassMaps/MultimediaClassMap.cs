@@ -1,11 +1,11 @@
 ﻿using CsvHelper.Configuration;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 
-namespace ImuExports.Tasks.AtlasOfLivingAustralia.CsvMaps
+namespace ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps
 {
-    public sealed class MultimediaCsvMap : CsvClassMap<Multimedia>
+    public sealed class MultimediaClassMap : ClassMap<Multimedia>
     {
-        public MultimediaCsvMap()
+        public MultimediaClassMap()
         {
             Map(m => m.CoreID).Name("coreID");
             Map(m => m.Type).Name("type");

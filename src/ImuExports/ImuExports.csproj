@@ -56,8 +56,8 @@
       <HintPath>..\packages\CommandLineParser.1.9.71\lib\net45\CommandLine.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="CsvHelper">
-      <HintPath>..\..\lib\CsvHelper\CsvHelper.dll</HintPath>
+    <Reference Include="CsvHelper, Version=7.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
+      <HintPath>..\packages\CsvHelper.7.1.0\lib\net45\CsvHelper.dll</HintPath>
     </Reference>
     <Reference Include="HtmlAgilityPack, Version=1.4.9.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <HintPath>..\packages\HtmlAgilityPack.1.4.9\lib\Net45\HtmlAgilityPack.dll</HintPath>
@@ -132,8 +132,8 @@
     <Compile Include="Infrastructure\ImuSessionProvider.cs" />
     <Compile Include="Config\SerilogConfig.cs" />
     <Compile Include="Infrastructure\TaskRunner.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\CsvMaps\MultimediaCsvMap.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\CsvMaps\OccurrenceCsvMap.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\MultimediaClassMap.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\OccurrenceClassMap.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Multimedia.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Occurrence.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Party.cs" />

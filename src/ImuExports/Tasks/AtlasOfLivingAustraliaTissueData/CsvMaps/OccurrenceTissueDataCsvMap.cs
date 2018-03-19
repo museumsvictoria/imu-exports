@@ -3,7 +3,7 @@ using ImuExports.Tasks.AtlasOfLivingAustraliaTissueData.Models;
 
 namespace ImuExports.Tasks.AtlasOfLivingAustraliaTissueData.CsvMaps
 {
-    public sealed class OccurrenceTissueDataCsvMap : CsvClassMap<OccurrenceTissueData>
+    public sealed class OccurrenceTissueDataCsvMap : ClassMap<OccurrenceTissueData>
     {
         public OccurrenceTissueDataCsvMap()
         {
