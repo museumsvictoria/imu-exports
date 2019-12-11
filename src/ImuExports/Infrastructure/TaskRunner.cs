@@ -41,6 +41,8 @@ namespace ImuExports.Infrastructure
                 else
                     Log.Logger.Information("All Imu export tasks finished successfully");
             }
+
+            Log.CloseAndFlush();
         }
     }
 }

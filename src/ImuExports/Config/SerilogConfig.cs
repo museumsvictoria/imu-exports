@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using Serilog;
 
 namespace ImuExports.Config
@@ -10,7 +11,9 @@ namespace ImuExports.Config
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.AppSettings()
                 .WriteTo.ColoredConsole()
-                .WriteTo.RollingFile(string.Format("{0}\\logs\\{{Date}}.txt", AppDomain.CurrentDomain.BaseDirectory))
+                .WriteTo.Seq(ConfigurationManager.AppSettings["SeqUrl"])
+                .WriteTo.RollingFile($"{AppDomain.CurrentDomain.BaseDirectory}\\logs\\{{Date}}.txt")
+                .Enrich.WithMachineName()
                 .CreateLogger();
         }
     }
