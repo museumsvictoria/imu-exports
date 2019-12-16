@@ -100,7 +100,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     var mimeFormat = resource["mimeFormat"] as string;
                     
                     using (var fileStream = resource["file"] as FileStream)
-                    using (var file = File.Open(string.Format("{0}{1}.jpg", GlobalOptions.Options.Ala.Destination, irn), FileMode.Create, FileAccess.Write))
+                    using (var file = File.Open($"{GlobalOptions.Options.Ala.Destination}{irn}.jpg", FileMode.Create, FileAccess.Write))
                     {
                         if (mimeFormat != null && mimeFormat.ToLower() == "jpeg")
                             fileStream.CopyTo(file);
