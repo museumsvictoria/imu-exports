@@ -1,15 +1,19 @@
 ﻿using System;
+using System.Configuration;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using CommandLine;
+using ImuExports.Extensions;
 using ImuExports.Infrastructure;
+using LiteDB;
 using Serilog;
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia
 {
     public class AtlasOfLivingAustraliaOptions : ITaskOptions
     {
-        [Option('d', "dest", HelpText = "Destination directory for csv and images.", Required = true)]
+        [Option('d', "dest", HelpText = "Destination directory for csv and images.")]
         public string Destination { get; set; }
 
         [Option('a', "modified-after", HelpText = "Get all records after modified date >=")]
@@ -18,14 +22,29 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
         [Option('b', "modified-before", HelpText = "Get all records before modified date <=")]
         public string ModifiedBeforeDate { get; set; }
 
-        public Type TypeOfTask { get { return typeof (AtlasOfLivingAustraliaTask); }}
+        public Type TypeOfTask => typeof (AtlasOfLivingAustraliaTask);
 
         public DateTime? ParsedModifiedAfterDate { get; set; }
 
         public DateTime? ParsedModifiedBeforeDate { get; set; }
 
+        public bool IsAutomated { get; set; }
+
         public void Initialize()
         {
+            // Task is automated if no destination specified, create random temporary directory
+            if (string.IsNullOrWhiteSpace(this.Destination))
+            {
+                this.Destination = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\{Utils.RandomString(8)}";
+                this.IsAutomated = true;
+
+                // Check for last import date
+                using (var db = new LiteDatabase(ConfigurationManager.ConnectionStrings["LiteDB"].ConnectionString))
+                {
+
+                }
+            }
+
             // Add backslash if it doesnt exist to our destination directory
             if (!this.Destination.EndsWith(@"\"))
             {

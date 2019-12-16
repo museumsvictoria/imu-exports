@@ -28,26 +28,19 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             var occurrence = new Occurrence
             {
                 OccurrenceID = string.IsNullOrWhiteSpace(map.GetTrimString("ColRegPart"))
-                    ? string.Format(
-                        "urn:lsid:ozcam.taxonomy.org.au:NMV:{0}:PreservedSpecimen:{1}{2}",
-                        map.GetTrimString("ColDiscipline"), map.GetTrimString("ColRegPrefix"),
-                        map.GetTrimString("ColRegNumber"))
-                    : string.Format(
-                        "urn:lsid:ozcam.taxonomy.org.au:NMV:{0}:PreservedSpecimen:{1}{2}-{3}",
-                        map.GetTrimString("ColDiscipline"), map.GetTrimString("ColRegPrefix"),
-                        map.GetTrimString("ColRegNumber"), map.GetTrimString("ColRegPart"))
+                    ? $"urn:lsid:ozcam.taxonomy.org.au:NMV:{map.GetTrimString("ColDiscipline")}:PreservedSpecimen:{map.GetTrimString("ColRegPrefix")}{map.GetTrimString("ColRegNumber")}"
+                    : $"urn:lsid:ozcam.taxonomy.org.au:NMV:{map.GetTrimString("ColDiscipline")}:PreservedSpecimen:{map.GetTrimString("ColRegPrefix")}{map.GetTrimString("ColRegNumber")}-{map.GetTrimString("ColRegPart")}"
             };
 
             if (map.GetTrimString("ColTypeOfItem") == "Specimen")
                 occurrence.DctermsType = "PhysicalObject";
 
-            DateTime dctermsModified;
             if (DateTime.TryParseExact(
-                string.Format("{0} {1}", map.GetTrimString("AdmDateModified"), map.GetTrimString("AdmTimeModified")),
+                $"{map.GetTrimString("AdmDateModified")} {map.GetTrimString("AdmTimeModified")}",
                 "dd/MM/yyyy HH:mm",
                 new CultureInfo("en-AU"),
                 DateTimeStyles.None,
-                out dctermsModified))
+                out var dctermsModified))
             {
                 occurrence.DctermsModified = dctermsModified.ToString("s");
             }
@@ -70,8 +63,8 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 occurrence.BasisOfRecord = "HumanObservation";
 
             occurrence.CatalogNumber = (string.IsNullOrWhiteSpace(map.GetTrimString("ColRegPart")))
-                                      ? string.Format("{0}{1}", map.GetTrimString("ColRegPrefix"), map.GetTrimString("ColRegNumber"))
-                                      : string.Format("{0}{1}-{2}", map.GetTrimString("ColRegPrefix"), map.GetTrimString("ColRegNumber"), map.GetTrimString("ColRegPart"));
+                                      ? $"{map.GetTrimString("ColRegPrefix")}{map.GetTrimString("ColRegNumber")}"
+                                      : $"{map.GetTrimString("ColRegPrefix")}{map.GetTrimString("ColRegNumber")}-{map.GetTrimString("ColRegPart")}";
 
             var individualCount = 0;
             if (!string.IsNullOrWhiteSpace(map.GetTrimString("SpeNoSpecimens")))
@@ -94,7 +87,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                                 new KeyValuePair<string, string>("storageMedium", preparationMap.GetTrimString("StrStorageMedium_tab"))
                             }
                     .Where(x => !string.IsNullOrWhiteSpace(x.Value))
-                    .Select(x => string.Format("{0}={1}", x.Key, x.Value))
+                    .Select(x => $"{x.Key}={x.Value}")
                     .Concatenate(";");
 
                 if (occurrence.Preparations != null)
@@ -112,15 +105,13 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 occurrence.EventID = colevent.GetTrimString("ColCollectionEventCode");
                 occurrence.SamplingProtocol = colevent.GetTrimString("ColCollectionMethod");
 
-                DateTime eventDateTo, eventDateFrom;
-                TimeSpan eventTimeTo, eventTimeFrom;
                 IList<DateTime> eventDates = new List<DateTime>();
                 IList<TimeSpan> eventTimes = new List<TimeSpan>();
                 var culture = new CultureInfo("en-AU");
 
-                if (DateTime.TryParseExact(colevent.GetTrimString("ColDateVisitedFrom"), new[] { "dd/MM/yyyy", "dd/MM/yy" }, culture, DateTimeStyles.None, out eventDateFrom))
+                if (DateTime.TryParseExact(colevent.GetTrimString("ColDateVisitedFrom"), new[] { "dd/MM/yyyy", "dd/MM/yy" }, culture, DateTimeStyles.None, out var eventDateFrom))
                 {
-                    if (TimeSpan.TryParseExact(colevent.GetTrimString("ColTimeVisitedFrom"), @"hh\:mm", culture, out eventTimeFrom))
+                    if (TimeSpan.TryParseExact(colevent.GetTrimString("ColTimeVisitedFrom"), @"hh\:mm", culture, out var eventTimeFrom))
                     {
                         eventDateFrom += eventTimeFrom;
                         eventTimes.Add(eventTimeFrom);
@@ -129,9 +120,9 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     eventDates.Add(eventDateFrom);
                 }
 
-                if (DateTime.TryParseExact(colevent.GetTrimString("ColDateVisitedTo"), new[] { "dd/MM/yyyy", "dd/MM/yy" }, culture, DateTimeStyles.None, out eventDateTo))
+                if (DateTime.TryParseExact(colevent.GetTrimString("ColDateVisitedTo"), new[] { "dd/MM/yyyy", "dd/MM/yy" }, culture, DateTimeStyles.None, out var eventDateTo))
                 {
-                    if (TimeSpan.TryParseExact(colevent.GetTrimString("ColTimeVisitedTo"), @"hh\:mm", culture, out eventTimeTo))
+                    if (TimeSpan.TryParseExact(colevent.GetTrimString("ColTimeVisitedTo"), @"hh\:mm", culture, out var eventTimeTo))
                     {
                         eventDateTo += eventTimeTo;
                         eventTimes.Add(eventTimeTo);
@@ -163,7 +154,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             if (site != null)
             {
                 if (!string.IsNullOrWhiteSpace(site.GetTrimString("SitSiteCode")) || !string.IsNullOrWhiteSpace(site.GetTrimString("SitSiteNumber")))
-                    occurrence.LocationID = string.Format("{0}{1}", site.GetTrimString("SitSiteCode"), site.GetTrimString("SitSiteNumber"));
+                    occurrence.LocationID = $"{site.GetTrimString("SitSiteCode")}{site.GetTrimString("SitSiteNumber")}";
 
                 occurrence.Locality = site.GetTrimString("LocPreciseLocation").ReplaceLineBreaks();
                 occurrence.VerbatimLocality = site.GetTrimString("LocPreciseLocation").ReplaceLineBreaks();
@@ -196,19 +187,18 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 {
                     var decimalLatitude = (object[])latlong["LatLatitudeDecimal_nesttab"];
                     if (decimalLatitude != null && decimalLatitude.Any(x => x != null))
-                        occurrence.DecimalLatitude = decimalLatitude.Where(x => x != null).FirstOrDefault().ToString();
+                        occurrence.DecimalLatitude = decimalLatitude.FirstOrDefault(x => x != null)?.ToString();
 
                     var decimalLongitude = ((object[])latlong["LatLongitudeDecimal_nesttab"]);
                     if (decimalLongitude != null && decimalLongitude.Any(x => x != null))
-                        occurrence.DecimalLongitude = decimalLongitude.Where(x => x != null).FirstOrDefault().ToString();
+                        occurrence.DecimalLongitude = decimalLongitude.FirstOrDefault(x => x != null)?.ToString();
 
                     occurrence.CoordinateUncertaintyInMeters = latlong.GetTrimString("LatRadiusNumeric_tab");
                     occurrence.GeodeticDatum = (string.IsNullOrWhiteSpace(latlong.GetTrimString("LatDatum_tab"))) ? "WGS84" : latlong.GetTrimString("LatDatum_tab");
 
                     occurrence.GeoreferencedBy = partyFactory.Make(latlong.GetMap("determinedBy")).Name;
 
-                    DateTime georeferencedDate;
-                    if (DateTime.TryParseExact(latlong.GetTrimString("LatDetDate0"), "dd/MM/yyyy", new CultureInfo("en-AU"), DateTimeStyles.None, out georeferencedDate))
+                    if (DateTime.TryParseExact(latlong.GetTrimString("LatDetDate0"), "dd/MM/yyyy", new CultureInfo("en-AU"), DateTimeStyles.None, out var georeferencedDate))
                         occurrence.GeoreferencedDate = georeferencedDate.ToString("s");
 
                     occurrence.GeoreferenceProtocol = latlong.GetTrimString("LatLatLongDetermination_tab");
@@ -240,7 +230,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                                 taxonomy.GetCleanString("ClaGenus"),
                                 string.IsNullOrWhiteSpace(taxonomy.GetCleanString("ClaSubgenus"))
                                     ? null
-                                    : string.Format("({0})", taxonomy.GetCleanString("ClaSubgenus")),
+                                    : $"({taxonomy.GetCleanString("ClaSubgenus")})",
                                 taxonomy.GetCleanString("ClaSpecies"),
                                 taxonomy.GetCleanString("ClaSubspecies"),
                                 taxonomy.GetTrimString("AutAuthorString")
@@ -305,9 +295,9 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 if (!string.IsNullOrWhiteSpace(identificationQualifier))
                 {
                     if (string.Equals(identification.GetTrimString("IdeQualifierRank_tab"), "Genus", StringComparison.OrdinalIgnoreCase))
-                        occurrence.IdentificationQualifier = string.Format("{0} {1}", identificationQualifier, occurrence.Genus);
+                        occurrence.IdentificationQualifier = $"{identificationQualifier} {occurrence.Genus}";
                     else if (string.Equals(identification.GetTrimString("IdeQualifierRank_tab"), "species", StringComparison.OrdinalIgnoreCase))
-                        occurrence.IdentificationQualifier = string.Format("{0} {1}", identificationQualifier, occurrence.SpecificEpithet);
+                        occurrence.IdentificationQualifier = $"{identificationQualifier} {occurrence.SpecificEpithet}";
                 }
             }
 
@@ -316,7 +306,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             foreach (var image in occurrence.Images)
             {
                 image.CoreID = occurrence.OccurrenceID;
-                image.References = string.Format("http://collections.museumvictoria.com.au/specimens/{0}", irn);
+                image.References = $"http://collections.museumvictoria.com.au/specimens/{irn}";
             }
 
             occurrence.AssociatedMedia = occurrence.Images.Select(x => x.Identifier).Concatenate(";");

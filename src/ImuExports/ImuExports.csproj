@@ -69,6 +69,7 @@
     <Compile Include="Config\Constants.cs" />
     <Compile Include="Config\ProgramConfig.cs" />
     <Compile Include="Extensions\MapExtensions.cs" />
+    <Compile Include="Extensions\Utils.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Infrastructure\IModuleSearchConfig.cs" />
     <Compile Include="Infrastructure\IFactory.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="Infrastructure\TaskRunner.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\MultimediaClassMap.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\OccurrenceClassMap.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Application.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Multimedia.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Occurrence.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Party.cs" />
@@ -170,6 +172,9 @@
     </PackageReference>
     <PackageReference Include="HtmlAgilityPack">
       <Version>1.4.9</Version>
+    </PackageReference>
+    <PackageReference Include="LiteDB">
+      <Version>4.1.4</Version>
     </PackageReference>
     <PackageReference Include="Magick.NET-Q16-x64">
       <Version>7.0.6.102</Version>

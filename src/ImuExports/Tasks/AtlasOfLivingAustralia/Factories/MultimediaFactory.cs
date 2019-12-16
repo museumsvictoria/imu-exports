@@ -29,7 +29,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 {
                     Type = "StillImage",
                     Format = "image/jpeg",
-                    Identifier = string.Format("{0}.jpg", irn),
+                    Identifier = $"{irn}.jpg",
                     Title = map.GetTrimString("MulTitle"),
                     Creator = map.GetTrimStrings("MulCreator_tab").Concatenate(";"),
                     Publisher = "Museums Victoria",

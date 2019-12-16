@@ -67,7 +67,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                         }
                         else if (!string.IsNullOrWhiteSpace(organisationOtherName) && !string.IsNullOrWhiteSpace(source))
                         {
-                            name = string.Format("{0} ({1})", organisationOtherName, source);
+                            name = $"{organisationOtherName} ({source})";
                         }
 
                         party.Name = new[]
