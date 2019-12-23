@@ -71,6 +71,7 @@
     <Compile Include="Extensions\MapExtensions.cs" />
     <Compile Include="Extensions\Utils.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Infrastructure\IModuleDeletionsConfig.cs" />
     <Compile Include="Infrastructure\IModuleSearchConfig.cs" />
     <Compile Include="Infrastructure\IFactory.cs" />
     <Compile Include="Infrastructure\ITaskOptions.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\Models\OccurrenceTissueData.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\AtlasOfLivingAustraliaOptions.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\AtlasOfLivingAustraliaConstants.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Config\CatalogueModuleDeletionsConfig.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\MultimediaModuleSearchConfig.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\CollectionEventModuleSearchConfig.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\CatalogueModuleSearchConfig.cs" />

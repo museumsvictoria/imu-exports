@@ -6,6 +6,7 @@ using System.Reflection;
 using CommandLine;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
+using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 using LiteDB;
 using Serilog;
 
@@ -39,9 +40,21 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                 this.IsAutomated = true;
 
                 // Check for last import date
-                using (var db = new LiteDatabase(ConfigurationManager.ConnectionStrings["LiteDB"].ConnectionString))
+                using (var db = new LiteRepository(ConfigurationManager.ConnectionStrings["LiteDB"].ConnectionString))
                 {
+                    var application = db.Query<Application>().FirstOrDefault();
 
+                    if (application == null)
+                    {
+                        application = new Application { PreviousDateRun = DateTime.Now };
+                    }
+                    else
+                    {
+                        ParsedModifiedAfterDate = application.PreviousDateRun;
+                        application.PreviousDateRun = DateTime.Now;
+                    }
+
+                    db.Upsert(application);
                 }
             }
 

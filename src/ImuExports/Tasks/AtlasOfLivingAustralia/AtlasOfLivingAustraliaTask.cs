@@ -16,13 +16,16 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
     {
         private readonly IFactory<Occurrence> occurrenceFactory;
         private readonly IEnumerable<IModuleSearchConfig> moduleSearchConfigs;
+        private readonly IEnumerable<IModuleDeletionsConfig> moduleDeletionsConfigs;
 
         public AtlasOfLivingAustraliaTask(
             IFactory<Occurrence> occurrenceFactory,
-            IEnumerable<IModuleSearchConfig> moduleSearchConfigs)
+            IEnumerable<IModuleSearchConfig> moduleSearchConfigs,
+            IEnumerable<IModuleDeletionsConfig> moduleDeletionsConfigs)
         {
             this.occurrenceFactory = occurrenceFactory;
             this.moduleSearchConfigs = moduleSearchConfigs;
+            this.moduleDeletionsConfigs = moduleDeletionsConfigs;
         }
 
         public void Run()
@@ -30,41 +33,115 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
             using (Log.Logger.BeginTimedOperation($"{GetType().Name} starting", $"{GetType().Name}.Run"))
             {
                 // Cache Irns
-                var cachedIrns = (GlobalOptions.Options.Ala.ParsedModifiedAfterDate.HasValue || GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.HasValue) ?
-                    this.moduleSearchConfigs.SelectMany(msc => this.CacheIrns(msc.ModuleName, msc.Terms, msc.Columns, msc.IrnSelectFunc)).Distinct().ToList() :
-                    this.CacheIrns("ecatalogue", this.BuildFullExportSearchTerms());
+                var cachedSearchIrns = new List<long>();
+
+                if (GlobalOptions.Options.Ala.ParsedModifiedAfterDate.HasValue ||
+                    GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.HasValue)
+                {
+                    foreach (var moduleSearchConfig in this.moduleSearchConfigs)
+                    {
+                        if (Program.ImportCanceled)
+                        {
+                            this.Cleanup();
+                            return;
+                        }
+
+                        cachedSearchIrns.AddRange(this.CacheIrns(moduleSearchConfig.ModuleName, moduleSearchConfig.Terms, moduleSearchConfig.Columns, moduleSearchConfig.IrnSelectFunc));
+                    }
+                }
+                else
+                {
+                    if (Program.ImportCanceled)
+                    {
+                        this.Cleanup();
+                        return;
+                    }
+
+                    cachedSearchIrns = this.CacheIrns("ecatalogue", this.BuildFullExportSearchTerms()).ToList();
+                }
+
+                // Fetch deletions
+                var deletions = new List<string>();
+                var offset = 0;
+                Log.Logger.Information("Fetching deletions");
+                foreach (var moduleDeletionsConfig in this.moduleDeletionsConfigs)
+                {
+                    using (var imuSession = ImuSessionProvider.CreateInstance(moduleDeletionsConfig.ModuleName))
+                    {
+                        var hits = imuSession.FindTerms(moduleDeletionsConfig.Terms);
+
+                        Log.Logger.Information("Found {Hits} {moduleName} records for deletion where {@Terms}", hits, moduleDeletionsConfig.ModuleName, moduleDeletionsConfig.Terms.List);
+
+                        while (true)
+                        {
+                            if (Program.ImportCanceled)
+                            {
+                                this.Cleanup();
+                                return;
+                            }
+
+                            var results = imuSession.Fetch("start", offset, Constants.DataBatchSize, moduleDeletionsConfig.Columns);
+
+                            if (results.Count == 0)
+                                break;
+
+                            var ids = results.Rows.SelectMany(moduleDeletionsConfig.SelectFunc);
+
+                            deletions.AddRange(ids);
+                            
+                            offset += results.Count;
+
+                            Log.Logger.Information("{Name} {moduleName} records for deletion progress... {Offset}/{TotalResults}", this.GetType().Name, moduleDeletionsConfig.ModuleName, offset, hits);
+                        }
+                    }
+                }
 
                 // Fetch data
                 var occurrences = new List<Occurrence>();
-                var offset = 0;
-                Log.Logger.Information("Fetching data");
-                while (true)
+                foreach (var moduleDeletionsConfig in this.moduleDeletionsConfigs)
                 {
                     if (Program.ImportCanceled)
-                        return;
-
-                    using (var imuSession = ImuSessionProvider.CreateInstance("ecatalogue"))
                     {
-                        var cachedIrnsBatch = cachedIrns
-                            .Skip(offset)
-                            .Take(Constants.DataBatchSize)
-                            .ToList();
-
-                        if (cachedIrnsBatch.Count == 0)
-                            break;
-
-                        imuSession.FindKeys(cachedIrnsBatch);
-
-                        var results = imuSession.Fetch("start", 0, -1, this.ExportColumns);
-
-                        Log.Logger.Debug("Fetched {RecordCount} records from Imu", cachedIrnsBatch.Count);
-
-                        occurrences.AddRange(results.Rows.Select(occurrenceFactory.Make));
-
-                        offset += results.Count;
-
-                        Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset, cachedIrns.Count);
+                        this.Cleanup();
+                        return;
                     }
+
+                    // Fetch data
+                    offset = 0;
+                    Log.Logger.Information("Fetching data");
+                    while (true)
+                    {
+                        if (Program.ImportCanceled)
+                        {
+                            this.Cleanup();
+                            return;
+                        }
+
+                        using (var imuSession = ImuSessionProvider.CreateInstance("ecatalogue"))
+                        {
+                            var cachedIrnsBatch = cachedSearchIrns
+                                .Skip(offset)
+                                .Take(Constants.DataBatchSize)
+                                .ToList();
+
+                            if (cachedIrnsBatch.Count == 0)
+                                break;
+
+                            imuSession.FindKeys(cachedIrnsBatch);
+
+                            var results = imuSession.Fetch("start", 0, -1, this.ExportColumns);
+
+                            Log.Logger.Debug("Fetched {RecordCount} records from Imu", cachedIrnsBatch.Count);
+
+                            occurrences.AddRange(results.Rows.Select(occurrenceFactory.Make));
+
+                            offset += results.Count;
+
+                            Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset, cachedSearchIrns.Count);
+                        }
+                    }
+
+                    //cachedDeletions.AddRange(this.CacheIrns(moduleSearchConfig.ModuleName, moduleSearchConfig.Terms, moduleSearchConfig.Columns, moduleSearchConfig.IrnSelectFunc));
                 }
 
                 // Save data
@@ -90,6 +167,15 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
 
                 // Copy meta.xml
                 File.Copy(@"meta.xml", GlobalOptions.Options.Ala.Destination + @"meta.xml", true);
+            }
+        }
+
+        private void Cleanup()
+        {
+            // Remove any temporary files and directory
+            if (GlobalOptions.Options.Ala.IsAutomated)
+            {
+                Directory.Delete(GlobalOptions.Options.Ala.Destination, true);
             }
         }
 
