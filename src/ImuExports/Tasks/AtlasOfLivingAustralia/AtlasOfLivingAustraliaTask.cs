@@ -27,8 +27,9 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
 
         public void Run()
         {            
-            using (Log.Logger.BeginTimedOperation(string.Format("{0} starting", GetType().Name), string.Format("{0}.Run", GetType().Name)))
+            using (Log.Logger.BeginTimedOperation($"{GetType().Name} starting", $"{GetType().Name}.Run"))
             {
+                // Cache Irns
                 var cachedIrns = (GlobalOptions.Options.Ala.ParsedModifiedAfterDate.HasValue || GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.HasValue) ?
                     this.moduleSearchConfigs.SelectMany(msc => this.CacheIrns(msc.ModuleName, msc.Terms, msc.Columns, msc.IrnSelectFunc)).Distinct().ToList() :
                     this.CacheIrns("ecatalogue", this.BuildFullExportSearchTerms());

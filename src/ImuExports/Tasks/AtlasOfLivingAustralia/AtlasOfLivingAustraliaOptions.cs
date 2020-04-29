@@ -18,7 +18,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
         [Option('b', "modified-before", HelpText = "Get all records before modified date <=")]
         public string ModifiedBeforeDate { get; set; }
 
-        public Type TypeOfTask { get { return typeof (AtlasOfLivingAustraliaTask); }}
+        public Type TypeOfTask => typeof (AtlasOfLivingAustraliaTask);
 
         public DateTime? ParsedModifiedAfterDate { get; set; }
 
