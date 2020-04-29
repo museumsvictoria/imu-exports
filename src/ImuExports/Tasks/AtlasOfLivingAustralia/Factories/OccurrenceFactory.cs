@@ -32,8 +32,16 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     : $"urn:lsid:ozcam.taxonomy.org.au:NMV:{map.GetTrimString("ColDiscipline")}:PreservedSpecimen:{map.GetTrimString("ColRegPrefix")}{map.GetTrimString("ColRegNumber")}-{map.GetTrimString("ColRegPart")}"
             };
 
-            if (map.GetTrimString("ColTypeOfItem") == "Specimen")
-                occurrence.DctermsType = "PhysicalObject";
+            switch (map.GetTrimString("ColTypeOfItem"))
+            {
+                case "Specimen":
+                    occurrence.DctermsType = "PhysicalObject";
+                    break;
+                case "Audiovisual":
+                case "Image":
+                    occurrence.DctermsType = "Event";
+                    break;
+            }
 
             if (DateTime.TryParseExact(
                 $"{map.GetTrimString("AdmDateModified")} {map.GetTrimString("AdmTimeModified")}",
@@ -48,9 +56,9 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             occurrence.DctermsLanguage = "en";
             occurrence.DctermsLicense = "https://creativecommons.org/publicdomain/zero/1.0/legalcode";
             occurrence.DctermsRightsHolder = "Museums Victoria";
-            occurrence.InstitutionId = occurrence.InstitutionCode = occurrence.OwnerInstitutionCode = "NMV";
-            occurrence.CollectionId = "urn:lsid:biocol.org:col:34978";
-            occurrence.DatasetId = occurrence.CollectionCode = map.GetTrimString("ColDiscipline");
+            occurrence.InstitutionId = "urn:lsid:biocol.org:col:34978";
+            occurrence.InstitutionCode = occurrence.OwnerInstitutionCode = "NMV";
+            occurrence.CollectionCode = map.GetTrimString("ColDiscipline");
             occurrence.OccurrenceStatus = "present";
 
             var colevent = map.GetMap("colevent");
@@ -260,7 +268,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                                     taxonomy.GetCleanString("ClaSuperfamily"),
                                     taxonomy.GetCleanString("ClaFamily"),
                                     taxonomy.GetCleanString("ClaSubfamily")
-                                }.Concatenate(";");
+                                }.Concatenate("; ");
 
                     occurrence.TaxonRank = new Dictionary<string, string>
                             {

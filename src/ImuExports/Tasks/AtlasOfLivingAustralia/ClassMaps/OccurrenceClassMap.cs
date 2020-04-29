@@ -14,8 +14,6 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps
             Map(m => m.DctermsLicense).Name("dcterms:license");
             Map(m => m.DctermsRightsHolder).Name("dcterms:rightsHolder");            
             Map(m => m.InstitutionId).Name("institutionID");
-            Map(m => m.CollectionId).Name("collectionID");
-            Map(m => m.DatasetId).Name("datasetID");
             Map(m => m.InstitutionCode).Name("institutionCode");
             Map(m => m.CollectionCode).Name("collectionCode");
             Map(m => m.DatasetName).Name("datasetName");
