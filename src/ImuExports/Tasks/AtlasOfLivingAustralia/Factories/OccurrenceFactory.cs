@@ -82,8 +82,8 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             if (individualCount > 0)
                 occurrence.IndividualCount = individualCount.ToString();
 
-            occurrence.Sex = map.GetTrimStrings("SpeSex_tab").Concatenate(";");
-            occurrence.LifeStage = map.GetTrimStrings("SpeStageAge_tab").Concatenate(";");
+            occurrence.Sex = map.GetTrimStrings("SpeSex_tab").Concatenate(" | ");
+            occurrence.LifeStage = map.GetTrimStrings("SpeStageAge_tab").Concatenate(" | ");
 
             foreach (var preparationMap in map.GetMaps("preparations"))
             {
@@ -96,7 +96,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                             }
                     .Where(x => !string.IsNullOrWhiteSpace(x.Value))
                     .Select(x => $"{x.Key}={x.Value}")
-                    .Concatenate(";");
+                    .Concatenate(" | ");
 
                 if (occurrence.Preparations != null)
                 {
@@ -139,15 +139,15 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     eventDates.Add(eventDateTo);
                 }
 
-                occurrence.EventDate = eventDates.Select(x => x.ToString("s")).Concatenate(";");
-                occurrence.EventTime = eventTimes.Select(x => x.ToString("c")).Concatenate(";");
+                occurrence.EventDate = eventDates.Select(x => x.ToString("s")).Concatenate("\\");
+                occurrence.EventTime = eventTimes.Select(x => x.ToString("c")).Concatenate("\\");
 
                 occurrence.FieldNumber = colevent.GetTrimString("ColCollectionEventCode");
                 occurrence.MinimumDepthInMeters = colevent.GetTrimString("AquDepthFromMet");
                 occurrence.MaximumDepthInMeters = colevent.GetTrimString("AquDepthToMet");
 
                 if (colevent.GetMaps("collectors") != null)
-                    occurrence.RecordedBy = colevent.GetMaps("collectors").Where(x => x != null).Select(x => partyFactory.Make(x).Name).Concatenate("; ");
+                    occurrence.RecordedBy = colevent.GetMaps("collectors").Where(x => x != null).Select(x => partyFactory.Make(x).Name).Concatenate(" | ");
             }
 
             occurrence.Year = map.GetTrimString("DarYearCollected");
@@ -178,7 +178,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                                     geo.GetTrimString("LocContinent_tab"),
                                     geo.GetTrimString("LocCountry_tab"),
                                     geo.GetTrimString("LocProvinceStateTerritory_tab")
-                                }.Concatenate(", ");
+                                }.Concatenate(" | ");
 
                     occurrence.Continent = geo.GetTrimString("LocContinent_tab");
                     occurrence.WaterBody = geo.GetTrimString("LocOcean_tab");
@@ -228,7 +228,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 occurrence.DateIdentified = identification.GetTrimString("IdeDateIdentified0");
                 
                 if (identification.GetMaps("identifiers") != null)
-                    occurrence.IdentifiedBy = identification.GetMaps("identifiers").Where(x => x != null).Select(x => partyFactory.Make(x).Name).Concatenate("; ");
+                    occurrence.IdentifiedBy = identification.GetMaps("identifiers").Where(x => x != null).Select(x => partyFactory.Make(x).Name).Concatenate(" | ");
 
                 var taxonomy = identification.GetMap("taxa");
                 if (taxonomy != null)
@@ -268,7 +268,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                                     taxonomy.GetCleanString("ClaSuperfamily"),
                                     taxonomy.GetCleanString("ClaFamily"),
                                     taxonomy.GetCleanString("ClaSubfamily")
-                                }.Concatenate("; ");
+                                }.Concatenate(" | ");
 
                     occurrence.TaxonRank = new Dictionary<string, string>
                             {
@@ -317,7 +317,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 image.References = $"http://collections.museumvictoria.com.au/specimens/{irn}";
             }
 
-            occurrence.AssociatedMedia = occurrence.Images.Select(x => x.Identifier).Concatenate(";");
+            occurrence.AssociatedMedia = occurrence.Images.Select(x => x.Identifier).Concatenate(" | ");
 
             return occurrence;
         }

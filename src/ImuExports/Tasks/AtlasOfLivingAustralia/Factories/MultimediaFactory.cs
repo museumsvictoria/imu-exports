@@ -31,9 +31,9 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     Format = "image/jpeg",
                     Identifier = $"{irn}.jpg",
                     Title = map.GetTrimString("MulTitle"),
-                    Creator = map.GetTrimStrings("MulCreator_tab").Concatenate(";"),
+                    Creator = map.GetTrimStrings("MulCreator_tab").Concatenate(" | "),
                     Publisher = "Museums Victoria",
-                    Source = map.GetTrimStrings("RigSource_tab").Concatenate(";"),
+                    Source = map.GetTrimStrings("RigSource_tab").Concatenate(" | "),
                     RightsHolder = "Museums Victoria",
                     AltText = map.GetTrimString("DetAlternateText")
                 };
