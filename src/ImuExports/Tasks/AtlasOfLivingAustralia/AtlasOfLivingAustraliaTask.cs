@@ -80,12 +80,12 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                 Log.Logger.Information("Saving image data as csv");
                 using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"multimedia.csv", false, Encoding.UTF8)))
                 {
-                    var images = occurrences.SelectMany(x => x.Images);
+                    var multimedia = occurrences.SelectMany(x => x.Multimedia);
 
                     csvWriter.Configuration.RegisterClassMap<MultimediaClassMap>();
                     csvWriter.Configuration.HasHeaderRecord = true;
                     csvWriter.Configuration.SanitizeForInjection = false;
-                    csvWriter.WriteRecords(images);
+                    csvWriter.WriteRecords(multimedia);
                 }
 
                 // Copy meta.xml

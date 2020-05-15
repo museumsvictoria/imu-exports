@@ -2,7 +2,7 @@
 {
     public class Multimedia
     {
-        public string CoreID { get; set; }
+        public string CoreId { get; set; }
 
         public string Type { get; set; }
 

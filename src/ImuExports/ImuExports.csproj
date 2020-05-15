@@ -97,6 +97,11 @@
     <Compile Include="Infrastructure\TaskRunner.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\MultimediaClassMap.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\OccurrenceClassMap.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\ResourceRelationship.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Loan.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Preparation.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Preservation.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\MaterialSample.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Multimedia.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Occurrence.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Party.cs" />
@@ -149,10 +154,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="meta.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
+    <Resource Include="Tasks\AtlasOfLivingAustralia\Resources\meta.xml" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
@@ -205,10 +207,10 @@
       <Version>3.1.2</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>xcopy /y $(ProjectDir)Tasks\AtlasOfLivingAustralia\Resources  $(ProjectDir)$(OutDir)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

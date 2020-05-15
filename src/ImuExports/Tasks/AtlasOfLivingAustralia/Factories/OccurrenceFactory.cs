@@ -23,6 +23,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 
         public Occurrence Make(Map map)
         {
+            // Occurrence fields
             var irn = map.GetLong("irn");
 
             var occurrence = new Occurrence
@@ -309,15 +310,21 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 }
             }
 
-            occurrence.Images = imageFactory.Make(map.GetMaps("media")).ToList();
-            
-            foreach (var image in occurrence.Images)
+            // Tissue fields
+            if (map.GetString("ColTypeOfItem") == "Specimen" && map.GetTrimString("ColRegPrefix") == "Z")
             {
-                image.CoreID = occurrence.OccurrenceID;
-                image.References = $"http://collections.museumvictoria.com.au/specimens/{irn}";
             }
 
-            occurrence.AssociatedMedia = occurrence.Images.Select(x => x.Identifier).Concatenate(" | ");
+            // Multimedia fields
+            occurrence.Multimedia = imageFactory.Make(map.GetMaps("media")).ToList();
+            
+            foreach (var multimedia in occurrence.Multimedia)
+            {
+                multimedia.CoreId = occurrence.OccurrenceID;
+                multimedia.References = $"http://collections.museumvictoria.com.au/specimens/{irn}";
+            }
+
+            occurrence.AssociatedMedia = occurrence.Multimedia.Select(x => x.Identifier).Concatenate(" | ");
 
             return occurrence;
         }
