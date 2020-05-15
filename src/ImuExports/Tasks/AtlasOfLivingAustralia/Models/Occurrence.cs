@@ -9,15 +9,17 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Models
             this.Multimedia = new List<Multimedia>();
         }
 
-        public IList<Multimedia> Multimedia { get; set; }
-
         public Loan Loan { get; set; }
 
         public MaterialSample MaterialSample { get; set; }
 
+        public IList<Multimedia> Multimedia { get; set; }
+
         public Preparation Preparation { get; set; }
 
         public Preservation Preservation { get; set; }
+
+        public ResourceRelationship ResourceRelationship { get; set; }
 
         public string DctermsType { get; set; }
 

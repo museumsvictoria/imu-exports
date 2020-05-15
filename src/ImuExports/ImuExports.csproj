@@ -79,6 +79,11 @@
     <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\Factories\OccurrenceTissueDataFactory.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\Models\OccurrenceTissueData.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\AtlasOfLivingAustraliaOptions.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\ResourceRelationshipClassMap.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\PreservationClassMap.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\PreparationClassMap.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\MaterialSampleClassMap.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\MultimediaClassMap.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\AtlasOfLivingAustraliaConstants.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\MultimediaModuleSearchConfig.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\CollectionEventModuleSearchConfig.cs" />
@@ -95,7 +100,7 @@
     <Compile Include="Infrastructure\ImuSessionProvider.cs" />
     <Compile Include="Config\SerilogConfig.cs" />
     <Compile Include="Infrastructure\TaskRunner.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\MultimediaClassMap.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\LoanClassMap.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\OccurrenceClassMap.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\ResourceRelationship.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Loan.cs" />
