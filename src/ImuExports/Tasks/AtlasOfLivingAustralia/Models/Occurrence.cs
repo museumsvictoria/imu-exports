@@ -6,7 +6,12 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Models
     {
         public Occurrence()
         {
+            this.Loan = new Loan();
+            this.MaterialSample = new MaterialSample();
             this.Multimedia = new List<Multimedia>();
+            this.Preparation = new Preparation();
+            this.Preservation = new Preservation();
+            this.ResourceRelationship = new ResourceRelationship();
         }
 
         public Loan Loan { get; set; }

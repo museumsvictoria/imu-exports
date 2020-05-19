@@ -69,6 +69,7 @@
     <Compile Include="Config\Constants.cs" />
     <Compile Include="Config\ProgramConfig.cs" />
     <Compile Include="Extensions\MapExtensions.cs" />
+    <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Infrastructure\IModuleSearchConfig.cs" />
     <Compile Include="Infrastructure\IFactory.cs" />

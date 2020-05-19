@@ -26,7 +26,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
         }
 
         public void Run()
-        {            
+        {
             using (Log.Logger.BeginTimedOperation($"{GetType().Name} starting", $"{GetType().Name}.Run"))
             {
                 // Cache Irns
@@ -77,7 +77,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                     csvWriter.WriteRecords(occurrences);
                 }
 
-                Log.Logger.Information("Saving image data as csv");
+                Log.Logger.Information("Saving multimedia data as csv");
                 using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"multimedia.csv", false, Encoding.UTF8)))
                 {
                     var multimedia = occurrences.SelectMany(x => x.Multimedia);
@@ -86,6 +86,61 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                     csvWriter.Configuration.HasHeaderRecord = true;
                     csvWriter.Configuration.SanitizeForInjection = false;
                     csvWriter.WriteRecords(multimedia);
+                }
+
+                Log.Logger.Information("Saving material sample data as csv");
+                using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"material-samples.csv", false, Encoding.UTF8)))
+                {
+                    var materialSamples = occurrences.Select(x => x.MaterialSample).Where(x => !string.IsNullOrEmpty(x.CoreId));
+
+                    csvWriter.Configuration.RegisterClassMap<MaterialSampleClassMap>();
+                    csvWriter.Configuration.HasHeaderRecord = true;
+                    csvWriter.Configuration.SanitizeForInjection = false;
+                    csvWriter.WriteRecords(materialSamples);
+                }
+
+                Log.Logger.Information("Saving preservation data as csv");
+                using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"preservations.csv", false, Encoding.UTF8)))
+                {
+                    var preservations = occurrences.Select(x => x.Preservation).Where(x => !string.IsNullOrEmpty(x.CoreId));
+
+                    csvWriter.Configuration.RegisterClassMap<PreservationClassMap>();
+                    csvWriter.Configuration.HasHeaderRecord = true;
+                    csvWriter.Configuration.SanitizeForInjection = false;
+                    csvWriter.WriteRecords(preservations);
+                }
+
+                Log.Logger.Information("Saving preparation data as csv");
+                using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"preparations.csv", false, Encoding.UTF8)))
+                {
+                    var preparations = occurrences.Select(x => x.Preparation).Where(x => !string.IsNullOrEmpty(x.CoreId));
+
+                    csvWriter.Configuration.RegisterClassMap<PreparationClassMap>();
+                    csvWriter.Configuration.HasHeaderRecord = true;
+                    csvWriter.Configuration.SanitizeForInjection = false;
+                    csvWriter.WriteRecords(preparations);
+                }
+
+                Log.Logger.Information("Saving resource relationship data as csv");
+                using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"resource-relationships.csv", false, Encoding.UTF8)))
+                {
+                    var resourceRelationships = occurrences.Select(x => x.ResourceRelationship).Where(x => !string.IsNullOrEmpty(x.CoreId));
+
+                    csvWriter.Configuration.RegisterClassMap<ResourceRelationshipClassMap>();
+                    csvWriter.Configuration.HasHeaderRecord = true;
+                    csvWriter.Configuration.SanitizeForInjection = false;
+                    csvWriter.WriteRecords(resourceRelationships);
+                }
+
+                Log.Logger.Information("Saving loan data as csv");
+                using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"loans.csv", false, Encoding.UTF8)))
+                {
+                    var loans = occurrences.Select(x => x.Loan).Where(x => !string.IsNullOrEmpty(x.CoreId));
+
+                    csvWriter.Configuration.RegisterClassMap<LoanClassMap>();
+                    csvWriter.Configuration.HasHeaderRecord = true;
+                    csvWriter.Configuration.SanitizeForInjection = false;
+                    csvWriter.WriteRecords(loans);
                 }
 
                 // Copy meta.xml
@@ -99,6 +154,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
             searchTerms.Add("ColCategory", "Natural Sciences");
             searchTerms.Add("MdaDataSets_tab", "Atlas of Living Australia");
             searchTerms.Add("AdmPublishWebNoPassword", "Yes");
+            searchTerms.Add("ColRegPrefix", "Z");
 
             if (GlobalOptions.Options.Ala.ParsedModifiedAfterDate.HasValue)
             {
@@ -128,13 +184,24 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
             "BirTotalClutchSize",
             "SpeSex_tab",
             "SpeStageAge_tab",
-            "preparations=[StrSpecimenNature_tab,StrSpecimenForm_tab,StrFixativeTreatment_tab,StrStorageMedium_tab]",
+            "preparations=[StrSpecimenNature_tab,StrSpecimenForm_tab,StrFixativeTreatment_tab,StrStorageMedium_tab,StrDatePrepared0]",
             "DarYearCollected",
             "DarMonthCollected",
             "DarDayCollected",
             "site=SitSiteRef.(SitSiteCode,SitSiteNumber,geo=[LocOcean_tab,LocContinent_tab,LocCountry_tab,LocProvinceStateTerritory_tab,LocIslandGroup,LocIsland,LocDistrictCountyShire_tab,LocTownship_tab],LocPreciseLocation,LocElevationASLFromMt,LocElevationASLToMt,latlong=[LatLongitudeDecimal_nesttab,LatLatitudeDecimal_nesttab,LatRadiusNumeric_tab,LatDatum_tab,determinedBy=LatDeterminedByRef_tab.(NamPartyType,NamFullName,NamOrganisation,NamBranch,NamDepartment,NamOrganisation,NamOrganisationOtherNames_tab,NamSource,AddPhysStreet,AddPhysCity,AddPhysState,AddPhysCountry,ColCollaborationName),LatDetDate0,LatLatLongDetermination_tab,LatDetSource_tab])",
             "identifications=[IdeTypeStatus_tab,IdeCurrentNameLocal_tab,identifiers=IdeIdentifiedByRef_nesttab.(NamPartyType,NamFullName,NamOrganisation,NamBranch,NamDepartment,NamOrganisation,NamOrganisationOtherNames_tab,NamSource,AddPhysStreet,AddPhysCity,AddPhysState,AddPhysCountry,ColCollaborationName),IdeDateIdentified0,IdeQualifier_tab,IdeQualifierRank_tab,taxa=TaxTaxonomyRef_tab.(irn,ClaScientificName,ClaKingdom,ClaPhylum,ClaSubphylum,ClaSuperclass,ClaClass,ClaSubclass,ClaSuperorder,ClaOrder,ClaSuborder,ClaInfraorder,ClaSuperfamily,ClaFamily,ClaSubfamily,ClaTribe,ClaSubtribe,ClaGenus,ClaSubgenus,ClaSpecies,ClaSubspecies,ClaRank,AutAuthorString,ClaApplicableCode,comname=[ComName_tab,ComStatus_tab])]",
-            "media=MulMultiMediaRef_tab.(irn,MulTitle,MulIdentifier,MulMimeType,MulCreator_tab,MdaDataSets_tab,metadata=[MdaElement_tab,MdaQualifier_tab,MdaFreeText_tab],DetAlternateText,RigCreator_tab,RigSource_tab,RigAcknowledgementCredit,RigCopyrightStatement,RigCopyrightStatus,RigLicence,RigLicenceDetails,ChaRepository_tab,ChaMd5Sum,AdmPublishWebNoPassword,AdmDateModified,AdmTimeModified)"
+            "media=MulMultiMediaRef_tab.(irn,MulTitle,MulIdentifier,MulMimeType,MulCreator_tab,MdaDataSets_tab,metadata=[MdaElement_tab,MdaQualifier_tab,MdaFreeText_tab],DetAlternateText,RigCreator_tab,RigSource_tab,RigAcknowledgementCredit,RigCopyrightStatement,RigCopyrightStatus,RigLicence,RigLicenceDetails,ChaRepository_tab,ChaMd5Sum,AdmPublishWebNoPassword,AdmDateModified,AdmTimeModified)",
+            "parent=ColParentRecordRef.(irn,ColRegPrefix,ColRegNumber,ColRegPart,ColDiscipline,MdaDataSets_tab)",
+            "tissue=[TisInitialPreservation_tab,TisLtStorageMethod_tab,TisDatePrepared0,TisTissueType_tab]",
+            "TisCollectionCode",
+            "TisOtherInstitutionNo",
+            "TisRegistrationNumber",
+            "ManOnLoan",
+            "location=LocCurrentLocationRef.(irn)",
+            "TisTissueUsedUp",
+            "GneDnaUsedUp",
+            "TisAvailableForLoan",
+            "preparedby=StrPreparedByRef_tab.(NamPartyType,NamFullName,NamOrganisation,NamBranch,NamDepartment,NamOrganisation,NamOrganisationOtherNames_tab,NamSource,AddPhysStreet,AddPhysCity,AddPhysState,AddPhysCountry,ColCollaborationName)",
         };
     }
 }
