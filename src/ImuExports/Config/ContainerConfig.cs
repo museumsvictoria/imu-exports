@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using ImuExports.Infrastructure;
-using ImuExports.Tasks.AtlasOfLivingAustralia.Config;
 using SimpleInjector;
 
 namespace ImuExports.Config

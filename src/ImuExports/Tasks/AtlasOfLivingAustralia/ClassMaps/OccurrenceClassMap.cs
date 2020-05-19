@@ -7,7 +7,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps
     {
         public OccurrenceClassMap()
         {
-            Map(m => m.OccurrenceID).Name("occurrenceID");
+            Map(m => m.OccurrenceId).Name("occurrenceID");
             Map(m => m.DctermsType).Name("dcterms:type");
             Map(m => m.DctermsModified).Name("dcterms:modified");
             Map(m => m.DctermsLanguage).Name("dcterms:language");

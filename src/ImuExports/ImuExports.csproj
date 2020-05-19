@@ -74,11 +74,6 @@
     <Compile Include="Infrastructure\IModuleSearchConfig.cs" />
     <Compile Include="Infrastructure\IFactory.cs" />
     <Compile Include="Infrastructure\ITaskOptions.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\AtlasOfLivingAustraliaTissueDataOptions.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\AtlasOfLivingAustraliaTissueDataTask.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\CsvMaps\OccurrenceTissueDataCsvMap.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\Factories\OccurrenceTissueDataFactory.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\Models\OccurrenceTissueData.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\AtlasOfLivingAustraliaOptions.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\ResourceRelationshipClassMap.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\PreservationClassMap.cs" />
@@ -93,7 +88,6 @@
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\SiteModuleSearchConfig.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\MultimediaFactory.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\OccurrenceFactory.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\PartiesFactory.cs" />
     <Compile Include="Config\GlobalOptions.cs" />
     <Compile Include="Config\Options.cs" />
     <Compile Include="Config\ContainerConfig.cs" />
@@ -110,7 +104,6 @@
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\MaterialSample.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Multimedia.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Occurrence.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Party.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\AtlasOfLivingAustraliaTask.cs" />

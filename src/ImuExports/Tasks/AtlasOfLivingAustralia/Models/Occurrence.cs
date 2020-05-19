@@ -48,7 +48,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Models
 
         public string BasisOfRecord { get; set; }
 
-        public string OccurrenceID { get; set; }
+        public string OccurrenceId { get; set; }
 
         public string CatalogNumber { get; set; }
 
