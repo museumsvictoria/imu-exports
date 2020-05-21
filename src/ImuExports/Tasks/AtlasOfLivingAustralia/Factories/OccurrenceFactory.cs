@@ -11,12 +11,12 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 {
     public class OccurrenceFactory : IFactory<Occurrence>
     {
-        private readonly IFactory<Multimedia> imageFactory;
+        private readonly IFactory<Multimedia> multimediaFactory;
 
         public OccurrenceFactory(
-            IFactory<Multimedia> imageFactory)
+            IFactory<Multimedia> multimediaFactory)
         {
-            this.imageFactory = imageFactory;
+            this.multimediaFactory = multimediaFactory;
         }
 
         public Occurrence Make(Map map)
@@ -395,15 +395,15 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             }
 
             // Multimedia extension fields
-            occurrence.Multimedia = imageFactory.Make(map.GetMaps("media")).ToList();
+            occurrence.Multimedia = multimediaFactory.Make(map.GetMaps("media")).ToList();
             
             foreach (var multimedia in occurrence.Multimedia)
             {
                 multimedia.CoreId = occurrence.OccurrenceId;
-                multimedia.References = $"http://collections.museumvictoria.com.au/specimens/{map.GetLong("irn")}";
+                multimedia.References = $"https://collections.museumvictoria.com.au/specimens/{map.GetLong("irn")}";
             }
 
-            occurrence.AssociatedMedia = occurrence.Multimedia.Select(x => x.Identifier).Concatenate(" | ");
+            occurrence.AssociatedMedia = MakeAssociatedMedia(map.GetMaps("media"));
 
             return occurrence;
         }
@@ -510,6 +510,26 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             return string.IsNullOrWhiteSpace(map.GetTrimString("ColRegPart"))
                 ? $"{map.GetTrimString("ColRegPrefix")}{map.GetTrimString("ColRegNumber")}"
                 : $"{map.GetTrimString("ColRegPrefix")}{map.GetTrimString("ColRegNumber")}-{map.GetTrimString("ColRegPart")}";
+        }
+
+        private string MakeAssociatedMedia(Map[] maps)
+        {
+            return maps.Select(map =>
+            {
+                if (map != null &&
+                    string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "yes",
+                        StringComparison.OrdinalIgnoreCase) &&
+                    map.GetTrimStrings("MdaDataSets_tab").Contains("Atlas of Living Australia") &&
+                    map.GetTrimStrings("MdaDataSets_tab").Contains("Collections Online: MMR") &&
+                    string.Equals(map.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
+                {
+                    var irn = map.GetLong("irn");
+
+                    return $"https://collections.museumvictoria.com.au/content/media/{(irn % 50)}/{irn}-large.jpg";
+                }
+
+                return null;
+            }).Concatenate(" | ");
         }
     }
 }
