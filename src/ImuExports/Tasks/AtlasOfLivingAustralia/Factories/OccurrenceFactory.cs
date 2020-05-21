@@ -90,11 +90,12 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     }))
                 .SelectMany(x => x)
                 .Distinct()
+                .Where(x => !string.Equals(x, "none", StringComparison.OrdinalIgnoreCase))
                 .Concatenate(" | ");
 
             if (colevent != null)
             {
-                occurrence.EventID = colevent.GetTrimString("ColCollectionEventCode");
+                occurrence.EventId = colevent.GetTrimString("ColCollectionEventCode");
                 occurrence.SamplingProtocol = colevent.GetTrimString("ColCollectionMethod");
 
                 IList<DateTime> eventDates = new List<DateTime>();
@@ -146,7 +147,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             if (site != null)
             {
                 if (!string.IsNullOrWhiteSpace(site.GetTrimString("SitSiteCode")) || !string.IsNullOrWhiteSpace(site.GetTrimString("SitSiteNumber")))
-                    occurrence.LocationID = $"{site.GetTrimString("SitSiteCode")}{site.GetTrimString("SitSiteNumber")}";
+                    occurrence.LocationId = $"{site.GetTrimString("SitSiteCode")}{site.GetTrimString("SitSiteNumber")}";
 
                 occurrence.Locality = site.GetTrimString("LocPreciseLocation").ReplaceLineBreaks();
                 occurrence.VerbatimLocality = site.GetTrimString("LocPreciseLocation").ReplaceLineBreaks();
@@ -313,8 +314,8 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 {
                     occurrence.ResourceRelationship.RelatedResourceId = new[]
                     {
-                        map.GetTrimString("TisCollectionCode"),
                         map.GetTrimString("TisOtherInstitutionNo"),
+                        map.GetTrimString("TisCollectionCode"),
                         map.GetTrimString("TisRegistrationNumber")
                     }.Concatenate(":");
                     occurrence.ResourceRelationship.RelationshipOfResource = "same individual";
@@ -356,6 +357,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                         }))
                     .SelectMany(x => x)
                     .Distinct()
+                    .Where(x => !string.Equals(x, "none", StringComparison.OrdinalIgnoreCase))
                     .Concatenate(" | ");
                 occurrence.Preservation.PreservationTemperature = map.GetMaps("tissue").Select(x => x.GetString("TisLtStorageMethod_tab")).Concatenate(" | ");
                 if (DateTime.TryParseExact(
@@ -382,6 +384,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                             }))
                         .SelectMany(x => x)
                         .Distinct()
+                        .Where(x => !string.Equals(x, "none", StringComparison.OrdinalIgnoreCase))
                         .Concatenate(" | ");
                 if (map.GetMaps("preparedby") != null)
                     occurrence.Preparation.PreparedBy = map.GetMaps("preparedby").Select(MakePartyName).Concatenate(" | ");

@@ -28,7 +28,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps
             Map(m => m.OccurrenceStatus).Name("occurrenceStatus");
             Map(m => m.Preparations).Name("preparations");
             Map(m => m.AssociatedMedia).Name("associatedMedia");
-            Map(m => m.EventID).Name("eventID");
+            Map(m => m.EventId).Name("eventID");
             Map(m => m.SamplingProtocol).Name("samplingProtocol");
             Map(m => m.EventDate).Name("eventDate");
             Map(m => m.EventTime).Name("eventTime");
@@ -36,7 +36,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps
             Map(m => m.Month).Name("month");
             Map(m => m.Day).Name("day");
             Map(m => m.FieldNumber).Name("fieldNumber");
-            Map(m => m.LocationID).Name("locationID");
+            Map(m => m.LocationId).Name("locationID");
             Map(m => m.HigherGeography).Name("higherGeography");
             Map(m => m.Continent).Name("continent");
             Map(m => m.WaterBody).Name("waterBody");

@@ -68,7 +68,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Models
 
         public string AssociatedMedia { get; set; }
 
-        public string EventID { get; set; }
+        public string EventId { get; set; }
 
         public string SamplingProtocol { get; set; }
 
@@ -84,7 +84,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Models
 
         public string FieldNumber { get; set; }
 
-        public string LocationID { get; set; }
+        public string LocationId { get; set; }
 
         public string HigherGeography { get; set; }
 
