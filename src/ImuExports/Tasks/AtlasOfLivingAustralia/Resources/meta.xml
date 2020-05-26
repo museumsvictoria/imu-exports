@@ -77,43 +77,20 @@
 		<field index="69" term="http://rs.tdwg.org/dwc/terms/scientificNameAuthorship"/>
 		<field index="70" term="http://rs.tdwg.org/dwc/terms/vernacularName"/>
 		<field index="71" term="http://rs.tdwg.org/dwc/terms/nomenclaturalCode"/>
-	</core>
-	<extension encoding="UTF-8" linesTerminatedBy="\r\n" fieldsTerminatedBy="," fieldsEnclosedBy="&quot;" ignoreHeaderLines="1" rowType="http://data.ggbn.org/schemas/ggbn/terms/MaterialSample">
-		<files>
-			<location>material-samples.csv</location>
-		</files>
-		<coreid index="0"/>
-		<field index="1" term="http://data.ggbn.org/schemas/ggbn/terms/materialSampleType"/>
-	</extension>
-	<extension encoding="UTF-8" linesTerminatedBy="\r\n" fieldsTerminatedBy="," fieldsEnclosedBy="&quot;" ignoreHeaderLines="1" rowType="http://data.ggbn.org/schemas/ggbn/terms/Preservation">
-		<files>
-			<location>preservations.csv</location>
-		</files>
-		<coreid index="0"/>
-		<field index="1" term="http://data.ggbn.org/schemas/ggbn/terms/preservationType"/>
-		<field index="2" term="http://data.ggbn.org/schemas/ggbn/terms/preservationTemperature"/>
-		<field index="3" term="http://data.ggbn.org/schemas/ggbn/terms/preservationDateBegin"/>
-	</extension>
-	<extension encoding="UTF-8" linesTerminatedBy="\r\n" fieldsTerminatedBy="," fieldsEnclosedBy="&quot;" ignoreHeaderLines="1" rowType="http://data.ggbn.org/schemas/ggbn/terms/Preparation">
-		<files>
-			<location>preparations.csv</location>
-		</files>
-		<coreid index="0"/>
-		<field index="1" term="http://data.ggbn.org/schemas/ggbn/terms/preparationType"/>
-		<field index="2" term="http://data.ggbn.org/schemas/ggbn/terms/preparationDate"/>
-		<field index="3" term="http://data.ggbn.org/schemas/ggbn/terms/preparationMaterials"/>
-		<field index="4" term="http://data.ggbn.org/schemas/ggbn/terms/preparedBy"/>
-	</extension>
-	<extension encoding="UTF-8" linesTerminatedBy="\r\n" fieldsTerminatedBy="," fieldsEnclosedBy="&quot;" ignoreHeaderLines="1" rowType="http://rs.tdwg.org/dwc/terms/ResourceRelationship">
-		<files>
-			<location>resource-relationships.csv</location>
-		</files>
-		<coreid index="0"/>
-		<field index="1" term="http://rs.tdwg.org/dwc/terms/resourceID"/>
-		<field index="2" term="http://rs.tdwg.org/dwc/terms/relatedResourceID"/>
-		<field index="3" term="http://rs.tdwg.org/dwc/terms/relationshipOfResource"/>
-	</extension>
-	<extension encoding="UTF-8" linesTerminatedBy="\r\n" fieldsTerminatedBy="," fieldsEnclosedBy="&quot;" ignoreHeaderLines="1" rowType="http://rs.gbif.org/terms/1.0/Multimedia">
+    <field index="72" term="http://data.ggbn.org/schemas/ggbn/terms/blocked"/>
+    <field index="73" term="http://rs.tdwg.org/dwc/terms/disposition"/>
+    <field index="74" term="http://data.ggbn.org/schemas/ggbn/terms/materialSampleType"/>
+    <field index="75" term="http://data.ggbn.org/schemas/ggbn/terms/preparationType"/>
+    <field index="76" term="http://data.ggbn.org/schemas/ggbn/terms/preparationMaterials"/>
+    <field index="77" term="http://data.ggbn.org/schemas/ggbn/terms/preparedBy"/>
+    <field index="78" term="http://data.ggbn.org/schemas/ggbn/terms/preparationDate"/>
+    <field index="79" term="http://data.ggbn.org/schemas/ggbn/terms/preservationType"/>
+    <field index="80" term="http://data.ggbn.org/schemas/ggbn/terms/preservationTemperature"/>
+    <field index="81" term="http://data.ggbn.org/schemas/ggbn/terms/preservationDateBegin"/>
+    <field index="82" term="http://rs.tdwg.org/dwc/terms/relatedResourceID"/>
+    <field index="83" term="http://rs.tdwg.org/dwc/terms/relationshipOfResource"/>
+  </core>
+  <extension encoding="UTF-8" linesTerminatedBy="\r\n" fieldsTerminatedBy="," fieldsEnclosedBy="&quot;" ignoreHeaderLines="1" rowType="http://rs.gbif.org/terms/1.0/Multimedia">
 		<files>
 			<location>multimedia.csv</location>
 		</files>
@@ -129,13 +106,5 @@
 		<field index="9" term="http://purl.org/dc/terms/source"/>
 		<field index="10" term="http://purl.org/dc/terms/license"/>
 		<field index="11" term="http://purl.org/dc/terms/rightsHolder"/>
-	</extension>
-	<extension encoding="UTF-8" linesTerminatedBy="\r\n" fieldsTerminatedBy="," fieldsEnclosedBy="&quot;" ignoreHeaderLines="1" rowType="http://data.ggbn.org/schemas/ggbn/terms/Loan">
-		<files>
-			<location>loans.csv</location>
-		</files>
-		<coreid index="0"/>
-		<field index="1" term="http://data.ggbn.org/schemas/ggbn/terms/blocked"/>
-		<field index="2" term="http://purl.org/dc/terms/disposition"/>
 	</extension>
 </archive>

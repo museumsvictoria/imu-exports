@@ -297,54 +297,47 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             // Tissue extension fields
             if (map.GetTrimString("ColTypeOfItem") == "Specimen" && map.GetTrimString("ColRegPrefix") == "Z")
             {
-                // Material Sample
-                occurrence.MaterialSample.MaterialSampleType = "Tissue";
-                occurrence.MaterialSample.CoreId = occurrence.OccurrenceId;
-
-                // Resource Relationship
-                var parentMap = map.GetMap("parent");
-                if (parentMap != null && parentMap.GetTrimStrings("MdaDataSets_tab").Contains("Atlas of Living Australia"))
-                {
-                    occurrence.ResourceRelationship.RelatedResourceId = MakeOccurrenceId(parentMap);
-                    occurrence.ResourceRelationship.RelationshipOfResource = "same individual";
-                }
-                else if (!string.IsNullOrWhiteSpace(map.GetTrimString("TisCollectionCode")) ||
-                         !string.IsNullOrWhiteSpace(map.GetTrimString("TisOtherInstitutionNo")) ||
-                         !string.IsNullOrWhiteSpace(map.GetTrimString("TisRegistrationNumber")))
-                {
-                    occurrence.ResourceRelationship.RelatedResourceId = new[]
-                    {
-                        map.GetTrimString("TisOtherInstitutionNo"),
-                        map.GetTrimString("TisCollectionCode"),
-                        map.GetTrimString("TisRegistrationNumber")
-                    }.Concatenate(":");
-                    occurrence.ResourceRelationship.RelationshipOfResource = "same individual";
-                }
-
-                if (!occurrence.ResourceRelationship.AllStringPropertiesNullOrEmpty())
-                    occurrence.ResourceRelationship.CoreId = occurrence.ResourceRelationship.ResourceId = occurrence.OccurrenceId;
-
                 // Loan
                 var locationMap = map.GetMap("location");
                 if (map.GetString("ManOnLoan") == "Yes")
-                    occurrence.Loan.Disposition = "On Loan";
+                    occurrence.Disposition = "On Loan";
                 else if (locationMap != null && (locationMap.GetLong("irn") == 294982 || locationMap.GetLong("irn") == 294981))
-                    occurrence.Loan.Disposition = "Missing";
+                    occurrence.Disposition = "Missing";
                 else if (map.GetString("TisTissueUsedUp") == "Yes" || map.GetString("GneDnaUsedUp") == "Yes")
-                    occurrence.Loan.Disposition = "Used";
+                    occurrence.Disposition = "Used";
                 else
-                    occurrence.Loan.Disposition = "In collection";
+                    occurrence.Disposition = "In collection";
 
                 if (map.GetString("TisAvailableForLoan") == "No")
-                    occurrence.Loan.Blocked = "Not available for loan";
+                    occurrence.Blocked = "Not available for loan";
                 else if (map.GetString("TisAvailableForLoan") == "Yes")
-                    occurrence.Loan.Blocked = "Available for loan";
+                    occurrence.Blocked = "Available for loan";
 
-                if(!occurrence.Loan.AllStringPropertiesNullOrEmpty())
-                    occurrence.Loan.CoreId = occurrence.OccurrenceId;
+                // Material Sample
+                occurrence.MaterialSampleType = "Tissue";
+
+                // Preparation
+                occurrence.PreparationType = map.GetMaps("tissue").Select(x => x.GetString("TisTissueType_tab")).Concatenate(" | ");
+                occurrence.PreparationMaterials = map.GetMaps("preparations")
+                    .Select(x => new[]
+                    {
+                        x.GetString("StrFixativeTreatment_tab"),
+                    })
+                    .Concat(map.GetMaps("tissue")
+                        .Select(x => new[]
+                        {
+                            x.GetString("TisInitialPreservation_tab"),
+                        }))
+                    .SelectMany(x => x)
+                    .Distinct()
+                    .Where(x => !string.Equals(x, "none", StringComparison.OrdinalIgnoreCase))
+                    .Concatenate(" | ");
+                if (map.GetMaps("preparedby") != null)
+                    occurrence.PreparedBy = map.GetMaps("preparedby").Select(MakePartyName).Concatenate(" | ");
+                occurrence.PreparationDate = occurrence.PreservationDateBegin;
 
                 // Preservation
-                occurrence.Preservation.PreservationType = map.GetMaps("preparations")
+                occurrence.PreservationType = map.GetMaps("preparations")
                     .Select(x => new[]
                     {
                         x.GetString("StrFixativeTreatment_tab"),
@@ -359,39 +352,33 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     .Distinct()
                     .Where(x => !string.Equals(x, "none", StringComparison.OrdinalIgnoreCase))
                     .Concatenate(" | ");
-                occurrence.Preservation.PreservationTemperature = map.GetMaps("tissue").Select(x => x.GetString("TisLtStorageMethod_tab")).Concatenate(" | ");
+                occurrence.PreservationTemperature = map.GetMaps("tissue").Select(x => x.GetString("TisLtStorageMethod_tab")).Distinct().Concatenate(" | ");
                 if (DateTime.TryParseExact(
                     string.IsNullOrWhiteSpace(map.GetMaps("tissue").FirstOrDefault()?.GetString("TisDatePrepared0")) ? map.GetMaps("preparations").FirstOrDefault()?.GetString("StrDatePrepared0") : map.GetMaps("tissue").FirstOrDefault()?.GetString("TisDatePrepared0"),
                     new[] { "dd/MM/yyyy", "dd/MM/yy" }, new CultureInfo("en-AU"), DateTimeStyles.None, out var preservationDateBegin))
                 {
-                    occurrence.Preservation.PreservationDateBegin = preservationDateBegin.ToString("s");
+                    occurrence.PreservationDateBegin = preservationDateBegin.ToString("s");
                 }
 
-                if (!occurrence.Preservation.AllStringPropertiesNullOrEmpty())
-                    occurrence.Preservation.CoreId = occurrence.OccurrenceId;
-
-                // Preparation
-                occurrence.Preparation.PreparationType = map.GetMaps("tissue").Select(x => x.GetString("TisTissueType_tab")).Concatenate(" | ");
-                occurrence.Preparation.PreparationMaterials = map.GetMaps("preparations")
-                        .Select(x => new[]
-                        {
-                            x.GetString("StrFixativeTreatment_tab"),
-                        })
-                        .Concat(map.GetMaps("tissue")
-                            .Select(x => new[]
-                            {
-                                x.GetString("TisInitialPreservation_tab"),
-                            }))
-                        .SelectMany(x => x)
-                        .Distinct()
-                        .Where(x => !string.Equals(x, "none", StringComparison.OrdinalIgnoreCase))
-                        .Concatenate(" | ");
-                if (map.GetMaps("preparedby") != null)
-                    occurrence.Preparation.PreparedBy = map.GetMaps("preparedby").Select(MakePartyName).Concatenate(" | ");
-                occurrence.Preparation.PreparationDate = occurrence.Preservation.PreservationDateBegin;
-
-                if (!occurrence.Preparation.AllStringPropertiesNullOrEmpty())
-                    occurrence.Preparation.CoreId = occurrence.OccurrenceId;
+                // Resource Relationship
+                var parentMap = map.GetMap("parent");
+                if (parentMap != null && parentMap.GetTrimStrings("MdaDataSets_tab").Contains("Atlas of Living Australia"))
+                {
+                    occurrence.RelatedResourceId = MakeOccurrenceId(parentMap);
+                    occurrence.RelationshipOfResource = "same individual";
+                }
+                else if (!string.IsNullOrWhiteSpace(map.GetTrimString("TisCollectionCode")) ||
+                         !string.IsNullOrWhiteSpace(map.GetTrimString("TisOtherInstitutionNo")) ||
+                         !string.IsNullOrWhiteSpace(map.GetTrimString("TisRegistrationNumber")))
+                {
+                    occurrence.RelatedResourceId = new[]
+                    {
+                        map.GetTrimString("TisOtherInstitutionNo"),
+                        map.GetTrimString("TisCollectionCode"),
+                        map.GetTrimString("TisRegistrationNumber")
+                    }.Concatenate(":");
+                    occurrence.RelationshipOfResource = "same individual";
+                }
             }
 
             // Multimedia extension fields

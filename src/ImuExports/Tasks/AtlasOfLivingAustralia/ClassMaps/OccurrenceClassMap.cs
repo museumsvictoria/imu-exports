@@ -79,6 +79,18 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps
             Map(m => m.ScientificNameAuthorship).Name("scientificNameAuthorship");
             Map(m => m.VernacularName).Name("vernacularName");
             Map(m => m.NomenclaturalCode).Name("nomenclaturalCode");
+            Map(m => m.Blocked).Name("blocked");
+            Map(m => m.Disposition).Name("disposition");
+            Map(m => m.MaterialSampleType).Name("materialSampleType");
+            Map(m => m.PreparationType).Name("preparationType");
+            Map(m => m.PreparationMaterials).Name("preparationMaterials");
+            Map(m => m.PreparedBy).Name("preparedBy");
+            Map(m => m.PreparationDate).Name("preparationDate");
+            Map(m => m.PreservationType).Name("preservationType");
+            Map(m => m.PreservationTemperature).Name("preservationTemperature");
+            Map(m => m.PreservationDateBegin).Name("preservationDateBegin");
+            Map(m => m.RelatedResourceId).Name("relatedResourceId");
+            Map(m => m.RelationshipOfResource).Name("relationshipOfResource");
         }
     }
 }

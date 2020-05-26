@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using CsvHelper;
+﻿using CsvHelper;
 using IMu;
 using ImuExports.Config;
 using ImuExports.Infrastructure;
 using ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 using Serilog;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia
 {
@@ -86,61 +86,6 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                     csvWriter.Configuration.HasHeaderRecord = true;
                     csvWriter.Configuration.SanitizeForInjection = false;
                     csvWriter.WriteRecords(multimedia);
-                }
-
-                Log.Logger.Information("Saving material sample data as csv");
-                using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"material-samples.csv", false, Encoding.UTF8)))
-                {
-                    var materialSamples = occurrences.Select(x => x.MaterialSample).Where(x => !string.IsNullOrEmpty(x.CoreId));
-
-                    csvWriter.Configuration.RegisterClassMap<MaterialSampleClassMap>();
-                    csvWriter.Configuration.HasHeaderRecord = true;
-                    csvWriter.Configuration.SanitizeForInjection = false;
-                    csvWriter.WriteRecords(materialSamples);
-                }
-
-                Log.Logger.Information("Saving preservation data as csv");
-                using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"preservations.csv", false, Encoding.UTF8)))
-                {
-                    var preservations = occurrences.Select(x => x.Preservation).Where(x => !string.IsNullOrEmpty(x.CoreId));
-
-                    csvWriter.Configuration.RegisterClassMap<PreservationClassMap>();
-                    csvWriter.Configuration.HasHeaderRecord = true;
-                    csvWriter.Configuration.SanitizeForInjection = false;
-                    csvWriter.WriteRecords(preservations);
-                }
-
-                Log.Logger.Information("Saving preparation data as csv");
-                using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"preparations.csv", false, Encoding.UTF8)))
-                {
-                    var preparations = occurrences.Select(x => x.Preparation).Where(x => !string.IsNullOrEmpty(x.CoreId));
-
-                    csvWriter.Configuration.RegisterClassMap<PreparationClassMap>();
-                    csvWriter.Configuration.HasHeaderRecord = true;
-                    csvWriter.Configuration.SanitizeForInjection = false;
-                    csvWriter.WriteRecords(preparations);
-                }
-
-                Log.Logger.Information("Saving resource relationship data as csv");
-                using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"resource-relationships.csv", false, Encoding.UTF8)))
-                {
-                    var resourceRelationships = occurrences.Select(x => x.ResourceRelationship).Where(x => !string.IsNullOrEmpty(x.CoreId));
-
-                    csvWriter.Configuration.RegisterClassMap<ResourceRelationshipClassMap>();
-                    csvWriter.Configuration.HasHeaderRecord = true;
-                    csvWriter.Configuration.SanitizeForInjection = false;
-                    csvWriter.WriteRecords(resourceRelationships);
-                }
-
-                Log.Logger.Information("Saving loan data as csv");
-                using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"loans.csv", false, Encoding.UTF8)))
-                {
-                    var loans = occurrences.Select(x => x.Loan).Where(x => !string.IsNullOrEmpty(x.CoreId));
-
-                    csvWriter.Configuration.RegisterClassMap<LoanClassMap>();
-                    csvWriter.Configuration.HasHeaderRecord = true;
-                    csvWriter.Configuration.SanitizeForInjection = false;
-                    csvWriter.WriteRecords(loans);
                 }
 
                 // Copy meta.xml

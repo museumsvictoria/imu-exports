@@ -15,6 +15,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -29,7 +30,6 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -69,16 +69,11 @@
     <Compile Include="Config\Constants.cs" />
     <Compile Include="Config\ProgramConfig.cs" />
     <Compile Include="Extensions\MapExtensions.cs" />
-    <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Infrastructure\IModuleSearchConfig.cs" />
     <Compile Include="Infrastructure\IFactory.cs" />
     <Compile Include="Infrastructure\ITaskOptions.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\AtlasOfLivingAustraliaOptions.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\ResourceRelationshipClassMap.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\PreservationClassMap.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\PreparationClassMap.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\MaterialSampleClassMap.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\MultimediaClassMap.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\AtlasOfLivingAustraliaConstants.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\MultimediaModuleSearchConfig.cs" />
@@ -95,13 +90,7 @@
     <Compile Include="Infrastructure\ImuSessionProvider.cs" />
     <Compile Include="Config\SerilogConfig.cs" />
     <Compile Include="Infrastructure\TaskRunner.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\LoanClassMap.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\OccurrenceClassMap.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\ResourceRelationship.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Loan.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Preparation.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Preservation.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\MaterialSample.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Multimedia.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Occurrence.cs" />
     <Compile Include="Program.cs" />

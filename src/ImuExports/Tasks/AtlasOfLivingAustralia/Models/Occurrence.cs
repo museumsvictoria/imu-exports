@@ -6,25 +6,10 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Models
     {
         public Occurrence()
         {
-            this.Loan = new Loan();
-            this.MaterialSample = new MaterialSample();
             this.Multimedia = new List<Multimedia>();
-            this.Preparation = new Preparation();
-            this.Preservation = new Preservation();
-            this.ResourceRelationship = new ResourceRelationship();
         }
 
-        public Loan Loan { get; set; }
-
-        public MaterialSample MaterialSample { get; set; }
-
         public IList<Multimedia> Multimedia { get; set; }
-
-        public Preparation Preparation { get; set; }
-
-        public Preservation Preservation { get; set; }
-
-        public ResourceRelationship ResourceRelationship { get; set; }
 
         public string DctermsType { get; set; }
 
@@ -169,5 +154,39 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Models
         public string VernacularName { get; set; }
 
         public string NomenclaturalCode { get; set; }
+
+        #region Loan
+        public string Blocked { get; set; }
+
+        public string Disposition { get; set; }
+        #endregion
+
+        #region MaterialSample
+        public string MaterialSampleType { get; set; }
+        #endregion
+
+        #region Preparation
+        public string PreparationType { get; set; }
+
+        public string PreparationMaterials { get; set; }
+
+        public string PreparedBy { get; set; }
+
+        public string PreparationDate { get; set; }
+        #endregion
+
+        #region Preservation
+        public string PreservationType { get; set; }
+
+        public string PreservationTemperature { get; set; }
+
+        public string PreservationDateBegin { get; set; }
+        #endregion
+
+        #region ResourceRelationship
+        public string RelatedResourceId { get; set; }
+
+        public string RelationshipOfResource { get; set; }
+        #endregion
     }
 }
