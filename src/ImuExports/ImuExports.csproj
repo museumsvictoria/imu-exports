@@ -78,7 +78,6 @@
     <Compile Include="Tasks\AtlasOfLivingAustralia\AtlasOfLivingAustraliaOptions.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\MultimediaClassMap.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\AtlasOfLivingAustraliaConstants.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\Config\CatalogueModuleDeletionsConfig.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\MultimediaModuleSearchConfig.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\CollectionEventModuleSearchConfig.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\CatalogueModuleSearchConfig.cs" />
@@ -168,8 +167,8 @@
     <PackageReference Include="LiteDB">
       <Version>4.1.4</Version>
     </PackageReference>
-    <PackageReference Include="Magick.NET-Q16-x64">
-      <Version>7.0.6.102</Version>
+    <PackageReference Include="Magick.NET-Q16-AnyCPU">
+      <Version>7.20.0.1</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>8.0.3</Version>
