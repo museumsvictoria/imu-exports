@@ -7,15 +7,13 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps
     {
         public OccurrenceClassMap()
         {
-            Map(m => m.OccurrenceID).Name("occurrenceID");
+            Map(m => m.OccurrenceId).Name("occurrenceID");
             Map(m => m.DctermsType).Name("dcterms:type");
             Map(m => m.DctermsModified).Name("dcterms:modified");
             Map(m => m.DctermsLanguage).Name("dcterms:language");
             Map(m => m.DctermsLicense).Name("dcterms:license");
             Map(m => m.DctermsRightsHolder).Name("dcterms:rightsHolder");            
             Map(m => m.InstitutionId).Name("institutionID");
-            Map(m => m.CollectionId).Name("collectionID");
-            Map(m => m.DatasetId).Name("datasetID");
             Map(m => m.InstitutionCode).Name("institutionCode");
             Map(m => m.CollectionCode).Name("collectionCode");
             Map(m => m.DatasetName).Name("datasetName");
@@ -30,7 +28,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps
             Map(m => m.OccurrenceStatus).Name("occurrenceStatus");
             Map(m => m.Preparations).Name("preparations");
             Map(m => m.AssociatedMedia).Name("associatedMedia");
-            Map(m => m.EventID).Name("eventID");
+            Map(m => m.EventId).Name("eventID");
             Map(m => m.SamplingProtocol).Name("samplingProtocol");
             Map(m => m.EventDate).Name("eventDate");
             Map(m => m.EventTime).Name("eventTime");
@@ -38,7 +36,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps
             Map(m => m.Month).Name("month");
             Map(m => m.Day).Name("day");
             Map(m => m.FieldNumber).Name("fieldNumber");
-            Map(m => m.LocationID).Name("locationID");
+            Map(m => m.LocationId).Name("locationID");
             Map(m => m.HigherGeography).Name("higherGeography");
             Map(m => m.Continent).Name("continent");
             Map(m => m.WaterBody).Name("waterBody");
@@ -81,6 +79,18 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps
             Map(m => m.ScientificNameAuthorship).Name("scientificNameAuthorship");
             Map(m => m.VernacularName).Name("vernacularName");
             Map(m => m.NomenclaturalCode).Name("nomenclaturalCode");
+            Map(m => m.Blocked).Name("blocked");
+            Map(m => m.Disposition).Name("disposition");
+            Map(m => m.MaterialSampleType).Name("materialSampleType");
+            Map(m => m.PreparationType).Name("preparationType");
+            Map(m => m.PreparationMaterials).Name("preparationMaterials");
+            Map(m => m.PreparedBy).Name("preparedBy");
+            Map(m => m.PreparationDate).Name("preparationDate");
+            Map(m => m.PreservationType).Name("preservationType");
+            Map(m => m.PreservationTemperature).Name("preservationTemperature");
+            Map(m => m.PreservationDateBegin).Name("preservationDateBegin");
+            Map(m => m.RelatedResourceId).Name("relatedResourceId");
+            Map(m => m.RelationshipOfResource).Name("relationshipOfResource");
         }
     }
 }

@@ -15,6 +15,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -29,7 +30,6 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -75,12 +75,8 @@
     <Compile Include="Infrastructure\IModuleSearchConfig.cs" />
     <Compile Include="Infrastructure\IFactory.cs" />
     <Compile Include="Infrastructure\ITaskOptions.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\AtlasOfLivingAustraliaTissueDataOptions.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\AtlasOfLivingAustraliaTissueDataTask.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\CsvMaps\OccurrenceTissueDataCsvMap.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\Factories\OccurrenceTissueDataFactory.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustraliaTissueData\Models\OccurrenceTissueData.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\AtlasOfLivingAustraliaOptions.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\MultimediaClassMap.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\AtlasOfLivingAustraliaConstants.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\CatalogueModuleDeletionsConfig.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\MultimediaModuleSearchConfig.cs" />
@@ -90,7 +86,6 @@
     <Compile Include="Tasks\AtlasOfLivingAustralia\Config\SiteModuleSearchConfig.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\MultimediaFactory.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\OccurrenceFactory.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\PartiesFactory.cs" />
     <Compile Include="Config\GlobalOptions.cs" />
     <Compile Include="Config\Options.cs" />
     <Compile Include="Config\ContainerConfig.cs" />
@@ -98,12 +93,10 @@
     <Compile Include="Infrastructure\ImuSessionProvider.cs" />
     <Compile Include="Config\SerilogConfig.cs" />
     <Compile Include="Infrastructure\TaskRunner.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\MultimediaClassMap.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\OccurrenceClassMap.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Application.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Multimedia.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Occurrence.cs" />
-    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Party.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tasks\AtlasOfLivingAustralia\AtlasOfLivingAustraliaTask.cs" />
@@ -153,10 +146,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="meta.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
+    <Resource Include="Tasks\AtlasOfLivingAustralia\Resources\meta.xml" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
@@ -212,10 +202,10 @@
       <Version>3.1.2</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>xcopy /y $(ProjectDir)Tasks\AtlasOfLivingAustralia\Resources  $(ProjectDir)$(OutDir)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

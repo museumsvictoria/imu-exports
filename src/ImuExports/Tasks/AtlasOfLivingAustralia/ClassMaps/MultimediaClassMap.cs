@@ -7,7 +7,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps
     {
         public MultimediaClassMap()
         {
-            Map(m => m.CoreID).Name("coreID");
+            Map(m => m.CoreId).Name("coreID");
             Map(m => m.Type).Name("type");
             Map(m => m.Format).Name("format");
             Map(m => m.Identifier).Name("identifier");

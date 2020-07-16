@@ -11,29 +11,31 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 {
     public class OccurrenceFactory : IFactory<Occurrence>
     {
-        private readonly IFactory<Party> partyFactory;
-        private readonly IFactory<Multimedia> imageFactory;
+        private readonly IFactory<Multimedia> multimediaFactory;
 
-        public OccurrenceFactory(IFactory<Party> partyFactory,
-            IFactory<Multimedia> imageFactory)
+        public OccurrenceFactory(
+            IFactory<Multimedia> multimediaFactory)
         {
-            this.partyFactory = partyFactory;
-            this.imageFactory = imageFactory;
+            this.multimediaFactory = multimediaFactory;
         }
 
         public Occurrence Make(Map map)
         {
-            var irn = map.GetLong("irn");
+            var occurrence = new Occurrence();
 
-            var occurrence = new Occurrence
+            // Occurrence core fields
+            occurrence.OccurrenceId = MakeOccurrenceId(map);
+
+            switch (map.GetTrimString("ColTypeOfItem"))
             {
-                OccurrenceID = string.IsNullOrWhiteSpace(map.GetTrimString("ColRegPart"))
-                    ? $"urn:lsid:ozcam.taxonomy.org.au:NMV:{map.GetTrimString("ColDiscipline")}:PreservedSpecimen:{map.GetTrimString("ColRegPrefix")}{map.GetTrimString("ColRegNumber")}"
-                    : $"urn:lsid:ozcam.taxonomy.org.au:NMV:{map.GetTrimString("ColDiscipline")}:PreservedSpecimen:{map.GetTrimString("ColRegPrefix")}{map.GetTrimString("ColRegNumber")}-{map.GetTrimString("ColRegPart")}"
-            };
-
-            if (map.GetTrimString("ColTypeOfItem") == "Specimen")
-                occurrence.DctermsType = "PhysicalObject";
+                case "Specimen":
+                    occurrence.DctermsType = "PhysicalObject";
+                    break;
+                case "Audiovisual":
+                case "Image":
+                    occurrence.DctermsType = "Event";
+                    break;
+            }
 
             if (DateTime.TryParseExact(
                 $"{map.GetTrimString("AdmDateModified")} {map.GetTrimString("AdmTimeModified")}",
@@ -48,23 +50,17 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             occurrence.DctermsLanguage = "en";
             occurrence.DctermsLicense = "https://creativecommons.org/publicdomain/zero/1.0/legalcode";
             occurrence.DctermsRightsHolder = "Museums Victoria";
-            occurrence.InstitutionId = occurrence.InstitutionCode = occurrence.OwnerInstitutionCode = "NMV";
-            occurrence.CollectionId = "urn:lsid:biocol.org:col:34978";
-            occurrence.DatasetId = occurrence.CollectionCode = map.GetTrimString("ColDiscipline");
+            occurrence.InstitutionId = "urn:lsid:biocol.org:col:34978";
+            occurrence.InstitutionCode = occurrence.OwnerInstitutionCode = "NMV";
+            occurrence.CollectionCode = map.GetTrimString("ColDiscipline");
             occurrence.OccurrenceStatus = "present";
 
             var colevent = map.GetMap("colevent");
             if (colevent != null)
                 occurrence.DatasetName = colevent.GetTrimString("ExpExpeditionName");
 
-            if (map.GetTrimString("ColTypeOfItem") == "Specimen")
-                occurrence.BasisOfRecord = "PreservedSpecimen";
-            if (map.GetTrimString("ColTypeOfItem") == "Audiovisual" || map.GetTrimString("ColTypeOfItem") == "Image")
-                occurrence.BasisOfRecord = "HumanObservation";
-
-            occurrence.CatalogNumber = (string.IsNullOrWhiteSpace(map.GetTrimString("ColRegPart")))
-                                      ? $"{map.GetTrimString("ColRegPrefix")}{map.GetTrimString("ColRegNumber")}"
-                                      : $"{map.GetTrimString("ColRegPrefix")}{map.GetTrimString("ColRegNumber")}-{map.GetTrimString("ColRegPart")}";
+            occurrence.BasisOfRecord = MakeBasisOfRecord(map);
+            occurrence.CatalogNumber = MakeCatalogNumber(map);
 
             var individualCount = 0;
             if (!string.IsNullOrWhiteSpace(map.GetTrimString("SpeNoSpecimens")))
@@ -74,35 +70,32 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             if (individualCount > 0)
                 occurrence.IndividualCount = individualCount.ToString();
 
-            occurrence.Sex = map.GetTrimStrings("SpeSex_tab").Concatenate(";");
-            occurrence.LifeStage = map.GetTrimStrings("SpeStageAge_tab").Concatenate(";");
+            occurrence.Sex = map.GetTrimStrings("SpeSex_tab").Concatenate(" | ");
+            occurrence.LifeStage = map.GetTrimStrings("SpeStageAge_tab").Concatenate(" | ");
 
-            foreach (var preparationMap in map.GetMaps("preparations"))
-            {
-                var preparation = new[]
-                            {
-                                new KeyValuePair<string, string>("specimenNature", preparationMap.GetTrimString("StrSpecimenNature_tab")),
-                                new KeyValuePair<string, string>("specimenForm", preparationMap.GetTrimString("StrSpecimenForm_tab")),
-                                new KeyValuePair<string, string>("fixativeTreatment", preparationMap.GetTrimString("StrFixativeTreatment_tab")),
-                                new KeyValuePair<string, string>("storageMedium", preparationMap.GetTrimString("StrStorageMedium_tab"))
-                            }
-                    .Where(x => !string.IsNullOrWhiteSpace(x.Value))
-                    .Select(x => $"{x.Key}={x.Value}")
-                    .Concatenate(";");
-
-                if (occurrence.Preparations != null)
+            occurrence.Preparations = map.GetMaps("preparations")
+                .Select(x => new[]
                 {
-                    occurrence.Preparations += ";" + preparation;
-                }
-                else
-                {
-                    occurrence.Preparations = preparation;
-                }
-            }
+                    x.GetString("StrSpecimenNature_tab"),
+                    x.GetString("StrSpecimenForm_tab"),
+                    x.GetString("StrFixativeTreatment_tab"),
+                    x.GetString("StrStorageMedium_tab")
+                })
+                .Concat(map.GetMaps("tissue")
+                    .Select(x => new[]
+                    {
+                        x.GetString("TisTissueType_tab"),
+                        x.GetString("TisInitialPreservation_tab"),
+                        x.GetString("TisLtStorageMethod_tab")
+                    }))
+                .SelectMany(x => x)
+                .Distinct()
+                .Where(x => !string.Equals(x, "none", StringComparison.OrdinalIgnoreCase))
+                .Concatenate(" | ");
 
             if (colevent != null)
             {
-                occurrence.EventID = colevent.GetTrimString("ColCollectionEventCode");
+                occurrence.EventId = colevent.GetTrimString("ColCollectionEventCode");
                 occurrence.SamplingProtocol = colevent.GetTrimString("ColCollectionMethod");
 
                 IList<DateTime> eventDates = new List<DateTime>();
@@ -131,15 +124,15 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     eventDates.Add(eventDateTo);
                 }
 
-                occurrence.EventDate = eventDates.Select(x => x.ToString("s")).Concatenate(";");
-                occurrence.EventTime = eventTimes.Select(x => x.ToString("c")).Concatenate(";");
+                occurrence.EventDate = eventDates.Select(x => x.ToString("s")).Concatenate("\\");
+                occurrence.EventTime = eventTimes.Select(x => x.ToString("c")).Concatenate("\\");
 
                 occurrence.FieldNumber = colevent.GetTrimString("ColCollectionEventCode");
                 occurrence.MinimumDepthInMeters = colevent.GetTrimString("AquDepthFromMet");
                 occurrence.MaximumDepthInMeters = colevent.GetTrimString("AquDepthToMet");
 
                 if (colevent.GetMaps("collectors") != null)
-                    occurrence.RecordedBy = colevent.GetMaps("collectors").Where(x => x != null).Select(x => partyFactory.Make(x).Name).Concatenate("; ");
+                    occurrence.RecordedBy = colevent.GetMaps("collectors").Where(x => x != null).Select(MakePartyName).Concatenate(" | ");
             }
 
             occurrence.Year = map.GetTrimString("DarYearCollected");
@@ -154,7 +147,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             if (site != null)
             {
                 if (!string.IsNullOrWhiteSpace(site.GetTrimString("SitSiteCode")) || !string.IsNullOrWhiteSpace(site.GetTrimString("SitSiteNumber")))
-                    occurrence.LocationID = $"{site.GetTrimString("SitSiteCode")}{site.GetTrimString("SitSiteNumber")}";
+                    occurrence.LocationId = $"{site.GetTrimString("SitSiteCode")}{site.GetTrimString("SitSiteNumber")}";
 
                 occurrence.Locality = site.GetTrimString("LocPreciseLocation").ReplaceLineBreaks();
                 occurrence.VerbatimLocality = site.GetTrimString("LocPreciseLocation").ReplaceLineBreaks();
@@ -170,7 +163,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                                     geo.GetTrimString("LocContinent_tab"),
                                     geo.GetTrimString("LocCountry_tab"),
                                     geo.GetTrimString("LocProvinceStateTerritory_tab")
-                                }.Concatenate(", ");
+                                }.Concatenate(" | ");
 
                     occurrence.Continent = geo.GetTrimString("LocContinent_tab");
                     occurrence.WaterBody = geo.GetTrimString("LocOcean_tab");
@@ -196,7 +189,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     occurrence.CoordinateUncertaintyInMeters = latlong.GetTrimString("LatRadiusNumeric_tab");
                     occurrence.GeodeticDatum = (string.IsNullOrWhiteSpace(latlong.GetTrimString("LatDatum_tab"))) ? "WGS84" : latlong.GetTrimString("LatDatum_tab");
 
-                    occurrence.GeoreferencedBy = partyFactory.Make(latlong.GetMap("determinedBy")).Name;
+                    occurrence.GeoreferencedBy = MakePartyName(latlong.GetMap("determinedBy"));
 
                     if (DateTime.TryParseExact(latlong.GetTrimString("LatDetDate0"), "dd/MM/yyyy", new CultureInfo("en-AU"), DateTimeStyles.None, out var georeferencedDate))
                         occurrence.GeoreferencedDate = georeferencedDate.ToString("s");
@@ -220,7 +213,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 occurrence.DateIdentified = identification.GetTrimString("IdeDateIdentified0");
                 
                 if (identification.GetMaps("identifiers") != null)
-                    occurrence.IdentifiedBy = identification.GetMaps("identifiers").Where(x => x != null).Select(x => partyFactory.Make(x).Name).Concatenate("; ");
+                    occurrence.IdentifiedBy = identification.GetMaps("identifiers").Where(x => x != null).Select(MakePartyName).Concatenate(" | ");
 
                 var taxonomy = identification.GetMap("taxa");
                 if (taxonomy != null)
@@ -260,7 +253,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                                     taxonomy.GetCleanString("ClaSuperfamily"),
                                     taxonomy.GetCleanString("ClaFamily"),
                                     taxonomy.GetCleanString("ClaSubfamily")
-                                }.Concatenate(";");
+                                }.Concatenate(" | ");
 
                     occurrence.TaxonRank = new Dictionary<string, string>
                             {
@@ -301,15 +294,103 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 }
             }
 
-            occurrence.Images = imageFactory.Make(map.GetMaps("media")).ToList();
-            
-            foreach (var image in occurrence.Images)
+            // Tissue extension fields
+            if (map.GetTrimString("ColTypeOfItem") == "Specimen" && map.GetTrimString("ColRegPrefix") == "Z")
             {
-                image.CoreID = occurrence.OccurrenceID;
-                image.References = $"http://collections.museumvictoria.com.au/specimens/{irn}";
+                // Loan
+                var locationMap = map.GetMap("location");
+                if (map.GetString("ManOnLoan") == "Yes")
+                    occurrence.Disposition = "On Loan";
+                else if (locationMap != null && (locationMap.GetLong("irn") == 294982 || locationMap.GetLong("irn") == 294981))
+                    occurrence.Disposition = "Missing";
+                else if (map.GetString("TisTissueUsedUp") == "Yes" || map.GetString("GneDnaUsedUp") == "Yes")
+                    occurrence.Disposition = "Used";
+                else
+                    occurrence.Disposition = "In collection";
+
+                if (map.GetString("TisAvailableForLoan") == "No")
+                    occurrence.Blocked = "Not available for loan";
+                else if (map.GetString("TisAvailableForLoan") == "Yes")
+                    occurrence.Blocked = "Available for loan";
+
+                // Material Sample
+                occurrence.MaterialSampleType = "Tissue";
+
+                // Preparation
+                occurrence.PreparationType = map.GetMaps("tissue").Select(x => x.GetString("TisTissueType_tab")).Concatenate(" | ");
+                occurrence.PreparationMaterials = map.GetMaps("preparations")
+                    .Select(x => new[]
+                    {
+                        x.GetString("StrFixativeTreatment_tab"),
+                    })
+                    .Concat(map.GetMaps("tissue")
+                        .Select(x => new[]
+                        {
+                            x.GetString("TisInitialPreservation_tab"),
+                        }))
+                    .SelectMany(x => x)
+                    .Distinct()
+                    .Where(x => !string.Equals(x, "none", StringComparison.OrdinalIgnoreCase))
+                    .Concatenate(" | ");
+                if (map.GetMaps("preparedby") != null)
+                    occurrence.PreparedBy = map.GetMaps("preparedby").Select(MakePartyName).Concatenate(" | ");
+                occurrence.PreparationDate = occurrence.PreservationDateBegin;
+
+                // Preservation
+                occurrence.PreservationType = map.GetMaps("preparations")
+                    .Select(x => new[]
+                    {
+                        x.GetString("StrFixativeTreatment_tab"),
+                        x.GetString("StrStorageMedium_tab")
+                    })
+                    .Concat(map.GetMaps("tissue")
+                        .Select(x => new[]
+                        {
+                            x.GetString("TisInitialPreservation_tab"),
+                        }))
+                    .SelectMany(x => x)
+                    .Distinct()
+                    .Where(x => !string.Equals(x, "none", StringComparison.OrdinalIgnoreCase))
+                    .Concatenate(" | ");
+                occurrence.PreservationTemperature = map.GetMaps("tissue").Select(x => x.GetString("TisLtStorageMethod_tab")).Distinct().Concatenate(" | ");
+                if (DateTime.TryParseExact(
+                    string.IsNullOrWhiteSpace(map.GetMaps("tissue").FirstOrDefault()?.GetString("TisDatePrepared0")) ? map.GetMaps("preparations").FirstOrDefault()?.GetString("StrDatePrepared0") : map.GetMaps("tissue").FirstOrDefault()?.GetString("TisDatePrepared0"),
+                    new[] { "dd/MM/yyyy", "dd/MM/yy" }, new CultureInfo("en-AU"), DateTimeStyles.None, out var preservationDateBegin))
+                {
+                    occurrence.PreservationDateBegin = preservationDateBegin.ToString("s");
+                }
+
+                // Resource Relationship
+                var parentMap = map.GetMap("parent");
+                if (parentMap != null && parentMap.GetTrimStrings("MdaDataSets_tab").Contains("Atlas of Living Australia"))
+                {
+                    occurrence.RelatedResourceId = MakeOccurrenceId(parentMap);
+                    occurrence.RelationshipOfResource = "same individual";
+                }
+                else if (!string.IsNullOrWhiteSpace(map.GetTrimString("TisCollectionCode")) ||
+                         !string.IsNullOrWhiteSpace(map.GetTrimString("TisOtherInstitutionNo")) ||
+                         !string.IsNullOrWhiteSpace(map.GetTrimString("TisRegistrationNumber")))
+                {
+                    occurrence.RelatedResourceId = new[]
+                    {
+                        map.GetTrimString("TisOtherInstitutionNo"),
+                        map.GetTrimString("TisCollectionCode"),
+                        map.GetTrimString("TisRegistrationNumber")
+                    }.Concatenate(":");
+                    occurrence.RelationshipOfResource = "same individual";
+                }
             }
 
-            occurrence.AssociatedMedia = occurrence.Images.Select(x => x.Identifier).Concatenate(";");
+            // Multimedia extension fields
+            occurrence.Multimedia = multimediaFactory.Make(map.GetMaps("media")).ToList();
+            
+            foreach (var multimedia in occurrence.Multimedia)
+            {
+                multimedia.CoreId = occurrence.OccurrenceId;
+                multimedia.References = $"https://collections.museumvictoria.com.au/specimens/{map.GetLong("irn")}";
+            }
+
+            occurrence.AssociatedMedia = MakeAssociatedMedia(map.GetMaps("media"));
 
             return occurrence;
         }
@@ -317,6 +398,125 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
         public IEnumerable<Occurrence> Make(IEnumerable<Map> maps)
         {
             return maps.Select(Make);
+        }
+
+        private string MakePartyName(Map map)
+        {
+            if (map == null) return null;
+
+            switch (map.GetTrimString("NamPartyType"))
+            {
+                case "Collaboration":
+                    return new[]
+                    {
+                        map.GetTrimString("ColCollaborationName")
+                    }.Concatenate(", ");
+                case "Cutter Number":
+                    return new[]
+                    {
+                        map.GetTrimString("NamBranch"),
+                        map.GetTrimString("NamDepartment"),
+                        map.GetTrimString("NamOrganisation"),
+                        map.GetTrimString("AddPhysStreet"),
+                        map.GetTrimString("AddPhysCity"),
+                        map.GetTrimString("AddPhysState"),
+                        map.GetTrimString("AddPhysCountry")
+                    }.Concatenate(", ");
+                case "Organisation":
+                    return new[]
+                    {
+                        map.GetTrimString("NamBranch"),
+                        map.GetTrimString("NamDepartment"),
+                        map.GetTrimString("NamOrganisation")
+                    }.Concatenate(", ");
+                case "Person":
+                    return new[]
+                    {
+                        map.GetTrimString("NamFullName"),
+                        map.GetTrimString("NamOrganisation")
+                    }.Concatenate(" - ");
+                case "Position":
+                    break;
+                case "Transport":
+                    var name = string.Empty;
+                    var organisationOtherName = map.GetTrimStrings("NamOrganisationOtherNames_tab").FirstOrDefault();
+                    var source = map.GetTrimString("NamSource");
+
+                    if (string.IsNullOrWhiteSpace(organisationOtherName) && !string.IsNullOrWhiteSpace(source))
+                    {
+                        name = source;
+                    }
+                    else if (!string.IsNullOrWhiteSpace(organisationOtherName) && string.IsNullOrWhiteSpace(source))
+                    {
+                        name = organisationOtherName;
+                    }
+                    else if (!string.IsNullOrWhiteSpace(organisationOtherName) && !string.IsNullOrWhiteSpace(source))
+                    {
+                        name = $"{organisationOtherName} ({source})";
+                    }
+
+                    return new[]
+                    {
+                        name,
+                        map.GetTrimString("NamFullName"),
+                        map.GetTrimString("NamOrganisation")
+                    }.Concatenate(", ");
+            }
+
+            return null;
+        }
+
+        private string MakeBasisOfRecord(Map map)
+        {
+            if (map.GetTrimString("ColTypeOfItem") == "Specimen")
+            {
+                return map.GetTrimString("ColRegPrefix") == "Z" ? "MaterialSample" : "PreservedSpecimen";
+            }
+            if (map.GetTrimString("ColTypeOfItem") == "Audiovisual" || map.GetTrimString("ColTypeOfItem") == "Image")
+                return "HumanObservation";
+            
+            return null;
+        }
+
+        private string MakeOccurrenceId(Map map)
+        {
+            return new[]
+            {
+                "urn",
+                "lsid",
+                "ozcam.taxonomy.org.au",
+                "NMV",
+                map.GetTrimString("ColDiscipline"),
+                MakeBasisOfRecord(map),
+                MakeCatalogNumber(map),
+            }.Concatenate(":");
+        }
+
+        private string MakeCatalogNumber(Map map)
+        {
+            return string.IsNullOrWhiteSpace(map.GetTrimString("ColRegPart"))
+                ? $"{map.GetTrimString("ColRegPrefix")}{map.GetTrimString("ColRegNumber")}"
+                : $"{map.GetTrimString("ColRegPrefix")}{map.GetTrimString("ColRegNumber")}-{map.GetTrimString("ColRegPart")}";
+        }
+
+        private string MakeAssociatedMedia(Map[] maps)
+        {
+            return maps.Select(map =>
+            {
+                if (map != null &&
+                    string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "yes",
+                        StringComparison.OrdinalIgnoreCase) &&
+                    map.GetTrimStrings("MdaDataSets_tab").Contains("Atlas of Living Australia") &&
+                    map.GetTrimStrings("MdaDataSets_tab").Contains("Collections Online: MMR") &&
+                    string.Equals(map.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
+                {
+                    var irn = map.GetLong("irn");
+
+                    return $"https://collections.museumvictoria.com.au/content/media/{(irn % 50)}/{irn}-large.jpg";
+                }
+
+                return null;
+            }).Concatenate(" | ");
         }
     }
 }
