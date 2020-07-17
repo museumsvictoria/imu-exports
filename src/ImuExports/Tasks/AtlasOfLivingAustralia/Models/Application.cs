@@ -2,9 +2,9 @@
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia.Models
 {
-    class Application
+    public class AtlasOfLivingAustraliaApplication
     {
-        public string Id => "application";
+        public string Id => "application/atlas-of-living-australia";
         public DateTime? PreviousDateRun { get; set; }
     }
 }

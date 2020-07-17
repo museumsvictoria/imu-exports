@@ -6,9 +6,11 @@ using ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 using Serilog;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
+using LiteDB;
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia
 {
@@ -115,16 +117,33 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                 }
 
                 // Copy meta.xml
+                Log.Logger.Information("Copying meta.xml");
                 File.Copy(@"meta.xml", GlobalOptions.Options.Ala.Destination + @"meta.xml", true);
+                
+                OnCompleted();
             }
         }
 
         private void Cleanup()
         {
-            // Remove any temporary files and directory
+            // Remove any temporary files and directory if running automated export
             if (GlobalOptions.Options.Ala.IsAutomated)
             {
                 Directory.Delete(GlobalOptions.Options.Ala.Destination, true);
+            }
+        }
+
+        private void OnCompleted()
+        {
+            // Update/Insert application
+            using (var db = new LiteRepository(ConfigurationManager.ConnectionStrings["LiteDB"].ConnectionString))
+            {
+                var application = GlobalOptions.Options.Ala.Application;
+
+                if (application != null)
+                {
+                    db.Upsert(application);
+                }
             }
         }
 
