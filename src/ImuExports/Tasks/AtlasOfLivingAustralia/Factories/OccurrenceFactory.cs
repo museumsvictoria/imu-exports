@@ -387,7 +387,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             foreach (var multimedia in occurrence.Multimedia)
             {
                 multimedia.CoreId = occurrence.OccurrenceId;
-                multimedia.References = $"https://collections.museumvictoria.com.au/specimens/{map.GetLong("irn")}";
+                multimedia.References = $"https://collections.museumsvictoria.com.au/specimens/{map.GetLong("irn")}";
             }
 
             occurrence.AssociatedMedia = MakeAssociatedMedia(map.GetMaps("media"));

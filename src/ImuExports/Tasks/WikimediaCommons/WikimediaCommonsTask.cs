@@ -19,7 +19,7 @@ namespace ImuExports.Tasks.WikimediaCommons
                 var items = new List<Item>();
 
                 // Fetch Data
-                var client = new RestClient("http://collections.museumvictoria.com.au/api/");
+                var client = new RestClient("https://collections.museumsvictoria.com.au/api/");
                 var request = new RestRequest("search", Method.GET);
                 request.AddQueryParameter("collection", "Tangyes Lantern Slide Collection");
                 request.AddQueryParameter("perpage", "100");
