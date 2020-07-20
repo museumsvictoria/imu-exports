@@ -59,7 +59,6 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                     else
                     {
                         ParsedModifiedAfterDate = this.Application.PreviousDateRun;
-                        this.Application.PreviousDateRun = DateTime.Now;
                         Log.Logger.Information("AtlasOfLivingAustralia Application found");
                         
                         Log.Logger.Information("Setting ParsedModifiedAfterDate to application.PreviousDateRun {ParsedModifiedAfterDate}", ParsedModifiedAfterDate?.ToString("yyyy-MM-dd"));

@@ -1,4 +1,5 @@
-﻿using CsvHelper;
+﻿using System;
+using CsvHelper;
 using IMu;
 using ImuExports.Config;
 using ImuExports.Infrastructure;
@@ -8,8 +9,11 @@ using Serilog;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using CommandLine;
+using ImuExports.Extensions;
 using LiteDB;
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia
@@ -120,6 +124,38 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                 Log.Logger.Information("Copying meta.xml");
                 File.Copy(@"meta.xml", GlobalOptions.Options.Ala.Destination + @"meta.xml", true);
                 
+                // Compress files
+                if (GlobalOptions.Options.Ala.IsAutomated)
+                {
+                    var zipFilename = GlobalOptions.Options.Ala.ParsedModifiedAfterDate.HasValue
+                        ? $"mv-dwca-{GlobalOptions.Options.Ala.ParsedModifiedAfterDate:yyyy-MM-dd}-to-{DateTime.Now:yyyy-MM-dd}.zip"
+                        : $"mv-dwca-{DateTime.Now:yyyy-MM-dd}.zip";
+                            
+                    var tempFilepath = $"{Path.GetTempPath()}{Utils.RandomString(8)}.tmp";
+                    
+                    try
+                    {
+                        // Zip Directory
+                        ZipFile.CreateFromDirectory(GlobalOptions.Options.Ala.Destination, tempFilepath);
+                        
+                        // Delete uncompressed files
+                        Directory.EnumerateFiles(GlobalOptions.Options.Ala.Destination).ToList().ForEach(File.Delete);
+                        
+                        // Move zip file
+                        File.Move(tempFilepath, $"{GlobalOptions.Options.Ala.Destination}{zipFilename}");
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log and cleanup before exit
+                        Log.Logger.Fatal(ex, "Error creating zip archive");
+                        Cleanup();
+                        Environment.Exit(Parser.DefaultExitCodeFail);
+                    }
+                }
+                
+                // Upload files
+                
+                
                 OnCompleted();
             }
         }
@@ -129,6 +165,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
             // Remove any temporary files and directory if running automated export
             if (GlobalOptions.Options.Ala.IsAutomated)
             {
+                Log.Logger.Information("Deleting temporary directory {Destination}", GlobalOptions.Options.Ala.Destination);
                 Directory.Delete(GlobalOptions.Options.Ala.Destination, true);
             }
         }
@@ -139,9 +176,10 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
             using (var db = new LiteRepository(ConfigurationManager.ConnectionStrings["LiteDB"].ConnectionString))
             {
                 var application = GlobalOptions.Options.Ala.Application;
-
+                
                 if (application != null)
                 {
+                    application.PreviousDateRun = DateTime.Now;
                     db.Upsert(application);
                 }
             }
