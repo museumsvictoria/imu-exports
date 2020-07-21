@@ -8,6 +8,7 @@ using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 using Serilog;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -15,6 +16,8 @@ using System.Text;
 using CommandLine;
 using ImuExports.Extensions;
 using LiteDB;
+using Renci.SshNet;
+using FileMode = System.IO.FileMode;
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia
 {
@@ -22,6 +25,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
     {
         private readonly IFactory<Occurrence> occurrenceFactory;
         private readonly IEnumerable<IModuleSearchConfig> moduleSearchConfigs;
+        private readonly AtlasOfLivingAustraliaOptions options = GlobalOptions.Options.Ala;
 
         public AtlasOfLivingAustraliaTask(
             IFactory<Occurrence> occurrenceFactory,
@@ -38,8 +42,8 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                 // Cache Irns
                 var cachedIrns = new List<long>();
 
-                if (GlobalOptions.Options.Ala.ParsedModifiedAfterDate.HasValue ||
-                    GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.HasValue)
+                if (this.options.ParsedModifiedAfterDate.HasValue ||
+                    this.options.ParsedModifiedBeforeDate.HasValue)
                 {
                     foreach (var moduleSearchConfig in this.moduleSearchConfigs)
                     {
@@ -81,7 +85,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                             .Skip(offset)
                             .Take(Constants.DataBatchSize)
                             .ToList();
-
+                        
                         if (cachedIrnsBatch.Count == 0)
                             break;
 
@@ -101,7 +105,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
 
                 // Save data
                 Log.Logger.Information("Saving occurrence data as csv");
-                using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"occurrences.csv", false, Encoding.UTF8)))
+                using (var csvWriter = new CsvWriter(new StreamWriter(this.options.Destination + @"occurrences.csv", false, Encoding.UTF8)))
                 {
                     csvWriter.Configuration.RegisterClassMap<OccurrenceClassMap>();
                     csvWriter.Configuration.HasHeaderRecord = true;
@@ -110,7 +114,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                 }
 
                 Log.Logger.Information("Saving multimedia data as csv");
-                using (var csvWriter = new CsvWriter(new StreamWriter(GlobalOptions.Options.Ala.Destination + @"multimedia.csv", false, Encoding.UTF8)))
+                using (var csvWriter = new CsvWriter(new StreamWriter(this.options.Destination + @"multimedia.csv", false, Encoding.UTF8)))
                 {
                     var multimedia = occurrences.SelectMany(x => x.Multimedia);
 
@@ -122,27 +126,65 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
 
                 // Copy meta.xml
                 Log.Logger.Information("Copying meta.xml");
-                File.Copy(@"meta.xml", GlobalOptions.Options.Ala.Destination + @"meta.xml", true);
+                File.Copy(@"meta.xml", this.options.Destination + @"meta.xml", true);
                 
-                // Compress files
-                if (GlobalOptions.Options.Ala.IsAutomated)
+                // Compress/Upload files to ALA if automated export
+                if (this.options.IsAutomated)
                 {
-                    var zipFilename = GlobalOptions.Options.Ala.ParsedModifiedAfterDate.HasValue
-                        ? $"mv-dwca-{GlobalOptions.Options.Ala.ParsedModifiedAfterDate:yyyy-MM-dd}-to-{DateTime.Now:yyyy-MM-dd}.zip"
-                        : $"mv-dwca-{DateTime.Now:yyyy-MM-dd}.zip";
+                    // Determine filename
+                    string startDate = null; 
+                    string endDate;
+
+                    if (this.options.ParsedModifiedAfterDate.HasValue)
+                    {
+                        startDate = this.options.ParsedModifiedAfterDate?.ToString("yyyy-MM-dd");
+                    }
+                    
+                    if (this.options.ParsedModifiedBeforeDate.HasValue)
+                    {
+                        endDate =
+                            this.options.ParsedModifiedBeforeDate <=
+                            this.options.DateStarted
+                                ? this.options.ParsedModifiedBeforeDate?.ToString("yyyy-MM-dd")
+                                : this.options.DateStarted.ToString("yyyy-MM-dd");
+                    }
+                    else
+                    {
+                        endDate = this.options.DateStarted.ToString("yyyy-MM-dd");
+                    }
+                    
+                    var zipFilename = startDate != null ? 
+                         $"mv-dwca-{startDate}-to-{endDate}.zip"
+                        : $"mv-dwca-{endDate}.zip";
                             
                     var tempFilepath = $"{Path.GetTempPath()}{Utils.RandomString(8)}.tmp";
+                    var stopwatch = Stopwatch.StartNew();
                     
                     try
                     {
                         // Zip Directory
-                        ZipFile.CreateFromDirectory(GlobalOptions.Options.Ala.Destination, tempFilepath);
-                        
+                        ZipFile.CreateFromDirectory(this.options.Destination, tempFilepath,
+                            CompressionLevel.NoCompression, true);
+                        Log.Logger.Information(
+                            "Created temporary zip file {tempFilepath} in {Elapsed} ({ElapsedMilliseconds} ms)",
+                            tempFilepath,
+                            stopwatch.Elapsed, stopwatch.ElapsedMilliseconds);
+
+
                         // Delete uncompressed files
-                        Directory.EnumerateFiles(GlobalOptions.Options.Ala.Destination).ToList().ForEach(File.Delete);
-                        
+                        stopwatch.Restart();
+                        Directory.EnumerateFiles(this.options.Destination).ToList().ForEach(File.Delete);
+                        Log.Logger.Information(
+                            "Deleted uncompressed files in {Destination} in {Elapsed} ({ElapsedMilliseconds} ms)",
+                            this.options.Destination, stopwatch.Elapsed, stopwatch.ElapsedMilliseconds);
+
                         // Move zip file
-                        File.Move(tempFilepath, $"{GlobalOptions.Options.Ala.Destination}{zipFilename}");
+                        stopwatch.Restart();
+                        File.Move(tempFilepath, $"{this.options.Destination}{zipFilename}");
+                        Log.Logger.Information(
+                            "Moved zip file {zipFilename} to {Destination} in {Elapsed} ({ElapsedMilliseconds} ms)",
+                            zipFilename, this.options.Destination, stopwatch.Elapsed,
+                            stopwatch.ElapsedMilliseconds);
                     }
                     catch (Exception ex)
                     {
@@ -151,37 +193,65 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                         Cleanup();
                         Environment.Exit(Parser.DefaultExitCodeFail);
                     }
+
+                    try
+                    {
+                        // Upload files
+                        using (var client = new SftpClient(ConfigurationManager.AppSettings["AtlasOfLivingAustralia:SFTP:Host"],
+                            22, ConfigurationManager.AppSettings["AtlasOfLivingAustralia:SFTP:Username"],
+                            ConfigurationManager.AppSettings["AtlasOfLivingAustralia:SFTP:Password"]))
+                        {
+                            Log.Logger.Information("Connecting to sftp server {Host}", ConfigurationManager.AppSettings["AtlasOfLivingAustralia:SFTP:Host"]);
+                            client.Connect();
+                            
+                            stopwatch.Restart();
+                            using (var fileStream = new FileStream($"{this.options.Destination}{zipFilename}", FileMode.Open))
+                            {
+                                Log.Logger.Information(
+                                    "Uploading zip {zipFilename} ({Length})", zipFilename, Utils.BytesToString(fileStream.Length));
+                                client.BufferSize = 4 * 1024; // bypass Payload error large files
+                                client.UploadFile(fileStream, zipFilename);
+                            }
+                            stopwatch.Stop();
+                            Log.Logger.Information(
+                                "Uploaded {zipFilename} in {Elapsed} ({ElapsedMilliseconds} ms)",
+                                zipFilename, stopwatch.Elapsed, stopwatch.ElapsedMilliseconds);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log and cleanup before exit
+                        Log.Logger.Fatal(ex, "Error uploading zip archive");
+                        Cleanup();
+                        Environment.Exit(Parser.DefaultExitCodeFail);
+                    }
+
+                    // Update/Insert application
+                    using (var db = new LiteRepository(ConfigurationManager.ConnectionStrings["LiteDB"].ConnectionString))
+                    {
+                        var application = this.options.Application;
+                
+                        if (application != null)
+                        {
+                            Log.Logger.Information("Updating ALA Application PreviousDateRun {PreviousDateRun} to {DateStarted}", application.PreviousDateRun, this.options.DateStarted);
+                            application.PreviousDateRun = this.options.DateStarted;
+                            db.Upsert(application);
+                        }
+                    }
+                    
+                    // Finished successfully so run cleanup
+                    Cleanup();
                 }
-                
-                // Upload files
-                
-                
-                OnCompleted();
             }
         }
 
         private void Cleanup()
         {
             // Remove any temporary files and directory if running automated export
-            if (GlobalOptions.Options.Ala.IsAutomated)
+            if (options.IsAutomated)
             {
-                Log.Logger.Information("Deleting temporary directory {Destination}", GlobalOptions.Options.Ala.Destination);
-                Directory.Delete(GlobalOptions.Options.Ala.Destination, true);
-            }
-        }
-
-        private void OnCompleted()
-        {
-            // Update/Insert application
-            using (var db = new LiteRepository(ConfigurationManager.ConnectionStrings["LiteDB"].ConnectionString))
-            {
-                var application = GlobalOptions.Options.Ala.Application;
-                
-                if (application != null)
-                {
-                    application.PreviousDateRun = DateTime.Now;
-                    db.Upsert(application);
-                }
+                Log.Logger.Information("Deleting temporary directory {Destination}", options.Destination);
+                Directory.Delete(options.Destination, true);
             }
         }
 
@@ -192,14 +262,14 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
             searchTerms.Add("MdaDataSets_tab", "Atlas of Living Australia");
             searchTerms.Add("AdmPublishWebNoPassword", "Yes");
 
-            if (GlobalOptions.Options.Ala.ParsedModifiedAfterDate.HasValue)
+            if (options.ParsedModifiedAfterDate.HasValue)
             {
-                searchTerms.Add("AdmDateModified", GlobalOptions.Options.Ala.ParsedModifiedAfterDate.Value.ToString("MMM dd yyyy"), ">=");
+                searchTerms.Add("AdmDateModified", options.ParsedModifiedAfterDate.Value.ToString("MMM dd yyyy"), ">=");
             }
 
-            if (GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.HasValue)
+            if (options.ParsedModifiedBeforeDate.HasValue)
             {
-                searchTerms.Add("AdmDateModified", GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.Value.ToString("MMM dd yyyy"), "<=");
+                searchTerms.Add("AdmDateModified", options.ParsedModifiedBeforeDate.Value.ToString("MMM dd yyyy"), "<=");
             }
 
             return searchTerms;

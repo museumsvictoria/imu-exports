@@ -33,6 +33,13 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
         
         public AtlasOfLivingAustraliaApplication Application { get; set; }
 
+        public DateTime DateStarted { get; private set; }
+        
+        public AtlasOfLivingAustraliaOptions()
+        {
+            DateStarted = DateTime.Now;
+        }
+
         public void Initialize()
         {
             Log.Logger.Information("Initializing {TypeOfTask}", TypeOfTask);
@@ -53,7 +60,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
 
                     if (this.Application == null)
                     {
-                        this.Application = new AtlasOfLivingAustraliaApplication { PreviousDateRun = DateTime.Now };
+                        this.Application = new AtlasOfLivingAustraliaApplication();
                         Log.Logger.Information("No AtlasOfLivingAustralia Application found... creating new application");
                     }
                     else
