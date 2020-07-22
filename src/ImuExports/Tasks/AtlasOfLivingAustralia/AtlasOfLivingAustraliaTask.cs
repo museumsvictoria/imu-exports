@@ -164,12 +164,11 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
                     {
                         // Zip Directory
                         ZipFile.CreateFromDirectory(this.options.Destination, tempFilepath,
-                            CompressionLevel.NoCompression, true);
+                            CompressionLevel.NoCompression, false);
                         Log.Logger.Information(
                             "Created temporary zip file {tempFilepath} in {Elapsed} ({ElapsedMilliseconds} ms)",
                             tempFilepath,
                             stopwatch.Elapsed, stopwatch.ElapsedMilliseconds);
-
 
                         // Delete uncompressed files
                         stopwatch.Restart();
