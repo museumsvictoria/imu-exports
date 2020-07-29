@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using IMu;
+using ImuExports.Config;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
+using ImuExports.Tasks.AtlasOfLivingAustralia.Config;
+using ImuExports.Tasks.AtlasOfLivingAustralia.Helpers;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
@@ -36,17 +39,8 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     occurrence.DctermsType = "Event";
                     break;
             }
-
-            if (DateTime.TryParseExact(
-                $"{map.GetTrimString("AdmDateModified")} {map.GetTrimString("AdmTimeModified")}",
-                "dd/MM/yyyy HH:mm",
-                new CultureInfo("en-AU"),
-                DateTimeStyles.None,
-                out var dctermsModified))
-            {
-                occurrence.DctermsModified = dctermsModified.ToString("s");
-            }
             
+            occurrence.DctermsModified = MakeDctermsModified(map);
             occurrence.DctermsLanguage = "en";
             occurrence.DctermsLicense = "https://creativecommons.org/publicdomain/zero/1.0/legalcode";
             occurrence.DctermsRightsHolder = "Museums Victoria";
@@ -140,10 +134,8 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             occurrence.Day = map.GetTrimString("DarDayCollected");
 
             var site = map.GetMap("site");
-
             if (site == null && colevent != null)
                 site = colevent.GetMap("site");
-
             if (site != null)
             {
                 if (!string.IsNullOrWhiteSpace(site.GetTrimString("SitSiteCode")) || !string.IsNullOrWhiteSpace(site.GetTrimString("SitSiteNumber")))
@@ -199,14 +191,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 }
             }
 
-            var types = new[] { "holotype", "lectotype", "neotype", "paralectotype", "paratype", "syntype", "type" };
-            var identification =
-                (map.GetMaps("identifications")
-                    .FirstOrDefault(x => (x.GetTrimString("IdeTypeStatus_tab") != null && types.Contains(x.GetTrimString("IdeTypeStatus_tab").Trim().ToLower()))) ??
-                 map.GetMaps("identifications")
-                     .FirstOrDefault(x => (x.GetTrimString("IdeCurrentNameLocal_tab") != null && x.GetTrimString("IdeCurrentNameLocal_tab").Trim().ToLower() == "yes"))) ??
-                map.GetMaps("identifications").FirstOrDefault(x => x != null);
-
+            var identification = MapSearches.GetIdentification(map);
             if (identification != null)
             {
                 occurrence.TypeStatus = identification.GetTrimString("IdeTypeStatus_tab");
@@ -362,7 +347,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 
                 // Resource Relationship
                 var parentMap = map.GetMap("parent");
-                if (parentMap != null && parentMap.GetTrimStrings("MdaDataSets_tab").Contains("Atlas of Living Australia"))
+                if (parentMap != null && parentMap.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.QueryString))
                 {
                     occurrence.RelatedResourceId = MakeOccurrenceId(parentMap);
                     occurrence.RelationshipOfResource = "same individual";
@@ -506,7 +491,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 if (map != null &&
                     string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "yes",
                         StringComparison.OrdinalIgnoreCase) &&
-                    map.GetTrimStrings("MdaDataSets_tab").Contains("Atlas of Living Australia") &&
+                    map.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.QueryString) &&
                     map.GetTrimStrings("MdaDataSets_tab").Contains("Collections Online: MMR") &&
                     string.Equals(map.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
                 {
@@ -517,6 +502,86 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 
                 return null;
             }).Concatenate(" | ");
+        }
+        
+        private string MakeDctermsModified(Map map)
+        {
+            var datesModified = new List<DateTime>();
+            
+            // Catalogue
+            if (DateTime.TryParseExact(
+                $"{map.GetTrimString("AdmDateModified")} {map.GetTrimString("AdmTimeModified")}",
+                "dd/MM/yyyy HH:mm",
+                new CultureInfo("en-AU"),
+                DateTimeStyles.None,
+                out var catalogueDateModified))
+            {
+                datesModified.Add(catalogueDateModified);
+            }
+            
+            // Collection Event
+            var colevent = map.GetMap("colevent");
+            
+            if (colevent != null &&
+                DateTime.TryParseExact(
+                    $"{colevent.GetTrimString("AdmDateModified")} {colevent.GetTrimString("AdmTimeModified")}",
+                    "dd/MM/yyyy HH:mm",
+                    new CultureInfo("en-AU"),
+                    DateTimeStyles.None,
+                    out var coleventDateModified))
+            {
+                datesModified.Add(coleventDateModified);
+            }
+            
+            // Site
+            var site = map.GetMap("site");
+            if (site == null && colevent != null)
+                site = colevent.GetMap("site");
+            
+            if (site != null &&
+                DateTime.TryParseExact(
+                    $"{site.GetTrimString("AdmDateModified")} {site.GetTrimString("AdmTimeModified")}",
+                    "dd/MM/yyyy HH:mm",
+                    new CultureInfo("en-AU"),
+                    DateTimeStyles.None,
+                    out var siteDateModified))
+            {
+                datesModified.Add(siteDateModified);
+            }
+            
+            // Media
+            var medias = map.GetMaps("media");
+            
+            foreach (var media in medias)
+            {
+                if (Assertions.IsMultimedia(media) &&
+                    DateTime.TryParseExact(
+                        $"{media.GetTrimString("AdmDateModified")} {media.GetTrimString("AdmTimeModified")}",
+                        "dd/MM/yyyy HH:mm",
+                        new CultureInfo("en-AU"),
+                        DateTimeStyles.None,
+                        out var mediaDateModified))
+                {
+                    datesModified.Add(mediaDateModified);
+                }
+            }
+
+            // Taxonomy
+            var identification = MapSearches.GetIdentification(map);
+            var taxonomy = identification?.GetMap("taxa");
+            
+            if (taxonomy != null &&
+                DateTime.TryParseExact(
+                    $"{taxonomy.GetTrimString("AdmDateModified")} {taxonomy.GetTrimString("AdmTimeModified")}",
+                    "dd/MM/yyyy HH:mm",
+                    new CultureInfo("en-AU"),
+                    DateTimeStyles.None,
+                    out var taxonomyDateModified))
+            {
+                datesModified.Add(taxonomyDateModified);
+            }
+
+            return datesModified.Max().ToString("s");
         }
     }
 }

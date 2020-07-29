@@ -7,6 +7,8 @@ namespace ImuExports.Infrastructure
     public interface IModuleSearchConfig
     {
         string ModuleName { get; }
+        
+        string ModuleSelectName { get; }
 
         string[] Columns { get; }
 

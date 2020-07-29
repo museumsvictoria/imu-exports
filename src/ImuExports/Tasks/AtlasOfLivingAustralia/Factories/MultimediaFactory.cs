@@ -8,6 +8,8 @@ using ImuExports.Config;
 using IMu;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
+using ImuExports.Tasks.AtlasOfLivingAustralia.Config;
+using ImuExports.Tasks.AtlasOfLivingAustralia.Helpers;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 using ImuExports.Utilities;
 using Serilog;
@@ -18,10 +20,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
     {
         public Multimedia Make(Map map)
         {
-            if (map != null &&
-                string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase) &&
-                map.GetTrimStrings("MdaDataSets_tab").Any(x => x.Contains("Atlas of Living Australia")) &&
-                string.Equals(map.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
+            if (Assertions.IsMultimedia(map))
             {
                 var irn = map.GetLong("irn");
 

@@ -8,9 +8,11 @@ using IMu;
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
 {
-    class MultimediaModuleSearchConfig : IModuleSearchConfig
+    public class MultimediaModuleSearchConfig : IModuleSearchConfig
     {
         string IModuleSearchConfig.ModuleName => "emultimedia";
+
+        string IModuleSearchConfig.ModuleSelectName => "catalogue";
 
         string[] IModuleSearchConfig.Columns => new[]
         {
@@ -30,7 +32,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
                 {
                     terms.Add("AdmDateModified", GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.Value.ToString("MMM dd yyyy"), "<=");
                 }
-                terms.Add("MdaDataSets_tab", "Atlas of Living Australia");
+                terms.Add("MdaDataSets_tab", AtlasOfLivingAustraliaConstants.QueryString);
                 terms.Add("AdmPublishWebNoPassword", "Yes");
 
                 return terms;
