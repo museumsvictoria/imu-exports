@@ -5,16 +5,20 @@ using ImuExports.Infrastructure;
 using ImuExports.Config;
 using ImuExports.Extensions;
 using IMu;
+using ImuExports.Tasks.AtlasOfLivingAustralia.Helpers;
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
 {
     class TaxonomyModuleSearchConfig : IModuleSearchConfig
     {
         string IModuleSearchConfig.ModuleName => "etaxonomy";
+        
+        string IModuleSearchConfig.ModuleSelectName => "catalogue";
 
         string[] IModuleSearchConfig.Columns => new[]
         {
-            "cat=<ecatalogue:TaxTaxonomyRef_tab>.(irn,MdaDataSets_tab,AdmPublishWebNoPassword)"
+            "irn",
+            "cat=<ecatalogue:TaxTaxonomyRef_tab>.(irn,MdaDataSets_tab,AdmPublishWebNoPassword,identifications=[IdeTypeStatus_tab,IdeCurrentNameLocal_tab,taxa=TaxTaxonomyRef_tab.(irn)])"
         };
 
         Terms IModuleSearchConfig.Terms
@@ -35,10 +39,26 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
             }
         }
 
-        Func<Map, IEnumerable<long>> IModuleSearchConfig.IrnSelectFunc => map => map
-            .GetMaps("cat")
-            .Where(x => x != null && x.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.QueryString) && string.Equals(x.GetTrimString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase))
-            .Select(x => x.GetLong("irn"))
-            .ToList();
+        Func<Map, IEnumerable<long>> IModuleSearchConfig.IrnSelectFunc => map =>
+        {
+            var irns = new List<long>();
+            foreach (var cat in map.GetMaps("cat"))
+            {
+                if (cat != null &&
+                    cat.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.QueryString) &&
+                    string.Equals(cat.GetTrimString("AdmPublishWebNoPassword"), "yes",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    var identification = MapSearches.GetIdentification(cat);
+                    var taxonomy = identification?.GetMap("taxa");
+
+                    if (taxonomy != null && taxonomy.GetLong("irn") == map.GetLong("irn"))
+                    {
+                        irns.Add(cat.GetLong("irn"));
+                    }
+                }
+            }
+            return irns;
+        };
     }
 }

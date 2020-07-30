@@ -26,6 +26,7 @@ namespace ImuExports.Config
 
             // Register module search configs
             container.RegisterCollection<IModuleSearchConfig>(new[] { typeof(IModuleSearchConfig).Assembly });
+            container.RegisterCollection<IModuleDeletionsConfig>(new[] { typeof(IModuleDeletionsConfig).Assembly });
 
             // Register factories
             container.Register(typeof(IFactory<>), new[] { typeof(IFactory<>).Assembly });

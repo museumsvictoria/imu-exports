@@ -11,6 +11,8 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
     {
         string IModuleSearchConfig.ModuleName => "ecatalogue";
 
+        string IModuleSearchConfig.ModuleSelectName => "catalogue";
+
         string[] IModuleSearchConfig.Columns => new[]
         {
             "irn"
@@ -30,7 +32,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
                     terms.Add("AdmDateModified", GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.Value.ToString("MMM dd yyyy"), "<=");
                 }
                 terms.Add("ColCategory", "Natural Sciences");
-                terms.Add("MdaDataSets_tab", "Atlas of Living Australia");
+                terms.Add("MdaDataSets_tab", AtlasOfLivingAustraliaConstants.QueryString);
                 terms.Add("AdmPublishWebNoPassword", "Yes");
 
                 return terms;

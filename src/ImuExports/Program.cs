@@ -11,15 +11,15 @@ namespace ImuExports
 
         static void Main(string[] args)
         {
-            // Configure Program
-            ProgramConfig.Initialize();
-
-            // Parse command line options
-            GlobalOptions.Initialize(args);
-
             // Configure serilog
             SerilogConfig.Initialize();
             
+            // Configure Program
+            ProgramConfig.Initialize();
+
+            // Parse command line options and run any task initialization steps
+            GlobalOptions.Initialize(args);
+
             // Wire up ioc
             var container = ContainerConfig.Initialize();
 

@@ -11,6 +11,8 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
     class CollectionEventModuleSearchConfig : IModuleSearchConfig
     {
         string IModuleSearchConfig.ModuleName => "ecollectionevents";
+        
+        string IModuleSearchConfig.ModuleSelectName => "catalogue";
 
         string[] IModuleSearchConfig.Columns => new[]
         {

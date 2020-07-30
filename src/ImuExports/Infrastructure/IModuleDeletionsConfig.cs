@@ -4,16 +4,14 @@ using IMu;
 
 namespace ImuExports.Infrastructure
 {
-    public interface IModuleSearchConfig
+    public interface IModuleDeletionsConfig
     {
         string ModuleName { get; }
-        
-        string ModuleSelectName { get; }
 
         string[] Columns { get; }
 
         Terms Terms { get; }
 
-        Func<Map, IEnumerable<long>> IrnSelectFunc { get; }
+        Func<Map, IEnumerable<string>> SelectFunc { get; }
     }
 }

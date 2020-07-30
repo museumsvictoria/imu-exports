@@ -8,6 +8,8 @@ using ImuExports.Config;
 using IMu;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
+using ImuExports.Tasks.AtlasOfLivingAustralia.Config;
+using ImuExports.Tasks.AtlasOfLivingAustralia.Helpers;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 using ImuExports.Utilities;
 using Serilog;
@@ -18,10 +20,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
     {
         public Multimedia Make(Map map)
         {
-            if (map != null &&
-                string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase) &&
-                map.GetTrimStrings("MdaDataSets_tab").Any(x => x.Contains("Atlas of Living Australia")) &&
-                string.Equals(map.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
+            if (Assertions.IsMultimedia(map))
             {
                 var irn = map.GetLong("irn");
 
@@ -100,7 +99,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     var mimeFormat = resource["mimeFormat"] as string;
                     
                     using (var fileStream = resource["file"] as FileStream)
-                    using (var file = File.Open(string.Format("{0}{1}.jpg", GlobalOptions.Options.Ala.Destination, irn), FileMode.Create, FileAccess.Write))
+                    using (var file = File.Open($"{GlobalOptions.Options.Ala.Destination}{irn}.jpg", FileMode.Create, FileAccess.Write))
                     {
                         if (mimeFormat != null && mimeFormat.ToLower() == "jpeg")
                             fileStream.CopyTo(file);

@@ -47,7 +47,7 @@ namespace ImuExports.Tasks
             return cachedIrns;
         }
 
-        protected IList<long> CacheIrns(string moduleName, Terms searchTerms, string[] columns, Func<Map, IEnumerable<long>> irnSelectFunc)
+        protected IList<long> CacheIrns(string moduleName, string moduleSearchName, Terms searchTerms, string[] columns, Func<Map, IEnumerable<long>> irnSelectFunc)
         {
             var cachedIrns = new List<long>();
             var offset = 0;
@@ -55,7 +55,7 @@ namespace ImuExports.Tasks
             // Cache Irns
             using (var imuSession = ImuSessionProvider.CreateInstance(moduleName))
             {
-                Log.Logger.Information("Caching {moduleName} irns", moduleName);
+                Log.Logger.Information("Caching {moduleSearchName} irns by searching {moduleName}", moduleSearchName, moduleName);
 
                 var hits = imuSession.FindTerms(searchTerms);
 
@@ -71,18 +71,20 @@ namespace ImuExports.Tasks
                     if (results.Count == 0)
                         break;
 
-                    var irns = results.Rows.SelectMany(irnSelectFunc);
+                    var irns = results.Rows.SelectMany(irnSelectFunc).ToList();
+                    
+                    Log.Logger.Debug("Selected {irns} {moduleSearchName} irns, adding to cached irns", irns.Count, moduleSearchName);
 
                     cachedIrns.AddRange(irns);
 
                     offset += results.Count;
 
-                    Log.Logger.Information("{Name} {moduleName} cache progress... {Offset}/{TotalResults}", this.GetType().Name, moduleName, offset, hits);
+                    Log.Logger.Information("{moduleName} cache progress... {Offset}/{TotalResults}", moduleName, offset, hits);
                 }
+                
+                Log.Logger.Information("Completed caching {cachedIrns} {moduleSearchName} irns found by searching {moduleName}", cachedIrns.Count, moduleSearchName, moduleName);
             }
-
-            Log.Logger.Information("Found {CachedIrns} Cached irns in {moduleName}", cachedIrns.Count, moduleName);
-
+            
             return cachedIrns;
         }
     }
