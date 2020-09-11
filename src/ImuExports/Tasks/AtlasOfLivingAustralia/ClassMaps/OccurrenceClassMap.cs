@@ -20,7 +20,6 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps
             Map(m => m.OwnerInstitutionCode).Name("ownerInstitutionCode");
             Map(m => m.BasisOfRecord).Name("basisOfRecord");
             Map(m => m.CatalogNumber).Name("catalogNumber");
-            Map(m => m.OccurrenceRemarks).Name("occurrenceRemarks");
             Map(m => m.RecordedBy).Name("recordedBy");
             Map(m => m.IndividualCount).Name("individualCount");
             Map(m => m.Sex).Name("sex");

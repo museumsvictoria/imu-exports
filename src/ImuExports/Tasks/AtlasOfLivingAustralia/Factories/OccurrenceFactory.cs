@@ -39,7 +39,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     occurrence.DctermsType = "Event";
                     break;
             }
-            
+
             occurrence.DctermsModified = MakeDctermsModified(map);
             occurrence.DctermsLanguage = "en";
             occurrence.DctermsLicense = "https://creativecommons.org/publicdomain/zero/1.0/legalcode";
@@ -96,9 +96,11 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 IList<TimeSpan> eventTimes = new List<TimeSpan>();
                 var culture = new CultureInfo("en-AU");
 
-                if (DateTime.TryParseExact(colevent.GetTrimString("ColDateVisitedFrom"), new[] { "dd/MM/yyyy", "dd/MM/yy" }, culture, DateTimeStyles.None, out var eventDateFrom))
+                if (DateTime.TryParseExact(colevent.GetTrimString("ColDateVisitedFrom"),
+                    new[] {"dd/MM/yyyy", "dd/MM/yy"}, culture, DateTimeStyles.None, out var eventDateFrom))
                 {
-                    if (TimeSpan.TryParseExact(colevent.GetTrimString("ColTimeVisitedFrom"), @"hh\:mm", culture, out var eventTimeFrom))
+                    if (TimeSpan.TryParseExact(colevent.GetTrimString("ColTimeVisitedFrom"), @"hh\:mm", culture,
+                        out var eventTimeFrom))
                     {
                         eventDateFrom += eventTimeFrom;
                         eventTimes.Add(eventTimeFrom);
@@ -107,9 +109,11 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     eventDates.Add(eventDateFrom);
                 }
 
-                if (DateTime.TryParseExact(colevent.GetTrimString("ColDateVisitedTo"), new[] { "dd/MM/yyyy", "dd/MM/yy" }, culture, DateTimeStyles.None, out var eventDateTo))
+                if (DateTime.TryParseExact(colevent.GetTrimString("ColDateVisitedTo"), new[] {"dd/MM/yyyy", "dd/MM/yy"},
+                    culture, DateTimeStyles.None, out var eventDateTo))
                 {
-                    if (TimeSpan.TryParseExact(colevent.GetTrimString("ColTimeVisitedTo"), @"hh\:mm", culture, out var eventTimeTo))
+                    if (TimeSpan.TryParseExact(colevent.GetTrimString("ColTimeVisitedTo"), @"hh\:mm", culture,
+                        out var eventTimeTo))
                     {
                         eventDateTo += eventTimeTo;
                         eventTimes.Add(eventTimeTo);
@@ -126,7 +130,8 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 occurrence.MaximumDepthInMeters = colevent.GetTrimString("AquDepthToMet");
 
                 if (colevent.GetMaps("collectors") != null)
-                    occurrence.RecordedBy = colevent.GetMaps("collectors").Where(x => x != null).Select(MakePartyName).Concatenate(" | ");
+                    occurrence.RecordedBy = colevent.GetMaps("collectors").Where(x => x != null).Select(MakePartyName)
+                        .Concatenate(" | ");
             }
 
             occurrence.Year = map.GetTrimString("DarYearCollected");
@@ -138,7 +143,8 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 site = colevent.GetMap("site");
             if (site != null)
             {
-                if (!string.IsNullOrWhiteSpace(site.GetTrimString("SitSiteCode")) || !string.IsNullOrWhiteSpace(site.GetTrimString("SitSiteNumber")))
+                if (!string.IsNullOrWhiteSpace(site.GetTrimString("SitSiteCode")) ||
+                    !string.IsNullOrWhiteSpace(site.GetTrimString("SitSiteNumber")))
                     occurrence.LocationId = $"{site.GetTrimString("SitSiteCode")}{site.GetTrimString("SitSiteNumber")}";
 
                 occurrence.Locality = site.GetTrimString("LocPreciseLocation").ReplaceLineBreaks();
@@ -150,12 +156,12 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 if (geo != null)
                 {
                     occurrence.HigherGeography = new[]
-                                {
-                                    geo.GetTrimString("LocOcean_tab"),
-                                    geo.GetTrimString("LocContinent_tab"),
-                                    geo.GetTrimString("LocCountry_tab"),
-                                    geo.GetTrimString("LocProvinceStateTerritory_tab")
-                                }.Concatenate(" | ");
+                    {
+                        geo.GetTrimString("LocOcean_tab"),
+                        geo.GetTrimString("LocContinent_tab"),
+                        geo.GetTrimString("LocCountry_tab"),
+                        geo.GetTrimString("LocProvinceStateTerritory_tab")
+                    }.Concatenate(" | ");
 
                     occurrence.Continent = geo.GetTrimString("LocContinent_tab");
                     occurrence.WaterBody = geo.GetTrimString("LocOcean_tab");
@@ -170,20 +176,23 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 var latlong = site.GetMaps("latlong").FirstOrDefault();
                 if (latlong != null)
                 {
-                    var decimalLatitude = (object[])latlong["LatLatitudeDecimal_nesttab"];
+                    var decimalLatitude = (object[]) latlong["LatLatitudeDecimal_nesttab"];
                     if (decimalLatitude != null && decimalLatitude.Any(x => x != null))
                         occurrence.DecimalLatitude = decimalLatitude.FirstOrDefault(x => x != null)?.ToString();
 
-                    var decimalLongitude = ((object[])latlong["LatLongitudeDecimal_nesttab"]);
+                    var decimalLongitude = ((object[]) latlong["LatLongitudeDecimal_nesttab"]);
                     if (decimalLongitude != null && decimalLongitude.Any(x => x != null))
                         occurrence.DecimalLongitude = decimalLongitude.FirstOrDefault(x => x != null)?.ToString();
 
                     occurrence.CoordinateUncertaintyInMeters = latlong.GetTrimString("LatRadiusNumeric_tab");
-                    occurrence.GeodeticDatum = (string.IsNullOrWhiteSpace(latlong.GetTrimString("LatDatum_tab"))) ? "WGS84" : latlong.GetTrimString("LatDatum_tab");
+                    occurrence.GeodeticDatum = string.IsNullOrWhiteSpace(latlong.GetTrimString("LatDatum_tab"))
+                        ? "WGS84"
+                        : latlong.GetTrimString("LatDatum_tab");
 
                     occurrence.GeoreferencedBy = MakePartyName(latlong.GetMap("determinedBy"));
 
-                    if (DateTime.TryParseExact(latlong.GetTrimString("LatDetDate0"), "dd/MM/yyyy", new CultureInfo("en-AU"), DateTimeStyles.None, out var georeferencedDate))
+                    if (DateTime.TryParseExact(latlong.GetTrimString("LatDetDate0"), "dd/MM/yyyy",
+                        new CultureInfo("en-AU"), DateTimeStyles.None, out var georeferencedDate))
                         occurrence.GeoreferencedDate = georeferencedDate.ToString("s");
 
                     occurrence.GeoreferenceProtocol = latlong.GetTrimString("LatLatLongDetermination_tab");
@@ -196,23 +205,24 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             {
                 occurrence.TypeStatus = identification.GetTrimString("IdeTypeStatus_tab");
                 occurrence.DateIdentified = identification.GetTrimString("IdeDateIdentified0");
-                
+
                 if (identification.GetMaps("identifiers") != null)
-                    occurrence.IdentifiedBy = identification.GetMaps("identifiers").Where(x => x != null).Select(MakePartyName).Concatenate(" | ");
+                    occurrence.IdentifiedBy = identification.GetMaps("identifiers").Where(x => x != null)
+                        .Select(MakePartyName).Concatenate(" | ");
 
                 var taxonomy = identification.GetMap("taxa");
                 if (taxonomy != null)
                 {
                     occurrence.ScientificName = new[]
-                            {
-                                taxonomy.GetCleanString("ClaGenus"),
-                                string.IsNullOrWhiteSpace(taxonomy.GetCleanString("ClaSubgenus"))
-                                    ? null
-                                    : $"({taxonomy.GetCleanString("ClaSubgenus")})",
-                                taxonomy.GetCleanString("ClaSpecies"),
-                                taxonomy.GetCleanString("ClaSubspecies"),
-                                taxonomy.GetTrimString("AutAuthorString")
-                            }.Concatenate(" ");
+                    {
+                        taxonomy.GetCleanString("ClaGenus"),
+                        string.IsNullOrWhiteSpace(taxonomy.GetCleanString("ClaSubgenus"))
+                            ? null
+                            : $"({taxonomy.GetCleanString("ClaSubgenus")})",
+                        taxonomy.GetCleanString("ClaSpecies"),
+                        taxonomy.GetCleanString("ClaSubspecies"),
+                        taxonomy.GetTrimString("AutAuthorString")
+                    }.Concatenate(" ");
 
                     occurrence.Kingdom = taxonomy.GetCleanString("ClaKingdom");
                     occurrence.Phylum = taxonomy.GetCleanString("ClaPhylum");
@@ -224,47 +234,52 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     occurrence.SpecificEpithet = taxonomy.GetCleanString("ClaSpecies");
                     occurrence.InfraspecificEpithet = taxonomy.GetCleanString("ClaSubspecies");
                     occurrence.HigherClassification = new[]
-                                {
-                                    taxonomy.GetCleanString("ClaKingdom"), 
-                                    taxonomy.GetCleanString("ClaPhylum"),
-                                    taxonomy.GetCleanString("ClaSubphylum"),
-                                    taxonomy.GetCleanString("ClaSuperclass"),
-                                    taxonomy.GetCleanString("ClaClass"),
-                                    taxonomy.GetCleanString("ClaSubclass"),
-                                    taxonomy.GetCleanString("ClaSuperorder"),
-                                    taxonomy.GetCleanString("ClaOrder"),
-                                    taxonomy.GetCleanString("ClaSuborder"),
-                                    taxonomy.GetCleanString("ClaInfraorder"),
-                                    taxonomy.GetCleanString("ClaSuperfamily"),
-                                    taxonomy.GetCleanString("ClaFamily"),
-                                    taxonomy.GetCleanString("ClaSubfamily")
-                                }.Concatenate(" | ");
+                    {
+                        taxonomy.GetCleanString("ClaKingdom"),
+                        taxonomy.GetCleanString("ClaPhylum"),
+                        taxonomy.GetCleanString("ClaSubphylum"),
+                        taxonomy.GetCleanString("ClaSuperclass"),
+                        taxonomy.GetCleanString("ClaClass"),
+                        taxonomy.GetCleanString("ClaSubclass"),
+                        taxonomy.GetCleanString("ClaSuperorder"),
+                        taxonomy.GetCleanString("ClaOrder"),
+                        taxonomy.GetCleanString("ClaSuborder"),
+                        taxonomy.GetCleanString("ClaInfraorder"),
+                        taxonomy.GetCleanString("ClaSuperfamily"),
+                        taxonomy.GetCleanString("ClaFamily"),
+                        taxonomy.GetCleanString("ClaSubfamily")
+                    }.Concatenate(" | ");
 
                     occurrence.TaxonRank = new Dictionary<string, string>
-                            {
-                                {"Kingdom", taxonomy.GetCleanString("ClaKingdom")},
-                                {"Phylum", taxonomy.GetCleanString("ClaPhylum")},
-                                {"Subphylum", taxonomy.GetCleanString("ClaSubphylum")},
-                                {"Superclass", taxonomy.GetCleanString("ClaSuperclass")},
-                                {"Class", taxonomy.GetCleanString("ClaClass")},
-                                {"Subclass", taxonomy.GetCleanString("ClaSubclass")},
-                                {"Superorder", taxonomy.GetCleanString("ClaSuperorder")},
-                                {"Order", taxonomy.GetCleanString("ClaOrder")},
-                                {"Suborder", taxonomy.GetCleanString("ClaSuborder")},
-                                {"Infraorder", taxonomy.GetCleanString("ClaInfraorder")},
-                                {"Superfamily", taxonomy.GetCleanString("ClaSuperfamily")},
-                                {"Family", taxonomy.GetCleanString("ClaFamily")},
-                                {"Subfamily", taxonomy.GetCleanString("ClaSubfamily")},
-                                {"Genus", taxonomy.GetCleanString("ClaGenus")},
-                                {"Subgenus", taxonomy.GetCleanString("ClaSubgenus")},
-                                {"Species", taxonomy.GetCleanString("ClaSpecies")},
-                                {"Subspecies", taxonomy.GetCleanString("ClaSubspecies")}
-                            }.Where(x => !string.IsNullOrWhiteSpace(x.Value)).Select(x => x.Key).LastOrDefault();
+                    {
+                        {"Kingdom", taxonomy.GetCleanString("ClaKingdom")},
+                        {"Phylum", taxonomy.GetCleanString("ClaPhylum")},
+                        {"Subphylum", taxonomy.GetCleanString("ClaSubphylum")},
+                        {"Superclass", taxonomy.GetCleanString("ClaSuperclass")},
+                        {"Class", taxonomy.GetCleanString("ClaClass")},
+                        {"Subclass", taxonomy.GetCleanString("ClaSubclass")},
+                        {"Superorder", taxonomy.GetCleanString("ClaSuperorder")},
+                        {"Order", taxonomy.GetCleanString("ClaOrder")},
+                        {"Suborder", taxonomy.GetCleanString("ClaSuborder")},
+                        {"Infraorder", taxonomy.GetCleanString("ClaInfraorder")},
+                        {"Superfamily", taxonomy.GetCleanString("ClaSuperfamily")},
+                        {"Family", taxonomy.GetCleanString("ClaFamily")},
+                        {"Subfamily", taxonomy.GetCleanString("ClaSubfamily")},
+                        {"Genus", taxonomy.GetCleanString("ClaGenus")},
+                        {"Subgenus", taxonomy.GetCleanString("ClaSubgenus")},
+                        {"Species", taxonomy.GetCleanString("ClaSpecies")},
+                        {"Subspecies", taxonomy.GetCleanString("ClaSubspecies")}
+                    }
+                        .Where(x => !string.IsNullOrWhiteSpace(x.Value))
+                        .Select(x => x.Key)
+                        .LastOrDefault();
 
                     occurrence.ScientificNameAuthorship = taxonomy.GetTrimString("AutAuthorString");
                     occurrence.NomenclaturalCode = taxonomy.GetTrimString("ClaApplicableCode");
 
-                    var vernacularName = taxonomy.GetMaps("comname").FirstOrDefault(x => x.GetTrimString("ComStatus_tab") != null && x.GetTrimString("ComStatus_tab").Trim().ToLower() == "preferred");
+                    var vernacularName = taxonomy.GetMaps("comname").FirstOrDefault(x =>
+                        x.GetTrimString("ComStatus_tab") != null &&
+                        x.GetTrimString("ComStatus_tab").Trim().ToLower() == "preferred");
                     if (vernacularName != null)
                         occurrence.VernacularName = vernacularName.GetTrimString("ComName_tab");
                 }
@@ -272,9 +287,11 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 var identificationQualifier = identification.GetTrimString("IdeQualifier_tab");
                 if (!string.IsNullOrWhiteSpace(identificationQualifier))
                 {
-                    if (string.Equals(identification.GetTrimString("IdeQualifierRank_tab"), "Genus", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(identification.GetTrimString("IdeQualifierRank_tab"), "Genus",
+                        StringComparison.OrdinalIgnoreCase))
                         occurrence.IdentificationQualifier = $"{identificationQualifier} {occurrence.Genus}";
-                    else if (string.Equals(identification.GetTrimString("IdeQualifierRank_tab"), "species", StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(identification.GetTrimString("IdeQualifierRank_tab"), "species",
+                        StringComparison.OrdinalIgnoreCase))
                         occurrence.IdentificationQualifier = $"{identificationQualifier} {occurrence.SpecificEpithet}";
                 }
             }
@@ -286,7 +303,8 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 var locationMap = map.GetMap("location");
                 if (map.GetString("ManOnLoan") == "Yes")
                     occurrence.Disposition = "On Loan";
-                else if (locationMap != null && (locationMap.GetLong("irn") == 294982 || locationMap.GetLong("irn") == 294981))
+                else if (locationMap != null &&
+                         (locationMap.GetLong("irn") == 294982 || locationMap.GetLong("irn") == 294981))
                     occurrence.Disposition = "Missing";
                 else if (map.GetString("TisTissueUsedUp") == "Yes" || map.GetString("GneDnaUsedUp") == "Yes")
                     occurrence.Disposition = "Used";
@@ -302,7 +320,8 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 occurrence.MaterialSampleType = "Tissue";
 
                 // Preparation
-                occurrence.PreparationType = map.GetMaps("tissue").Select(x => x.GetString("TisTissueType_tab")).Concatenate(" | ");
+                occurrence.PreparationType = map.GetMaps("tissue").Select(x => x.GetString("TisTissueType_tab"))
+                    .Concatenate(" | ");
                 occurrence.PreparationMaterials = map.GetMaps("preparations")
                     .Select(x => new[]
                     {
@@ -337,17 +356,24 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     .Distinct()
                     .Where(x => !string.Equals(x, "none", StringComparison.OrdinalIgnoreCase))
                     .Concatenate(" | ");
-                occurrence.PreservationTemperature = map.GetMaps("tissue").Select(x => x.GetString("TisLtStorageMethod_tab")).Distinct().Concatenate(" | ");
+
+                occurrence.PreservationTemperature = map.GetMaps("tissue")
+                    .Select(x => x.GetString("TisLtStorageMethod_tab")).Distinct().Concatenate(" | ");
+
                 if (DateTime.TryParseExact(
-                    string.IsNullOrWhiteSpace(map.GetMaps("tissue").FirstOrDefault()?.GetString("TisDatePrepared0")) ? map.GetMaps("preparations").FirstOrDefault()?.GetString("StrDatePrepared0") : map.GetMaps("tissue").FirstOrDefault()?.GetString("TisDatePrepared0"),
-                    new[] { "dd/MM/yyyy", "dd/MM/yy" }, new CultureInfo("en-AU"), DateTimeStyles.None, out var preservationDateBegin))
+                    string.IsNullOrWhiteSpace(map.GetMaps("tissue").FirstOrDefault()?.GetString("TisDatePrepared0"))
+                        ? map.GetMaps("preparations").FirstOrDefault()?.GetString("StrDatePrepared0")
+                        : map.GetMaps("tissue").FirstOrDefault()?.GetString("TisDatePrepared0"),
+                    new[] {"dd/MM/yyyy", "dd/MM/yy"}, new CultureInfo("en-AU"), DateTimeStyles.None,
+                    out var preservationDateBegin))
                 {
                     occurrence.PreservationDateBegin = preservationDateBegin.ToString("s");
                 }
 
                 // Resource Relationship
                 var parentMap = map.GetMap("parent");
-                if (parentMap != null && parentMap.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.QueryString))
+                if (parentMap != null && parentMap.GetTrimStrings("MdaDataSets_tab")
+                    .Contains(AtlasOfLivingAustraliaConstants.QueryString))
                 {
                     occurrence.RelatedResourceId = MakeOccurrenceId(parentMap);
                     occurrence.RelationshipOfResource = "same individual";
@@ -368,7 +394,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 
             // Multimedia extension fields
             occurrence.Multimedia = multimediaFactory.Make(map.GetMaps("media")).ToList();
-            
+
             foreach (var multimedia in occurrence.Multimedia)
             {
                 multimedia.CoreId = occurrence.OccurrenceId;
@@ -457,9 +483,10 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             {
                 return map.GetTrimString("ColRegPrefix") == "Z" ? "MaterialSample" : "PreservedSpecimen";
             }
+
             if (map.GetTrimString("ColTypeOfItem") == "Audiovisual" || map.GetTrimString("ColTypeOfItem") == "Image")
                 return "HumanObservation";
-            
+
             return null;
         }
 
@@ -503,11 +530,11 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 return null;
             }).Concatenate(" | ");
         }
-        
+
         private string MakeDctermsModified(Map map)
         {
             var datesModified = new List<DateTime>();
-            
+
             // Catalogue
             if (DateTime.TryParseExact(
                 $"{map.GetTrimString("AdmDateModified")} {map.GetTrimString("AdmTimeModified")}",
@@ -518,10 +545,10 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             {
                 datesModified.Add(catalogueDateModified);
             }
-            
+
             // Collection Event
             var colevent = map.GetMap("colevent");
-            
+
             if (colevent != null &&
                 DateTime.TryParseExact(
                     $"{colevent.GetTrimString("AdmDateModified")} {colevent.GetTrimString("AdmTimeModified")}",
@@ -532,12 +559,12 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             {
                 datesModified.Add(coleventDateModified);
             }
-            
+
             // Site
             var site = map.GetMap("site");
             if (site == null && colevent != null)
                 site = colevent.GetMap("site");
-            
+
             if (site != null &&
                 DateTime.TryParseExact(
                     $"{site.GetTrimString("AdmDateModified")} {site.GetTrimString("AdmTimeModified")}",
@@ -548,10 +575,10 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             {
                 datesModified.Add(siteDateModified);
             }
-            
+
             // Media
             var medias = map.GetMaps("media");
-            
+
             foreach (var media in medias)
             {
                 if (Assertions.IsMultimedia(media) &&
@@ -569,7 +596,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             // Taxonomy
             var identification = MapSearches.GetIdentification(map);
             var taxonomy = identification?.GetMap("taxa");
-            
+
             if (taxonomy != null &&
                 DateTime.TryParseExact(
                     $"{taxonomy.GetTrimString("AdmDateModified")} {taxonomy.GetTrimString("AdmTimeModified")}",
