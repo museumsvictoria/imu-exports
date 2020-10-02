@@ -28,18 +28,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 
             // Occurrence core fields
             occurrence.OccurrenceId = MakeOccurrenceId(map);
-
-            switch (map.GetTrimString("ColTypeOfItem"))
-            {
-                case "Specimen":
-                    occurrence.DctermsType = "PhysicalObject";
-                    break;
-                case "Audiovisual":
-                case "Image":
-                    occurrence.DctermsType = "Event";
-                    break;
-            }
-
+            occurrence.DctermsType = MakeDctermsType(map);
             occurrence.DctermsModified = MakeDctermsModified(map);
             occurrence.DctermsLanguage = "en";
             occurrence.DctermsLicense = "https://creativecommons.org/publicdomain/zero/1.0/legalcode";
@@ -476,20 +465,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 
             return null;
         }
-
-        private string MakeBasisOfRecord(Map map)
-        {
-            if (map.GetTrimString("ColTypeOfItem") == "Specimen")
-            {
-                return map.GetTrimString("ColRegPrefix") == "Z" ? "MaterialSample" : "PreservedSpecimen";
-            }
-
-            if (map.GetTrimString("ColTypeOfItem") == "Audiovisual" || map.GetTrimString("ColTypeOfItem") == "Image")
-                return "HumanObservation";
-
-            return null;
-        }
-
+        
         private string MakeOccurrenceId(Map map)
         {
             return new[]
@@ -502,6 +478,38 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 MakeBasisOfRecord(map),
                 MakeCatalogNumber(map),
             }.Concatenate(":");
+        }
+
+        private string MakeDctermsType(Map map)
+        {
+            switch (map.GetTrimString("ColTypeOfItem"))
+            {
+                case "Specimen":
+                    return "PhysicalObject";
+                case "Audiovisual":
+                case "Image":
+                    return "Event";
+                case "Observation":
+                    return "StillImage";
+            }
+            
+            return null;
+        }
+
+        private string MakeBasisOfRecord(Map map)
+        {
+            switch (map.GetTrimString("ColTypeOfItem"))
+            {
+                case "Specimen":
+                    return map.GetTrimString("ColRegPrefix") == "Z" ? "MaterialSample" : "PreservedSpecimen";
+                case "Audiovisual":
+                case "Image":
+                    return "HumanObservation";
+                case "Observation":
+                    return "MachineObservation";
+            }
+            
+            return null;
         }
 
         private string MakeCatalogNumber(Map map)
