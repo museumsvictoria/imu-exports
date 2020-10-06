@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using ImuExports.Infrastructure;
 using ImuExports.Config;
 using ImuExports.Extensions;
@@ -45,7 +44,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
             foreach (var cat in map.GetMaps("cat"))
             {
                 if (cat != null &&
-                    cat.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.QueryString) &&
+                    cat.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString) &&
                     string.Equals(cat.GetTrimString("AdmPublishWebNoPassword"), "yes",
                         StringComparison.OrdinalIgnoreCase))
                 {

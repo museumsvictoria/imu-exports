@@ -32,7 +32,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
                 {
                     terms.Add("AdmDateModified", GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.Value.ToString("MMM dd yyyy"), "<=");
                 }
-                terms.Add("MdaDataSets_tab", AtlasOfLivingAustraliaConstants.QueryString);
+                terms.Add("MdaDataSets_tab", AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString);
                 terms.Add("AdmPublishWebNoPassword", "Yes");
 
                 return terms;
@@ -41,7 +41,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
 
         Func<Map, IEnumerable<long>> IModuleSearchConfig.IrnSelectFunc => map => map
             .GetMaps("cat")
-            .Where(x => x != null && x.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.QueryString))
+            .Where(x => x != null && x.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString))
             .Select(x => x.GetLong("irn"));
     }
 }

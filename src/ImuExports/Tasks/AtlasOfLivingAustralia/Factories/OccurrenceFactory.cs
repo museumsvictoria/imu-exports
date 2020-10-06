@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using IMu;
-using ImuExports.Config;
 using ImuExports.Extensions;
 using ImuExports.Infrastructure;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Config;
@@ -362,7 +361,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 // Resource Relationship
                 var parentMap = map.GetMap("parent");
                 if (parentMap != null && parentMap.GetTrimStrings("MdaDataSets_tab")
-                    .Contains(AtlasOfLivingAustraliaConstants.QueryString))
+                    .Contains(AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString))
                 {
                     occurrence.RelatedResourceId = MakeOccurrenceId(parentMap);
                     occurrence.RelationshipOfResource = "same individual";
@@ -387,10 +386,16 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             foreach (var multimedia in occurrence.Multimedia)
             {
                 multimedia.CoreId = occurrence.OccurrenceId;
-                multimedia.References = $"https://collections.museumsvictoria.com.au/specimens/{map.GetLong("irn")}";
+
+                if (map.GetTrimStrings("MdaDataSets_tab")
+                    .Any(x => x.Contains(AtlasOfLivingAustraliaConstants.ImuSpecimenQueryString)))
+                {
+                    multimedia.References =
+                        $"https://collections.museumsvictoria.com.au/specimens/{map.GetLong("irn")}";
+                }
             }
 
-            occurrence.AssociatedMedia = MakeAssociatedMedia(map.GetMaps("media"));
+            occurrence.AssociatedMedia = MakeAssociatedMedia(map);
 
             return occurrence;
         }
@@ -519,18 +524,18 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 : $"{map.GetTrimString("ColRegPrefix")}{map.GetTrimString("ColRegNumber")}-{map.GetTrimString("ColRegPart")}";
         }
 
-        private string MakeAssociatedMedia(Map[] maps)
+        private string MakeAssociatedMedia(Map map)
         {
-            return maps.Select(map =>
+            return map.GetMaps("media").Select(mediaMap =>
             {
-                if (map != null &&
-                    string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "yes",
+                // Add associated media only if mmr exists in collections online
+                if (mediaMap != null &&
+                    string.Equals(mediaMap.GetTrimString("AdmPublishWebNoPassword"), "yes",
                         StringComparison.OrdinalIgnoreCase) &&
-                    map.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.QueryString) &&
-                    map.GetTrimStrings("MdaDataSets_tab").Contains("Collections Online: MMR") &&
-                    string.Equals(map.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
+                    mediaMap.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.ImuMultimediaQueryString) &&
+                    string.Equals(mediaMap.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
                 {
-                    var irn = map.GetLong("irn");
+                    var irn = mediaMap.GetLong("irn");
 
                     return $"https://collections.museumvictoria.com.au/content/media/{(irn % 50)}/{irn}-large.jpg";
                 }

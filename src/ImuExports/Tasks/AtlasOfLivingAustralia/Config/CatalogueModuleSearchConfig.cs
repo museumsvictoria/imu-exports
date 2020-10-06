@@ -32,7 +32,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
                     terms.Add("AdmDateModified", GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.Value.ToString("MMM dd yyyy"), "<=");
                 }
                 terms.Add("ColCategory", "Natural Sciences");
-                terms.Add("MdaDataSets_tab", AtlasOfLivingAustraliaConstants.QueryString);
+                terms.Add("MdaDataSets_tab", AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString);
                 terms.Add("AdmPublishWebNoPassword", "Yes");
 
                 return terms;

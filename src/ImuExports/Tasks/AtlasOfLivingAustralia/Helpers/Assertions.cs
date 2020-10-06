@@ -12,7 +12,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Helpers
         {
             return map != null &&
                    string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase) &&
-                   map.GetTrimStrings("MdaDataSets_tab").Any(x => x.Contains(AtlasOfLivingAustraliaConstants.QueryString)) &&
+                   map.GetTrimStrings("MdaDataSets_tab").Any(x => x.Contains(AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString)) &&
                    string.Equals(map.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase);
         }
     }

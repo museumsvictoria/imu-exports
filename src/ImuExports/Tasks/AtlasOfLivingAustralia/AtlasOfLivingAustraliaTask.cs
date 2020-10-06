@@ -62,6 +62,9 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
 
                         cachedIrns.AddRange(irns);
                     }
+
+                    // Remove any duplicates
+                    cachedIrns = cachedIrns.Distinct().ToList();
                 }
                 else
                 {
@@ -265,7 +268,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
         {
             var searchTerms = new Terms();
             searchTerms.Add("ColCategory", "Natural Sciences");
-            searchTerms.Add("MdaDataSets_tab", AtlasOfLivingAustraliaConstants.QueryString);
+            searchTerms.Add("MdaDataSets_tab", AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString);
             searchTerms.Add("AdmPublishWebNoPassword", "Yes");
 
             if (options.ParsedModifiedAfterDate.HasValue)
@@ -291,6 +294,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia
             "AdmDateModified",
             "AdmTimeModified",
             "ColDiscipline",
+            "MdaDataSets_tab",
             "colevent=ColCollectionEventRef.(AdmDateModified,AdmTimeModified,ExpExpeditionName,ColCollectionEventCode,ColCollectionMethod,ColDateVisitedFrom,ColDateVisitedTo,ColTimeVisitedTo,ColTimeVisitedFrom,AquDepthToMet,AquDepthFromMet,site=ColSiteRef.(AdmDateModified,AdmTimeModified,SitSiteCode,SitSiteNumber,geo=[LocOcean_tab,LocContinent_tab,LocCountry_tab,LocProvinceStateTerritory_tab,LocIslandGroup,LocIsland,LocDistrictCountyShire_tab,LocTownship_tab],LocPreciseLocation,LocElevationASLFromMt,LocElevationASLToMt,latlong=[LatLongitudeDecimal_nesttab,LatLatitudeDecimal_nesttab,LatRadiusNumeric_tab,LatDatum_tab,determinedBy=LatDeterminedByRef_tab.(NamPartyType,NamFullName,NamOrganisation,NamBranch,NamDepartment,NamOrganisation,NamOrganisationOtherNames_tab,NamSource,AddPhysStreet,AddPhysCity,AddPhysState,AddPhysCountry,ColCollaborationName),LatDetDate0,LatLatLongDetermination_tab,LatDetSource_tab]),collectors=ColParticipantRef_tab.(NamPartyType,NamFullName,NamOrganisation,NamBranch,NamDepartment,NamOrganisation,NamOrganisationOtherNames_tab,NamSource,AddPhysStreet,AddPhysCity,AddPhysState,AddPhysCountry,ColCollaborationName))",
             "SpeNoSpecimens",
             "BirTotalClutchSize",

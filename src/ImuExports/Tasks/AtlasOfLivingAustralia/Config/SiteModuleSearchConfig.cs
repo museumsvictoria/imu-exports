@@ -5,7 +5,6 @@ using ImuExports.Infrastructure;
 using ImuExports.Config;
 using ImuExports.Extensions;
 using IMu;
- using Serilog;
 
  namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
 {
@@ -47,7 +46,7 @@ using IMu;
             foreach (var catalogue in map.GetMaps("cat"))
             {
                 if (catalogue != null &&
-                    catalogue.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.QueryString) &&
+                    catalogue.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString) &&
                     string.Equals(catalogue.GetTrimString("AdmPublishWebNoPassword"), "yes",
                         StringComparison.OrdinalIgnoreCase))
                 {
@@ -64,7 +63,7 @@ using IMu;
                 foreach (var cat in collectionEvent.GetMaps("cat"))
                 {
                     if (cat != null &&
-                        cat.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.QueryString) &&
+                        cat.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString) &&
                         string.Equals(cat.GetTrimString("AdmPublishWebNoPassword"), "yes",
                             StringComparison.OrdinalIgnoreCase))
                     {
