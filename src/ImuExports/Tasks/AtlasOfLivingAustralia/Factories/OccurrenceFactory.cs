@@ -530,8 +530,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
             {
                 // Add associated media only if mmr exists in collections online
                 if (mediaMap != null &&
-                    string.Equals(mediaMap.GetTrimString("AdmPublishWebNoPassword"), "yes",
-                        StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(mediaMap.GetTrimString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase) &&
                     mediaMap.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.ImuMultimediaQueryString) &&
                     string.Equals(mediaMap.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
                 {

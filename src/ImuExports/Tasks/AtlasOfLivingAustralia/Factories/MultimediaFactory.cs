@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using ImageMagick;
 using ImuExports.Config;
 using IMu;
@@ -32,7 +33,6 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     Creator = map.GetTrimStrings("MulCreator_tab").Concatenate(" | "),
                     Publisher = "Museums Victoria",
                     Source = map.GetTrimStrings("RigSource_tab").Concatenate(" | "),
-                    RightsHolder = "Museums Victoria",
                     AltText = map.GetTrimString("DetAlternateText")
                 };
                 
@@ -48,6 +48,18 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     multimedia.License = "https://creativecommons.org/licenses/by/4.0/";
                 else if (map.GetTrimString("RigLicence").Equals("CC BY-NC", StringComparison.OrdinalIgnoreCase))
                     multimedia.License = "https://creativecommons.org/licenses/by-nc/4.0/";
+
+                if (map.GetTrimString("RigCopyrightStatus").Equals("In Copyright: MV Copyright", StringComparison.OrdinalIgnoreCase))
+                    multimedia.RightsHolder = "Museums Victoria";
+                else if (map.GetTrimString("RigCopyrightStatus").Equals("In Copyright: Third Party Copyright", StringComparison.OrdinalIgnoreCase))
+                {
+                    var rightsHolderRegex = Regex.Match(map.GetTrimString("RigCopyrightStatement"), @"Copyright (?<rightsholder>.*) \/ ");
+
+                    if (rightsHolderRegex.Groups["rightsholder"].Success)
+                    {
+                        multimedia.RightsHolder = rightsHolderRegex.Groups["rightsholder"].Value;
+                    }
+                }
 
                 if (TrySaveMultimedia(irn))
                     return multimedia;
