@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using ImageMagick;
 using ImuExports.Config;
 using IMu;
@@ -13,36 +15,59 @@ namespace ImuExports.Tasks.ExtractImages
     {
         public void Run()
         {
-            using (Log.Logger.BeginTimedOperation(string.Format("{0} starting", GetType().Name), string.Format("{0}.Run", GetType().Name)))
+            using (Log.Logger.BeginTimedOperation($"{GetType().Name} starting", $"{GetType().Name}.Run"))
             {
-                // Cache Irns
-                Log.Logger.Information("Caching data");
-                var cachedIrns = this.CacheIrns("emultimedia", BuildSearchTerms());
-
-                // Fetch data
-                Log.Logger.Information("Fetching data");
+                // Cache Narrative Irns
+                Log.Logger.Information("Caching narrative irns");
+                var cachedNarrativeIrns = this.CacheIrns("enarratives", BuildNarrativeSearchTerms());
+                
+                var cachedMultimediaIrns = new List<long>();
+                using (var imuSession = ImuSessionProvider.CreateInstance("enarratives"))
+                {
+                    imuSession.FindKeys(cachedNarrativeIrns.ToList());
+                    var result = imuSession.Fetch("start", 0, -1, NarrativeColumns);
+                    
+                    cachedMultimediaIrns.AddRange(result.Rows.SelectMany(row => row.GetMaps("media").Select(mm => mm.GetLong("irn"))));
+                                        
+                    Log.Logger.Information("Found {Count} emultimedia records", cachedMultimediaIrns.Count);
+                }
 
                 var offset = 0;
-                foreach (var cachedIrn in cachedIrns)
+                Log.Logger.Information("Fetching images");
+                while (true)
                 {
                     if (Program.ImportCanceled)
-                        return;
-
-                    try
                     {
-                        using (var imuSession = ImuSessionProvider.CreateInstance("emultimedia"))
-                        {
-                            imuSession.FindKey(cachedIrn);
-                            var result = imuSession.Fetch("start", 0, -1, Columns).Rows[0];
-                            var fileName = string.Format("{0}{1}.jpg", GlobalOptions.Options.Ei.Destination, Path.GetFileNameWithoutExtension(result.GetTrimString("MulIdentifier")));
-                            var resource = result.GetMap("resource");
+                        return;
+                    }
 
-                            if (File.Exists(fileName) && new FileInfo(fileName).Length > 0)
+                    using (var imuSession = ImuSessionProvider.CreateInstance("emultimedia"))
+                    {
+                        var multimediaIrnsBatch = cachedMultimediaIrns
+                            .Skip(offset)
+                            .Take(Constants.DataBatchSize)
+                            .ToList();
+                        
+                        if (multimediaIrnsBatch.Count == 0)
+                            break;
+
+                        imuSession.FindKeys(multimediaIrnsBatch);
+
+                        var results = imuSession.Fetch("start", 0, -1, this.MultimediaColumns);
+                        
+                        Log.Logger.Debug("Fetched {RecordCount} emultimedia records from Imu", multimediaIrnsBatch.Count);
+                        
+                        foreach (var row in results.Rows)
+                        {
+                            var fileName = $"{GlobalOptions.Options.Ei.Destination}{row.GetLong("irn")}.jpg";
+                            var resource = row.GetMap("resource");
+                            
+                            if (File.Exists(fileName))
                             {
-                                Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset++, cachedIrns.Count);
+                                Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset++, cachedMultimediaIrns.Count);
                                 continue;
                             }
-
+                            
                             using (var fileStream = resource["file"] as FileStream)
                             using (var file = File.Open(fileName, FileMode.Create, FileAccess.Write))
                             using (var image = new MagickImage(fileStream))
@@ -52,50 +77,34 @@ namespace ImuExports.Tasks.ExtractImages
                                 image.Write(file);
                             }
                         }
+                        
+                        offset += results.Count;
+
+                        Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset, cachedMultimediaIrns.Count);
                     }
-                    catch (Exception ex)
-                    {
-                        using (var imuSession = ImuSessionProvider.CreateInstance("emultimedia"))
-                        {
-                            imuSession.FindKey(cachedIrn);
-                            var result = imuSession.Fetch("start", 0, -1, Columns).Rows[0];
-                            var fileName = string.Format("{0}{1}", GlobalOptions.Options.Ei.Destination, result.GetTrimString("MulIdentifier"));
-                            var resource = result.GetMap("resource");
-
-                            Log.Logger.Error("Error converting image with filename {fileName} saving image to disk instead {ex}", fileName, ex);
-
-                            using (var fileStream = resource["file"] as FileStream)
-                            using (var file = File.Open(fileName, FileMode.Create, FileAccess.Write))
-                            {
-                                fileStream.CopyTo(file);
-                            }
-                        }                        
-                    }
-
-                    Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset++, cachedIrns.Count);
                 }
             }
+            
+
         }
 
-        private Terms BuildSearchTerms()
+        private Terms BuildNarrativeSearchTerms()
         {
             var searchTerms = new Terms();
 
-            searchTerms.Add("MdaDataSets_tab", "Google Cultural Institute");
+            searchTerms.Add("DetNarrativeIdentifier", "2021 extras1");
 
             return searchTerms;
         }
 
-        public string[] Columns
+        private string[] NarrativeColumns => new[]
         {
-            get
-            {
-                return new[]
-                {
-                    "MulIdentifier",
-                    "resource"
-                };
-            }
-        }
+            "media=MulMultiMediaRef_tab.(irn)",
+        };
+
+        private string[] MultimediaColumns => new[]
+        {
+            "resource"
+        };
     }
 }
