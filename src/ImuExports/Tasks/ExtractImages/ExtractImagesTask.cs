@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ImageMagick;
 using ImuExports.Config;
 using IMu;
-using ImuExports.Extensions;
 using ImuExports.Infrastructure;
 using Serilog;
 
@@ -64,7 +62,6 @@ namespace ImuExports.Tasks.ExtractImages
                             
                             if (File.Exists(fileName))
                             {
-                                Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset++, cachedMultimediaIrns.Count);
                                 continue;
                             }
                             
@@ -74,6 +71,11 @@ namespace ImuExports.Tasks.ExtractImages
                             {
                                 image.Format = MagickFormat.Jpg;
                                 image.Quality = 96;
+                                image.FilterType = FilterType.Triangle;
+                                image.ColorSpace = ColorSpace.sRGB;
+                                image.Resize(new MagickGeometry(2048) { Greater = true });
+                                image.UnsharpMask(0.25, 0.08, 8.3, 0.045);
+                                
                                 image.Write(file);
                             }
                         }

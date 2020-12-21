@@ -120,6 +120,10 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                             {
                                 image.Format = MagickFormat.Jpg;
                                 image.Quality = 90;
+                                image.FilterType = FilterType.Triangle;
+                                image.ColorSpace = ColorSpace.sRGB;
+                                image.Resize(new MagickGeometry(3000) { Greater = true });
+                                image.UnsharpMask(1.45, 0.18, 20, 0.085);
                                 image.Write(file);
                             }
                         }
