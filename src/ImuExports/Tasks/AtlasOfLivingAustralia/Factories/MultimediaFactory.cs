@@ -119,11 +119,14 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                             using (var image = new MagickImage(fileStream))
                             {
                                 image.Format = MagickFormat.Jpg;
+                                
+                                image.Format = MagickFormat.Jpg;
                                 image.Quality = 90;
-                                image.FilterType = FilterType.Triangle;
+                                image.FilterType = FilterType.Lanczos;
                                 image.ColorSpace = ColorSpace.sRGB;
                                 image.Resize(new MagickGeometry(3000) { Greater = true });
-                                image.UnsharpMask(1.45, 0.18, 20, 0.085);
+                                image.UnsharpMask(0.5, 0.5, 0.6, 0.025);
+                                
                                 image.Write(file);
                             }
                         }

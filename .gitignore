@@ -387,3 +387,4 @@ atlassian-ide-plugin.xml
 ## ImuExports
 ############
 env/**
+*.tif
