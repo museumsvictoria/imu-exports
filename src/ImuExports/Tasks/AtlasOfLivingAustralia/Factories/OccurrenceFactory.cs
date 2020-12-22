@@ -487,14 +487,14 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 
         private string MakeDctermsType(Map map)
         {
-            switch (map.GetTrimString("ColTypeOfItem"))
+            switch (map.GetTrimString("ColTypeOfItem").ToLower())
             {
-                case "Specimen":
+                case "specimen":
                     return "PhysicalObject";
-                case "Audiovisual":
-                case "Image":
+                case "audiovisual":
+                case "image":
                     return "Event";
-                case "Observation":
+                case "observation":
                     return "StillImage";
             }
             
@@ -503,14 +503,14 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
 
         private string MakeBasisOfRecord(Map map)
         {
-            switch (map.GetTrimString("ColTypeOfItem"))
+            switch (map.GetTrimString("ColTypeOfItem").ToLower())
             {
-                case "Specimen":
+                case "specimen":
                     return map.GetTrimString("ColRegPrefix") == "Z" ? "MaterialSample" : "PreservedSpecimen";
-                case "Audiovisual":
-                case "Image":
+                case "audiovisual":
+                case "image":
                     return "HumanObservation";
-                case "Observation":
+                case "observation":
                     return "MachineObservation";
             }
             
