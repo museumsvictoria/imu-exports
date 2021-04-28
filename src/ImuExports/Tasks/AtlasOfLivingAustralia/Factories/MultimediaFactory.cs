@@ -44,14 +44,14 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                 if(captionMap != null)
                     multimedia.Description = HtmlConverter.HtmlToText(captionMap.GetTrimString("MdaFreeText_tab"));
 
-                if (map.GetTrimString("RigLicence").Equals("CC BY", StringComparison.OrdinalIgnoreCase))
+                if (map.GetTrimString("RigLicence")?.Equals("CC BY", StringComparison.OrdinalIgnoreCase) == true)
                     multimedia.License = "https://creativecommons.org/licenses/by/4.0/";
-                else if (map.GetTrimString("RigLicence").Equals("CC BY-NC", StringComparison.OrdinalIgnoreCase))
+                else if (map.GetTrimString("RigLicence")?.Equals("CC BY-NC", StringComparison.OrdinalIgnoreCase) == true)
                     multimedia.License = "https://creativecommons.org/licenses/by-nc/4.0/";
 
-                if (map.GetTrimString("RigCopyrightStatus").Equals("In Copyright: MV Copyright", StringComparison.OrdinalIgnoreCase))
+                if (map.GetTrimString("RigCopyrightStatus")?.Equals("In Copyright: MV Copyright", StringComparison.OrdinalIgnoreCase) == true)
                     multimedia.RightsHolder = "Museums Victoria";
-                else if (map.GetTrimString("RigCopyrightStatus").Equals("In Copyright: Third Party Copyright", StringComparison.OrdinalIgnoreCase))
+                else if (map.GetTrimString("RigCopyrightStatus")?.Equals("In Copyright: Third Party Copyright", StringComparison.OrdinalIgnoreCase) == true)
                 {
                     var rightsHolderRegex = Regex.Match(map.GetTrimString("RigCopyrightStatement"), @"Copyright (?<rightsholder>.*) \/ ");
 
