@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using CommandLine.Text;
 using ImuExports.Tasks.AtlasOfLivingAustralia;
+using ImuExports.Tasks.AusGeochem;
 using ImuExports.Tasks.ExtractImages;
 using ImuExports.Tasks.FieldGuideGippsland;
 using ImuExports.Tasks.FieldGuideGunditjmara;
@@ -28,6 +29,9 @@ namespace ImuExports.Config
 
         [VerbOption("io", HelpText = "Extract records for Inside Out.")]
         public InsideOutOptions Io { get; set; }
+        
+        [VerbOption("agn", HelpText = "Export records for AusGeochem.")]
+        public AusGeochemOptions Agn { get; set; }
 
         [HelpVerbOption]
         public string GetUsage(string verb)
