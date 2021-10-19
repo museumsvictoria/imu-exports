@@ -2,6 +2,6 @@
 {
     public static class AusGeochemConstants
     {
-        public static string QueryString = "AuScope: AGN";
+        public static string QueryString = "AuScope Geochemistry Network";
     }
 }

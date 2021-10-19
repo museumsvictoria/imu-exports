@@ -107,7 +107,7 @@
     <Compile Include="Tasks\AusGeochem\AusGeochemTask.cs" />
     <Compile Include="Tasks\AusGeochem\ClassMaps\SpecimenClassMap.cs" />
     <Compile Include="Tasks\AusGeochem\Config\AusGeochemConstants.cs" />
-    <Compile Include="Tasks\AusGeochem\Factories\OccurrenceFactory.cs" />
+    <Compile Include="Tasks\AusGeochem\Factories\SpecimenFactory.cs" />
     <Compile Include="Tasks\AusGeochem\Models\Specimen.cs" />
     <Compile Include="Tasks\ExtractImages\ExtractImagesOptions.cs" />
     <Compile Include="Tasks\ExtractImages\ExtractImagesTask.cs" />
