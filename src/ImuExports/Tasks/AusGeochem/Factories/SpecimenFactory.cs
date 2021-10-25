@@ -23,11 +23,16 @@ namespace ImuExports.Tasks.AusGeochem.Factories
 
             specimen.LithologyTypeId = map.GetTrimString("RocRockName");
 
-            specimen.LithologyComment = new[]
+            if (map.GetTrimString("ColDiscipline") == "Petrology")
             {
-                string.IsNullOrWhiteSpace(map.GetTrimString("RocRockDescription")) ? null : $"Description: {map.GetTrimString("RocRockDescription")}",
-                string.IsNullOrWhiteSpace(map.GetTrimString("RocMainMineralsPresent")) ? null : $"Main Minerals: {map.GetTrimString("RocMainMineralsPresent")}"
-            }.Concatenate(" | ");
+                specimen.LithologyComment = new[]
+                {
+                    string.IsNullOrWhiteSpace(map.GetTrimString("RocRockDescription")) ? null : $"Description: {map.GetTrimString("RocRockDescription")}",
+                    string.IsNullOrWhiteSpace(map.GetTrimString("RocMainMineralsPresent")) ? null : $"Main Minerals: {map.GetTrimString("RocMainMineralsPresent")}",
+                    string.IsNullOrWhiteSpace(map.GetTrimString("RocThinSection")) ? null : $"Thin Section: {map.GetTrimString("RocThinSection")}",
+                    string.IsNullOrWhiteSpace(map.GetTrimString("MinChemicalAnalysis")) ? null : $"Chemical Analysis: {map.GetTrimString("MinChemicalAnalysis")}",
+                }.Concatenate(" | ");
+            }
 
             specimen.MineralId = map.GetTrimString("MinSpecies");
 
@@ -37,16 +42,19 @@ namespace ImuExports.Tasks.AusGeochem.Factories
             else if (map.GetTrimString("MinType") == "No")
                 typeSpecimen = map.GetTrimString("MinType");
             
-            specimen.MineralComment = new[]
+            if (map.GetTrimString("ColDiscipline") == "Mineralogy")
             {
-                string.IsNullOrWhiteSpace(map.GetTrimString("MinSpecies")) ? null : $"Mineral Species: {map.GetTrimString("MinSpecies")}",
-                string.IsNullOrWhiteSpace(map.GetTrimString("MinVariety")) ? null : $"Mineral Variety: {map.GetTrimString("MinVariety")}",
-                string.IsNullOrWhiteSpace(map.GetTrimString("MinAssociatedMatrix")) ? null : $"Associated Matrix: {map.GetTrimString("MinAssociatedMatrix")}",
-                string.IsNullOrWhiteSpace(map.GetTrimString("MinXrayed")) ? null : $"X-rayed: {map.GetTrimString("MinXrayed")}",
-                string.IsNullOrWhiteSpace(map.GetTrimString("MinChemicalAnalysis")) ? null : $"Chemical Analysis: {map.GetTrimString("MinChemicalAnalysis")}",
-                typeSpecimen == null ? null : $"Type specimen: {typeSpecimen}",
-            }.Concatenate(" | ");
-            
+                specimen.MineralComment = new[]
+                {
+                    string.IsNullOrWhiteSpace(map.GetTrimString("MinSpecies")) ? null : $"Mineral Species: {map.GetTrimString("MinSpecies")}",
+                    string.IsNullOrWhiteSpace(map.GetTrimString("MinVariety")) ? null : $"Mineral Variety: {map.GetTrimString("MinVariety")}",
+                    string.IsNullOrWhiteSpace(map.GetTrimString("MinAssociatedMatrix")) ? null : $"Associated Matrix: {map.GetTrimString("MinAssociatedMatrix")}",
+                    string.IsNullOrWhiteSpace(map.GetTrimString("MinXrayed")) ? null : $"X-rayed: {map.GetTrimString("MinXrayed")}",
+                    string.IsNullOrWhiteSpace(map.GetTrimString("MinChemicalAnalysis")) ? null : $"Chemical Analysis: {map.GetTrimString("MinChemicalAnalysis")}",
+                    typeSpecimen == null ? null : $"Type specimen: {typeSpecimen}",
+                }.Concatenate(" | ");
+            }
+
             var site = map.GetMap("site");
             if (site != null)
             {
@@ -75,7 +83,9 @@ namespace ImuExports.Tasks.AusGeochem.Factories
                     {
                         specimen.DecimalLatitude,
                         specimen.DecimalLongitude,
-                        latlong.GetTrimString("LatDatum_tab"),
+                        string.IsNullOrWhiteSpace(latlong.GetTrimString("LatDatum_tab")) ? "datum unknown" : latlong.GetTrimString("LatDatum_tab"),
+                        specimen.DateGeoreferenced,
+                        specimen.GeoreferencedBy,
                     }.Concatenate(", ");
                 }
 
@@ -107,8 +117,8 @@ namespace ImuExports.Tasks.AusGeochem.Factories
                     ? site.GetTrimString("LocDeterminationMethodASL")
                     : site.GetTrimString("LocDeterminationMethod");
 
-                specimen.LocationKindId = !string.IsNullOrWhiteSpace(site.GetTrimString("EraDepthDeterminationMethod"))
-                    ? "Subsurface"
+                specimen.LocationKindId = string.IsNullOrWhiteSpace(site.GetTrimString("EraDepthDeterminationMethod"))
+                    ? "Outcrop location"
                     : null;
 
                 specimen.LocationName = site.GetTrimString("LocPreciseLocation");
@@ -154,15 +164,17 @@ namespace ImuExports.Tasks.AusGeochem.Factories
 
             specimen.Collector = map.GetMaps("collectors").Select(MakePartyName).Concatenate(", ");
 
-            var prevno = map.GetMaps("prevno").FirstOrDefault();
-            if (map.GetTrimStrings("ColCollectionName_tab").Any() && !string.IsNullOrWhiteSpace(prevno?.GetTrimString("ManPreviousCollectionName_tab")))
-            {
-                specimen.PreviousNumber = new[]
-                {
-                    prevno.GetTrimString("ManPreviousCollectionName_tab"),
-                    prevno.GetTrimString("ManPreviousNumbers_tab"),
-                }.Concatenate(", ");
-            }
+            var prevno = map.GetMaps("prevno");
+
+            specimen.PreviousNumber = prevno
+                .Where(x => !string.IsNullOrWhiteSpace(x.GetTrimString("ManPreviousCollectionName_tab")))
+                .Select(x => 
+                    new[]
+                    {
+                        x.GetTrimString("ManPreviousCollectionName_tab"),
+                        x.GetTrimString("ManPreviousNumbers_tab"),
+                    }.Concatenate(": ")
+                ).Concatenate(" | ");
 
             return specimen;
         }

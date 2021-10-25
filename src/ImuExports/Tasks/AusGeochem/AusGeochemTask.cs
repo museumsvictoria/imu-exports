@@ -101,6 +101,7 @@ namespace ImuExports.Tasks.AusGeochem
             "RocRockName",
             "RocRockDescription",
             "RocMainMineralsPresent",
+            "RocThinSection",
             "MinSpecies",
             "MinVariety",
             "MinAssociatedMatrix",
