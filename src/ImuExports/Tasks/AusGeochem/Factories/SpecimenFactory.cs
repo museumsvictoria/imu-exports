@@ -29,8 +29,8 @@ namespace ImuExports.Tasks.AusGeochem.Factories
                 {
                     string.IsNullOrWhiteSpace(map.GetTrimString("RocRockDescription")) ? null : $"Description: {map.GetTrimString("RocRockDescription")}",
                     string.IsNullOrWhiteSpace(map.GetTrimString("RocMainMineralsPresent")) ? null : $"Main Minerals: {map.GetTrimString("RocMainMineralsPresent")}",
-                    string.IsNullOrWhiteSpace(map.GetTrimString("RocThinSection")) ? null : $"Thin Section: {map.GetTrimString("RocThinSection")}",
-                    string.IsNullOrWhiteSpace(map.GetTrimString("MinChemicalAnalysis")) ? null : $"Chemical Analysis: {map.GetTrimString("MinChemicalAnalysis")}",
+                    string.IsNullOrWhiteSpace(map.GetTrimString("RocThinSection")) || map.GetTrimString("RocThinSection") != "Yes"  ? null : $"Thin Section: {map.GetTrimString("RocThinSection")}",
+                    string.IsNullOrWhiteSpace(map.GetTrimString("MinChemicalAnalysis")) || map.GetTrimString("MinChemicalAnalysis") != "Yes" ? null : $"Chemical Analysis: {map.GetTrimString("MinChemicalAnalysis")}",
                 }.Concatenate(" | ");
             }
 
@@ -39,9 +39,7 @@ namespace ImuExports.Tasks.AusGeochem.Factories
             string typeSpecimen = null;
             if (map.GetTrimString("MinType") == "Yes")
                 typeSpecimen = map.GetTrimString("MinTypeType");
-            else if (map.GetTrimString("MinType") == "No")
-                typeSpecimen = map.GetTrimString("MinType");
-            
+
             if (map.GetTrimString("ColDiscipline") == "Mineralogy")
             {
                 specimen.MineralComment = new[]
@@ -49,8 +47,8 @@ namespace ImuExports.Tasks.AusGeochem.Factories
                     string.IsNullOrWhiteSpace(map.GetTrimString("MinSpecies")) ? null : $"Mineral Species: {map.GetTrimString("MinSpecies")}",
                     string.IsNullOrWhiteSpace(map.GetTrimString("MinVariety")) ? null : $"Mineral Variety: {map.GetTrimString("MinVariety")}",
                     string.IsNullOrWhiteSpace(map.GetTrimString("MinAssociatedMatrix")) ? null : $"Associated Matrix: {map.GetTrimString("MinAssociatedMatrix")}",
-                    string.IsNullOrWhiteSpace(map.GetTrimString("MinXrayed")) ? null : $"X-rayed: {map.GetTrimString("MinXrayed")}",
-                    string.IsNullOrWhiteSpace(map.GetTrimString("MinChemicalAnalysis")) ? null : $"Chemical Analysis: {map.GetTrimString("MinChemicalAnalysis")}",
+                    string.IsNullOrWhiteSpace(map.GetTrimString("MinXrayed")) || map.GetTrimString("MinXrayed") != "Yes" ? null : $"X-rayed: {map.GetTrimString("MinXrayed")}",
+                    string.IsNullOrWhiteSpace(map.GetTrimString("MinChemicalAnalysis")) || map.GetTrimString("MinChemicalAnalysis") != "Yes" ? null : $"Chemical Analysis: {map.GetTrimString("MinChemicalAnalysis")}",
                     typeSpecimen == null ? null : $"Type specimen: {typeSpecimen}",
                 }.Concatenate(" | ");
             }
@@ -102,27 +100,33 @@ namespace ImuExports.Tasks.AusGeochem.Factories
                         geo.GetTrimString("LocNearestNamedPlace_tab"),
                         geo.GetTrimString("LocPreciseLocation"),
                     }.Concatenate(", ");
+                    
+                    specimen.LocationName = new[]
+                    {
+                        geo.GetTrimString("LocDistrictCountyShire_tab"),
+                        geo.GetTrimString("LocTownship_tab"),
+                        geo.GetTrimString("LocNearestNamedPlace_tab"),
+                        geo.GetTrimString("LocPreciseLocation"),
+                    }.Concatenate(", ");
                 }
 
-                var elevation = new[]
+                if (site.GetTrimString("EraDepthDeterminationMethod") == "Subsurface - mine/quarry, unknown depth" ||
+                    site.GetTrimString("EraDepthDeterminationMethod") ==
+                    "Subsurface - mine/quarry, depth from locality data")
                 {
-                    site.GetTrimString("LocElevationASLFromMt"),
-                    site.GetTrimString("LocElevationASLToMt"),
-                }.Concatenate(" to ");
-                
-                if(!string.IsNullOrWhiteSpace(elevation))
-                    specimen.Elevation = $"{elevation} metres";
+                    specimen.LocationKindId = "Mine (unknown)";
+                }
+                else if (site.GetTrimString("EraDepthDeterminationMethod") ==
+                    "Subsurface - borehole/well, depth unknown" || site.GetTrimString("EraDepthDeterminationMethod") ==
+                    "Subsurface - borehole/well, depth from locality data")
+                {
+                    specimen.LocationKindId = "Borehole/well";
+                }
+                else if(string.IsNullOrWhiteSpace(site.GetTrimString("EraDepthDeterminationMethod")))
+                {
+                    specimen.LocationKindId = "Unknown";
+                }
 
-                specimen.VerticalDatumId = !string.IsNullOrWhiteSpace(site.GetTrimString("LocDeterminationMethodASL"))
-                    ? site.GetTrimString("LocDeterminationMethodASL")
-                    : site.GetTrimString("LocDeterminationMethod");
-
-                specimen.LocationKindId = string.IsNullOrWhiteSpace(site.GetTrimString("EraDepthDeterminationMethod"))
-                    ? "Outcrop location"
-                    : null;
-
-                specimen.LocationName = site.GetTrimString("LocPreciseLocation");
-                
                 specimen.LocationNotes = new[]
                 {
                     latlongLocationNotes,

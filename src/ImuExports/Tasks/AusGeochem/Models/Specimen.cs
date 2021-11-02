@@ -24,10 +24,6 @@
         
         public string DateGeoreferenced { get; set; }
         
-        public string Elevation { get; set; }
-        
-        public string VerticalDatumId { get; set; }
-        
         public string LocationKindId { get; set; }
         
         public string LocationName { get; set; }

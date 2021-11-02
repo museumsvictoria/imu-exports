@@ -18,8 +18,6 @@ namespace ImuExports.Tasks.AusGeochem.ClassMaps
             Map(m => m.LatLongPrecision).Name("lat/long precision_m");
             Map(m => m.GeoreferencedBy).Name("georeferencedBy");
             Map(m => m.DateGeoreferenced).Name("dateGeoreferenced");
-            Map(m => m.Elevation).Name("elevation");
-            Map(m => m.VerticalDatumId).Name("vertical_datum_id");
             Map(m => m.LocationKindId).Name("location_kind_id");
             Map(m => m.LocationName).Name("loc_name");
             Map(m => m.LocationNotes).Name("locationNotes");
