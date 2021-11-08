@@ -58,6 +58,8 @@ namespace ImuExports.Tasks.AusGeochem.Factories
             {
                 var latlong = site.GetMaps("latlong").FirstOrDefault(x => x.GetTrimString("LatPreferred_tab") == "Yes");
                 string latlongLocationNotes = null;
+                string georeferenceAssignedNotes = null;
+                
                 if (latlong != null)
                 {
                     var decimalLatitude = (object[]) latlong["LatLatitudeDecimal_nesttab"];
@@ -76,14 +78,18 @@ namespace ImuExports.Tasks.AusGeochem.Factories
                     
                     specimen.GeoreferencedBy = MakePartyName(latlong.GetMap("determinedBy"));
                     specimen.DateGeoreferenced = latlong.GetTrimString("LatDetDate0");
+                    
+                    georeferenceAssignedNotes = new []
+                    {
+                        specimen.GeoreferencedBy,
+                        specimen.DateGeoreferenced,
+                    }.Concatenate(", ");
 
                     latlongLocationNotes = new[]
                     {
                         specimen.DecimalLatitude,
                         specimen.DecimalLongitude,
                         string.IsNullOrWhiteSpace(latlong.GetTrimString("LatDatum_tab")) ? "datum unknown" : latlong.GetTrimString("LatDatum_tab"),
-                        specimen.DateGeoreferenced,
-                        specimen.GeoreferencedBy,
                     }.Concatenate(", ");
                 }
 
@@ -114,7 +120,7 @@ namespace ImuExports.Tasks.AusGeochem.Factories
                     site.GetTrimString("EraDepthDeterminationMethod") ==
                     "Subsurface - mine/quarry, depth from locality data")
                 {
-                    specimen.LocationKindId = "Mine (unknown)";
+                    specimen.LocationKindId = "Mine";
                 }
                 else if (site.GetTrimString("EraDepthDeterminationMethod") ==
                     "Subsurface - borehole/well, depth unknown" || site.GetTrimString("EraDepthDeterminationMethod") ==
@@ -130,6 +136,7 @@ namespace ImuExports.Tasks.AusGeochem.Factories
                 specimen.LocationNotes = new[]
                 {
                     latlongLocationNotes,
+                    string.IsNullOrWhiteSpace(georeferenceAssignedNotes) ? null : $"Georeference assigned: {georeferenceAssignedNotes}",
                     geoLocationNotes,
                 }.Concatenate(" | ");
 
@@ -163,8 +170,8 @@ namespace ImuExports.Tasks.AusGeochem.Factories
 
             specimen.ArchiveLocation = "Museums Victoria";
             specimen.ArchiveContact = "AskUs@museum.vic.gov.au";
-            specimen.DateCollectedMin = map.GetTrimString("LocDateCollectedTo");
-            specimen.DateCollectedMax = map.GetTrimString("LocDateCollectedFrom");
+            specimen.DateCollectedMin = map.GetTrimString("LocDateCollectedFrom");
+            specimen.DateCollectedMax = map.GetTrimString("LocDateCollectedTo");
 
             specimen.Collector = map.GetMaps("collectors").Select(MakePartyName).Concatenate(", ");
 
