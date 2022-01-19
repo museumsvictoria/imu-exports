@@ -161,7 +161,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories
                     occurrence.Municipality = geo.GetTrimString("LocTownship_tab");
                 }
 
-                var latlong = site.GetMaps("latlong").FirstOrDefault();
+                var latlong = site.GetMaps("latlong").FirstOrDefault(x => x.GetTrimString("LatPreferred_tab") == "Yes");
                 if (latlong != null)
                 {
                     var decimalLatitude = (object[]) latlong["LatLatitudeDecimal_nesttab"];
