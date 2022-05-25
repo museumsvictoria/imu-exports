@@ -2,11 +2,8 @@
 using CommandLine.Text;
 using ImuExports.NetFramework472.Tasks.AtlasOfLivingAustralia;
 using ImuExports.NetFramework472.Tasks.AusGeochem;
-using ImuExports.NetFramework472.Tasks.ExtractImages;
 using ImuExports.NetFramework472.Tasks.FieldGuideGippsland;
 using ImuExports.NetFramework472.Tasks.FieldGuideGunditjmara;
-using ImuExports.NetFramework472.Tasks.InsideOut;
-using ImuExports.NetFramework472.Tasks.WikimediaCommons;
 
 namespace ImuExports.NetFramework472.Config
 {
@@ -21,15 +18,6 @@ namespace ImuExports.NetFramework472.Config
         [VerbOption("gun", HelpText = "Export records for Gunditjmara Field Guide.")]
         public FieldGuideGunditjmaraOptions Gun { get; set; }
 
-        [VerbOption("wc", HelpText = "Export records for the Wikimedia commons.")]
-        public WikimediaCommonsOptions Wc { get; set; }
-
-        [VerbOption("ei", HelpText = "Extract images for the Ursula.")]
-        public ExtractImagesOptions Ei { get; set; }
-
-        [VerbOption("io", HelpText = "Extract records for Inside Out.")]
-        public InsideOutOptions Io { get; set; }
-        
         [VerbOption("agn", HelpText = "Export records for AusGeochem.")]
         public AusGeochemOptions Agn { get; set; }
 

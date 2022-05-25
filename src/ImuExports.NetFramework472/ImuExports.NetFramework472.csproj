@@ -109,19 +109,6 @@
     <Compile Include="Tasks\AusGeochem\Config\AusGeochemConstants.cs" />
     <Compile Include="Tasks\AusGeochem\Factories\SpecimenFactory.cs" />
     <Compile Include="Tasks\AusGeochem\Models\Specimen.cs" />
-    <Compile Include="Tasks\ExtractImages\ExtractImagesOptions.cs" />
-    <Compile Include="Tasks\ExtractImages\ExtractImagesTask.cs" />
-    <Compile Include="Tasks\InsideOut\Config\InsideOutConstants.cs" />
-    <Compile Include="Tasks\InsideOut\Factories\AudioFactory.cs" />
-    <Compile Include="Tasks\InsideOut\Factories\ThumbnailFactory.cs" />
-    <Compile Include="Tasks\InsideOut\Factories\ImageFactory.cs" />
-    <Compile Include="Tasks\InsideOut\Factories\ObjectFactory.cs" />
-    <Compile Include="Tasks\InsideOut\InsideOutOptions.cs" />
-    <Compile Include="Tasks\InsideOut\InsideOutTask.cs" />
-    <Compile Include="Tasks\InsideOut\Models\Audio.cs" />
-    <Compile Include="Tasks\InsideOut\Models\Thumbnail.cs" />
-    <Compile Include="Tasks\InsideOut\Models\Image.cs" />
-    <Compile Include="Tasks\InsideOut\Models\Object.cs" />
     <Compile Include="Tasks\FieldGuideGunditjmara\Factories\GunditjmaraAudioFactory.cs" />
     <Compile Include="Tasks\FieldGuideGunditjmara\Factories\GunditjmaraImageFactory.cs" />
     <Compile Include="Tasks\FieldGuideGunditjmara\Factories\GunditjmaraSpeciesFactory.cs" />
@@ -141,10 +128,6 @@
     <Compile Include="Tasks\FieldGuideGippsland\Models\GippslandMedia.cs" />
     <Compile Include="Tasks\FieldGuideGippsland\Models\GippslandSpecies.cs" />
     <Compile Include="Tasks\ImuTaskBase.cs" />
-    <Compile Include="Tasks\WikimediaCommons\Models\Item.cs" />
-    <Compile Include="Tasks\WikimediaCommons\Models\Media.cs" />
-    <Compile Include="Tasks\WikimediaCommons\WikimediaCommonsOptions.cs" />
-    <Compile Include="Tasks\WikimediaCommons\WikimediaCommonsTask.cs" />
     <Compile Include="Utilities\HtmlConverter.cs" />
     <Compile Include="Utilities\NetworkShareAccesser.cs" />
   </ItemGroup>
