@@ -1,0 +1,221 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4F6E748C-0AA2-4F3E-8B51-D5392B22860A}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ImuExports.NetFramework472</RootNamespace>
+    <AssemblyName>ImuExports.NetFramework472</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="imu-1.0.03">
+      <HintPath>..\..\lib\IMu\imu-1.0.03.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Config\Constants.cs" />
+    <Compile Include="Config\ProgramConfig.cs" />
+    <Compile Include="Extensions\MapExtensions.cs" />
+    <Compile Include="Extensions\Utils.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Infrastructure\IModuleDeletionsConfig.cs" />
+    <Compile Include="Infrastructure\IModuleSearchConfig.cs" />
+    <Compile Include="Infrastructure\IFactory.cs" />
+    <Compile Include="Infrastructure\ITaskOptions.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\AtlasOfLivingAustraliaOptions.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\MultimediaClassMap.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Config\AtlasOfLivingAustraliaConstants.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Config\MultimediaModuleSearchConfig.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Config\CollectionEventModuleSearchConfig.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Config\CatalogueModuleSearchConfig.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Config\TaxonomyModuleSearchConfig.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Config\SiteModuleSearchConfig.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\MultimediaFactory.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Factories\OccurrenceFactory.cs" />
+    <Compile Include="Config\GlobalOptions.cs" />
+    <Compile Include="Config\Options.cs" />
+    <Compile Include="Config\ContainerConfig.cs" />
+    <Compile Include="Infrastructure\ImuSession.cs" />
+    <Compile Include="Infrastructure\ImuSessionProvider.cs" />
+    <Compile Include="Config\SerilogConfig.cs" />
+    <Compile Include="Infrastructure\TaskRunner.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\ClassMaps\OccurrenceClassMap.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Helpers\Assertions.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Helpers\MapSearches.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Application.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Multimedia.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\Models\Occurrence.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tasks\AtlasOfLivingAustralia\AtlasOfLivingAustraliaTask.cs" />
+    <Compile Include="Infrastructure\ITask.cs" />
+    <Compile Include="Tasks\ExtractImages\ExtractImagesOptions.cs" />
+    <Compile Include="Tasks\ExtractImages\ExtractImagesTask.cs" />
+    <Compile Include="Tasks\InsideOut\Config\InsideOutConstants.cs" />
+    <Compile Include="Tasks\InsideOut\Factories\AudioFactory.cs" />
+    <Compile Include="Tasks\InsideOut\Factories\ThumbnailFactory.cs" />
+    <Compile Include="Tasks\InsideOut\Factories\ImageFactory.cs" />
+    <Compile Include="Tasks\InsideOut\Factories\ObjectFactory.cs" />
+    <Compile Include="Tasks\InsideOut\InsideOutOptions.cs" />
+    <Compile Include="Tasks\InsideOut\InsideOutTask.cs" />
+    <Compile Include="Tasks\InsideOut\Models\Audio.cs" />
+    <Compile Include="Tasks\InsideOut\Models\Thumbnail.cs" />
+    <Compile Include="Tasks\InsideOut\Models\Image.cs" />
+    <Compile Include="Tasks\InsideOut\Models\Object.cs" />
+    <Compile Include="Tasks\FieldGuideGunditjmara\Factories\GunditjmaraAudioFactory.cs" />
+    <Compile Include="Tasks\FieldGuideGunditjmara\Factories\GunditjmaraImageFactory.cs" />
+    <Compile Include="Tasks\FieldGuideGunditjmara\Factories\GunditjmaraSpeciesFactory.cs" />
+    <Compile Include="Tasks\FieldGuideGunditjmara\FieldGuideGunditjmaraOptions.cs" />
+    <Compile Include="Tasks\FieldGuideGunditjmara\FieldGuideGunditjmaraTask.cs" />
+    <Compile Include="Tasks\FieldGuideGunditjmara\Models\GunditjmaraAudio.cs" />
+    <Compile Include="Tasks\FieldGuideGunditjmara\Models\GunditjmaraImage.cs" />
+    <Compile Include="Tasks\FieldGuideGunditjmara\Models\GunditjmaraMedia.cs" />
+    <Compile Include="Tasks\FieldGuideGunditjmara\Models\GunditjmaraSpecies.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\Factories\GippslandAudioFactory.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\Factories\GippslandImageFactory.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\Factories\GippslandSpeciesFactory.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\FieldGuideGippslandOptions.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\FieldGuideGippslandTask.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\Models\GippslandAudio.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\Models\GippslandImage.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\Models\GippslandMedia.cs" />
+    <Compile Include="Tasks\FieldGuideGippsland\Models\GippslandSpecies.cs" />
+    <Compile Include="Tasks\ImuTaskBase.cs" />
+    <Compile Include="Tasks\WikimediaCommons\Models\Item.cs" />
+    <Compile Include="Tasks\WikimediaCommons\Models\Media.cs" />
+    <Compile Include="Tasks\WikimediaCommons\WikimediaCommonsOptions.cs" />
+    <Compile Include="Tasks\WikimediaCommons\WikimediaCommonsTask.cs" />
+    <Compile Include="Utilities\HtmlConverter.cs" />
+    <Compile Include="Utilities\NetworkShareAccesser.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Tasks\AtlasOfLivingAustralia\Resources\meta.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser">
+      <Version>1.9.71</Version>
+    </PackageReference>
+    <PackageReference Include="CsvHelper">
+      <Version>7.1.0</Version>
+    </PackageReference>
+    <PackageReference Include="HtmlAgilityPack">
+      <Version>1.4.9</Version>
+    </PackageReference>
+    <PackageReference Include="LiteDB">
+      <Version>4.1.4</Version>
+    </PackageReference>
+    <PackageReference Include="Magick.NET-Q16-AnyCPU">
+      <Version>7.20.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>8.0.3</Version>
+    </PackageReference>
+    <PackageReference Include="RestSharp">
+      <Version>105.2.3</Version>
+    </PackageReference>
+    <PackageReference Include="Serilog">
+      <Version>2.9.0</Version>
+    </PackageReference>
+    <PackageReference Include="Serilog.Enrichers.Environment">
+      <Version>2.1.3</Version>
+    </PackageReference>
+    <PackageReference Include="Serilog.Settings.AppSettings">
+      <Version>2.2.2</Version>
+    </PackageReference>
+    <PackageReference Include="Serilog.Sinks.ColoredConsole">
+      <Version>3.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Serilog.Sinks.RollingFile">
+      <Version>3.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="Serilog.Sinks.Seq">
+      <Version>4.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="SerilogMetrics">
+      <Version>2.1.0</Version>
+    </PackageReference>
+    <PackageReference Include="SimpleInjector">
+      <Version>3.1.2</Version>
+    </PackageReference>
+    <PackageReference Include="SSH.NET">
+      <Version>2016.1.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /y $(ProjectDir)Tasks\AtlasOfLivingAustralia\Resources  $(ProjectDir)$(OutDir)</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

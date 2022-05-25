@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImuExports", "ImuExports\ImuExports.csproj", "{4F6E748C-0AA2-4F3E-8B51-D5392B22860A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImuExports.NetFramework472", "ImuExports.NetFramework472\ImuExports.NetFramework472.csproj", "{4F6E748C-0AA2-4F3E-8B51-D5392B22860A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImuExports.Tests", "ImuExports.Tests\ImuExports.Tests.csproj", "{1A231674-3E2C-4490-B1A4-A5D27DD9EC22}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImuExports.NetFramework472.Tests", "ImuExports.NetFramework472.Tests\ImuExports.NetFramework472.Tests.csproj", "{1A231674-3E2C-4490-B1A4-A5D27DD9EC22}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
