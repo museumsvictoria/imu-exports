@@ -4,24 +4,24 @@ namespace ImuExports.Configuration
     {
         public const string SectionName = "AppSettings";
 
-        public string LiteDbConnectionString { get; set; }
+        public string LiteDbConnectionString { get; set; } = string.Empty;
         
-        public Emu Emu { get; set; }
+        public Emu? Emu { get; set; }
         
-        public AtlasOfLivingAustralia AtlasOfLivingAustralia { get; set; }
+        public AtlasOfLivingAustralia? AtlasOfLivingAustralia { get; set; }
     }
 
     public class Emu
     {
-        public string Host { get; set; }
+        public string Host { get; set; } = string.Empty;
         
-        public string Port { get; set; }
+        public string Port { get; set; } = string.Empty;
     }
 
     public class AtlasOfLivingAustralia
     {
-        public string SFTPUsername { get; set; }
+        public string Username { get; set; } = string.Empty;
         
-        public string SFTPPassword { get; set; }
+        public string Password { get; set; } = string.Empty;
     }
 }

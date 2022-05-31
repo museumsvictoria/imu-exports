@@ -1,8 +1,8 @@
-using ImuExports.Configuration;
-using ImuExports.Infrastructure;
+global using ImuExports.Configuration;
+global using ImuExports.Infrastructure;
+using Serilog;
 
 var configuration = new ConfigurationBuilder()
-    .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile(
         $"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production"}.json",
@@ -10,15 +10,35 @@ var configuration = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-var host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((context, services) =>
-    {
-        var configSection = context.Configuration.GetSection(AppSettings.SectionName);
-        services.Configure<AppSettings>(configSection);
-        services.AddHostedService<TaskRunner>();
-    })
-    .UseConsoleLifetime()
-    .Build();
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(configuration)
+    .WriteTo.File(Path.Combine(AppContext.BaseDirectory, "logs/log.txt"),
+        rollingInterval: RollingInterval.Day)
+    .CreateLogger();
 
-await host.RunAsync();
+try
+{
+    Log.Information("CollectionsOnline Tasks starting up...");
+    
+    var host = Host.CreateDefaultBuilder(args)
+        .ConfigureServices((context, services) =>
+        {
+            var configSection = context.Configuration.GetSection(AppSettings.SectionName);
 
+            services.Configure<AppSettings>(configSection);
+            services.AddHostedService<TaskRunner>();
+        })
+        .UseConsoleLifetime()
+        .UseSerilog()
+        .Build();
+    
+    await host.RunAsync();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "CollectionsOnline Tasks startup failed...");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
