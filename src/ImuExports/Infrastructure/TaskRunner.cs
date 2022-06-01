@@ -1,6 +1,4 @@
-using ImuExports.Configuration;
 using Microsoft.Extensions.Options;
-using Serilog;
 
 namespace ImuExports.Infrastructure;
 
@@ -8,15 +6,18 @@ public class TaskRunner : BackgroundService
 {
     private readonly AppSettings _appSettings;
     private readonly IHostApplicationLifetime _appLifetime;
-    private readonly IEnumerable<ITask> _tasks;
+    private readonly ITask _task;
+    private readonly ITaskOptions _taskOptions;
 
     public TaskRunner(IOptions<AppSettings> appSettings,
         IHostApplicationLifetime appLifetime,
-        IEnumerable<ITask> tasks)
+        ITask task,
+        ITaskOptions taskOptions)
     {
         _appSettings = appSettings.Value;
         _appLifetime = appLifetime;
-        _tasks = tasks;
+        _task = task;
+        _taskOptions = taskOptions;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

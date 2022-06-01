@@ -2,6 +2,7 @@
   "profiles": {
     "ImuExports": {
       "commandName": "Project",
+      "commandLineArgs": "ala",
       "dotnetRunMessages": true,
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"

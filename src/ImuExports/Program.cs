@@ -1,6 +1,6 @@
 global using ImuExports.Configuration;
 global using ImuExports.Infrastructure;
-using Serilog;
+global using Serilog;
 
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -18,20 +18,25 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    Log.Information("CollectionsOnline Tasks starting up...");
+    // Parse command line options
+    CommandOptions.Initialize(args);
     
+    Log.Debug("CollectionsOnline Tasks starting up...");
+
     var host = Host.CreateDefaultBuilder(args)
         .ConfigureServices((context, services) =>
         {
             var configSection = context.Configuration.GetSection(AppSettings.SectionName);
-
-            services.Configure<AppSettings>(configSection);
-            services.AddHostedService<TaskRunner>();
+            
+            services
+                .Configure<AppSettings>(configSection)
+                .AddHostedService<TaskRunner>()
+                .AddCommandOptions();
         })
         .UseConsoleLifetime()
         .UseSerilog()
         .Build();
-    
+
     await host.RunAsync();
 }
 catch (Exception ex)
