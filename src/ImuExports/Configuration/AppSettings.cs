@@ -4,7 +4,7 @@ namespace ImuExports.Configuration
     {
         public const string SectionName = "AppSettings";
 
-        public string LiteDbConnectionString { get; set; } = string.Empty;
+        public string LiteDbFilename { get; set; } = string.Empty;
         
         public Emu? Emu { get; set; }
         

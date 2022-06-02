@@ -2,8 +2,16 @@
 {
     public interface ITaskOptions
     {
-        void Initialize();
+        public Task Initialize(AppSettings appSettings)
+        {
+            return Task.CompletedTask;
+        }
 
         Type TypeOfTask { get; }
+        
+        public Task CleanUp(AppSettings appSettings)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

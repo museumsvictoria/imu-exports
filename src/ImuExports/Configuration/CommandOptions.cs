@@ -6,7 +6,7 @@ namespace ImuExports.Configuration
 {
     public static class CommandOptions
     {
-        public static ITaskOptions? TaskOptions;
+        public static ITaskOptions TaskOptions = null!;
 
         public static void Initialize(string[] args)
         {
@@ -20,7 +20,7 @@ namespace ImuExports.Configuration
                 .WithNotParsed(errors =>
                 {
                     // Exit with error code, errors automatically output to cli
-                    Environment.Exit(-1);
+                    Environment.Exit(Constants.ExitCodeError);
                 });
         }
     }

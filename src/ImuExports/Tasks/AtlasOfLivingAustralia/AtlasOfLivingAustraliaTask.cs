@@ -1,10 +1,12 @@
-﻿namespace ImuExports.Tasks.AtlasOfLivingAustralia
+﻿namespace ImuExports.Tasks.AtlasOfLivingAustralia;
+
+public class AtlasOfLivingAustraliaTask : ITask
 {
-    public class AtlasOfLivingAustraliaTask : ITask
+    public async Task Run(CancellationToken stoppingToken)
     {
-        public void Run()
-        {            
+        await Task.Run(() =>
+        {
             Log.Logger.Information("Run AtlasOfLivingAustraliaTask");
-        }
+        }, stoppingToken);
     }
 }

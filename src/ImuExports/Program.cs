@@ -3,10 +3,10 @@ global using ImuExports.Infrastructure;
 global using Serilog;
 
 var configuration = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile("appsettings.json", false, true)
     .AddJsonFile(
         $"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production"}.json",
-        optional: true)
+        true)
     .AddEnvironmentVariables()
     .Build();
 
@@ -20,18 +20,18 @@ try
 {
     // Parse command line options
     CommandOptions.Initialize(args);
-    
+
     Log.Debug("CollectionsOnline Tasks starting up...");
 
     var host = Host.CreateDefaultBuilder(args)
         .ConfigureServices((context, services) =>
         {
             var configSection = context.Configuration.GetSection(AppSettings.SectionName);
-            
+
             services
                 .Configure<AppSettings>(configSection)
                 .AddHostedService<TaskRunner>()
-                .AddCommandOptions();
+                .AddTask();
         })
         .UseConsoleLifetime()
         .UseSerilog()

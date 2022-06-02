@@ -1,10 +1,9 @@
-﻿namespace ImuExports.Tasks.AusGeochem
+﻿namespace ImuExports.Tasks.AusGeochem;
+
+public class AusGeochemTask : ITask
 {
-    public class AusGeochemTask : ITask
+    public async Task Run(CancellationToken stoppingToken)
     {
-        public void Run()
-        {            
-            Log.Logger.Information("Run AusGeochemTask");
-        }
+        await Task.Run(() => { Log.Logger.Information("Run AusGeochemTask"); }, stoppingToken);
     }
 }
