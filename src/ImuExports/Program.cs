@@ -1,6 +1,7 @@
 global using ImuExports.Configuration;
 global using ImuExports.Infrastructure;
 global using Serilog;
+using SimpleInjector;
 
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", false, true)
@@ -22,7 +23,11 @@ try
     CommandOptions.Initialize(args);
 
     Log.Debug("CollectionsOnline Tasks starting up...");
+    
+    // Create DI container as we need to add it while configuring host
+    var container = new Container();
 
+    // Configure host
     var host = Host.CreateDefaultBuilder(args)
         .ConfigureServices((context, services) =>
         {
@@ -30,13 +35,22 @@ try
 
             services
                 .Configure<AppSettings>(configSection)
-                .AddHostedService<TaskRunner>()
-                .AddTask();
+                .AddSimpleInjector(container, options =>
+                {
+                    options.AddHostedService<TaskRunner>();
+                    options.AddLogging();
+                });
         })
         .UseConsoleLifetime()
         .UseSerilog()
-        .Build();
+        .Build()
+        .UseSimpleInjector(container);
 
+    // Configure and verify DI container
+    container
+        .Initialize()
+        .Verify();
+    
     await host.RunAsync();
 }
 catch (Exception ex)

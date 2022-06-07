@@ -54,7 +54,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="imu-1.0.03">
-      <HintPath>..\..\lib\IMu\imu-1.0.03.dll</HintPath>
+      <HintPath>..\..\dep\IMu\imu-1.0.03.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />

@@ -34,7 +34,12 @@ public class TaskRunner : BackgroundService
         catch (Exception ex)
         {
             if (ex is OperationCanceledException)
+            {
                 Log.Logger.Information("TaskRunner has been cancelled prematurely");
+                
+                // Attempt to cleanup
+                await CommandOptions.TaskOptions.CleanUp(_appSettings);
+            }
             else
                 Log.Logger.Error(ex, "Exception occured running task");
 

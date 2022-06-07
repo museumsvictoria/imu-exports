@@ -16,6 +16,7 @@
     <ItemGroup>
         <PackageReference Include="CommandLineParser" Version="2.9.1" />
         <PackageReference Include="LiteDB" Version="5.0.11" />
+        <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="11.1.2" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
         <PackageReference Include="Serilog" Version="2.11.0" />
         <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
@@ -24,6 +25,17 @@
         <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
         <PackageReference Include="Serilog.Sinks.Seq" Version="5.1.1" />
         <PackageReference Include="SerilogMetrics" Version="2.1.0" />
+        <PackageReference Include="SimpleInjector.Integration.GenericHost" Version="5.3.0" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Reference Include="imu-1.0.03">
+        <HintPath>..\..\dep\IMu\imu-1.0.03.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Resource Include="Tasks\AtlasOfLivingAustralia\Resources\meta.xml" />
     </ItemGroup>
 
 </Project>
