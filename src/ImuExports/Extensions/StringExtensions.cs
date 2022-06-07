@@ -5,21 +5,21 @@ namespace ImuExports.Extensions;
 
 public static class StringExtensions
 {
-    public static string Concatenate(this IEnumerable<string>? input, string delimiter)
+    public static string Concatenate(this IEnumerable<string> input, string delimiter)
     {
-        var s = new StringBuilder();
+        var result = new StringBuilder();
 
         if (input != null)
             foreach (var item in input)
                 if (!string.IsNullOrWhiteSpace(item))
                 {
-                    if (s.Length != 0)
-                        s.Append(delimiter);
+                    if (result.Length != 0)
+                        result.Append(delimiter);
 
-                    s.Append(item);
+                    result.Append(item);
                 }
 
-        return s.Length != 0 ? s.ToString() : null;
+        return result.Length != 0 ? result.ToString() : null;
     }
 
     public static string ReplaceLineBreaks(this string input, string delimiter = " ")

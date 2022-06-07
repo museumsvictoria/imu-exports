@@ -31,7 +31,7 @@ try
     var host = Host.CreateDefaultBuilder(args)
         .ConfigureServices((context, services) =>
         {
-            var configSection = context.Configuration.GetSection(AppSettings.SectionName);
+            var configSection = context.Configuration.GetSection(AppSettings.SECTION_NAME);
 
             services
                 .Configure<AppSettings>(configSection)

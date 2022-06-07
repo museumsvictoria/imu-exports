@@ -2,13 +2,13 @@ namespace ImuExports.Configuration
 {
     public class AppSettings
     {
-        public const string SectionName = "AppSettings";
+        public const string SECTION_NAME = "AppSettings";
 
         public string LiteDbFilename { get; set; } = string.Empty;
         
-        public Emu? Emu { get; set; }
+        public Emu Emu { get; set; }
         
-        public AtlasOfLivingAustralia? AtlasOfLivingAustralia { get; set; }
+        public AtlasOfLivingAustralia AtlasOfLivingAustralia { get; set; }
     }
 
     public class Emu

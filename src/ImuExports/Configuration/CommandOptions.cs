@@ -17,7 +17,7 @@ namespace ImuExports.Configuration
                     // Arguments parsed successfully so assign to global options
                     TaskOptions = (ITaskOptions)options;
                 })
-                .WithNotParsed(errors =>
+                .WithNotParsed(_ =>
                 {
                     // Exit with error code, errors automatically output to cli
                     Environment.Exit(Constants.ExitCodeError);

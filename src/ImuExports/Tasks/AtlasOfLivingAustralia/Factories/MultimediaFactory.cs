@@ -5,6 +5,7 @@ using IMu;
 using ImuExports.Extensions;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Helpers;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
+using ImuExports.Utilities;
 using Microsoft.Extensions.Options;
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories;
@@ -43,8 +44,8 @@ public class MultimediaFactory : IFactory<Multimedia>
                     string.Equals(x.GetTrimString("MdaElement_tab"), "dcTitle", StringComparison.OrdinalIgnoreCase) &&
                     string.Equals(x.GetTrimString("MdaQualifier_tab"), "Caption.COL"));
 
-            // if (captionMap != null)
-            //     multimedia.Description = HtmlConverter.HtmlToText(captionMap.GetTrimString("MdaFreeText_tab"));
+            if (captionMap != null)
+                multimedia.Description = HtmlConverter.HtmlToText(captionMap.GetTrimString("MdaFreeText_tab"));
 
             if (map.GetTrimString("RigLicence")?.Equals("CC BY", StringComparison.OrdinalIgnoreCase) == true)
                 multimedia.License = "https://creativecommons.org/licenses/by/4.0/";

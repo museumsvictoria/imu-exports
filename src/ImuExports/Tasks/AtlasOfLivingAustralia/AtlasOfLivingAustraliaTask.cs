@@ -1,4 +1,9 @@
-﻿using IMu;
+﻿using System.Globalization;
+using System.Text;
+using CsvHelper;
+using CsvHelper.Configuration;
+using IMu;
+using ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Config;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 using Microsoft.Extensions.Options;
@@ -88,6 +93,32 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
             
                         Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset, cachedIrns.Count);
                     }
+                }
+                
+                // Save data
+                Log.Logger.Information("Saving occurrence data as csv");
+                
+                var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
+                {
+                    HasHeaderRecord = true,
+                    SanitizeForInjection = false
+                };
+
+                using (var writer = new StreamWriter(_options.Destination + @"occurrences.csv", false, Encoding.UTF8))
+                using (var csv = new CsvWriter(writer, csvConfig))
+                {
+                    csv.Context.RegisterClassMap<OccurrenceClassMap>();
+                    csv.WriteRecords(occurrences);
+                }
+
+                Log.Logger.Information("Saving multimedia data as csv");
+                using (var writer = new StreamWriter(_options.Destination + @"multimedia.csv", false, Encoding.UTF8))
+                using (var csv = new CsvWriter(writer, csvConfig))
+                {
+                    var multimedia = occurrences.SelectMany(x => x.Multimedia);
+
+                    csv.Context.RegisterClassMap<MultimediaClassMap>();
+                    csv.WriteRecords(multimedia);
                 }
             }
         }, stoppingToken);

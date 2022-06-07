@@ -48,7 +48,6 @@ public class AtlasOfLivingAustraliaOptions : ITaskOptions
                 Log.Logger.Debug("No destination specified... assuming task is automated");
 
                 Destination = $"{AppContext.BaseDirectory}\\{Utils.RandomString(8)}";
-                Log.Logger.Information("Exporting to directory {Destination}", Destination);
 
                 // Check for last import date
                 using var db = new LiteRepository(new ConnectionString()
@@ -77,12 +76,16 @@ public class AtlasOfLivingAustraliaOptions : ITaskOptions
             else
             {
                 Log.Logger.Debug("Destination specified... assuming task is being run manually");
-                Log.Logger.Information("Exporting to directory {Destination}", Destination);
             }
 
             // Add backslash if it doesnt exist to our destination directory
             if (!Destination.EndsWith(@"\")) Destination += @"\";
 
+            if (!Path.IsPathFullyQualified(Destination))
+            {
+                Destination = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, Destination));
+            }
+            
             // Make sure destination directory exists
             if (!Directory.Exists(Destination))
                 try
@@ -94,6 +97,8 @@ public class AtlasOfLivingAustraliaOptions : ITaskOptions
                     Log.Logger.Fatal(ex, "Error creating {Destination} directory", Destination);
                     Environment.Exit(Constants.ExitCodeError);
                 }
+            
+            Log.Logger.Information("Exporting to directory {Destination}", Destination);
 
             // Parse ModifiedAfterDate
             if (!string.IsNullOrWhiteSpace(ModifiedAfterDate))
@@ -107,7 +112,7 @@ public class AtlasOfLivingAustraliaOptions : ITaskOptions
                 }
                 catch (Exception ex)
                 {
-                    Log.Logger.Fatal(ex, "Error parsing ModifiedAfterDate, ensure string is in the format yyyy-MM-dd",
+                    Log.Logger.Fatal(ex, "Error parsing ModifiedAfterDate {ModifiedAfterDate}, ensure string is in the format yyyy-MM-dd",
                         ModifiedAfterDate);
                     Environment.Exit(Constants.ExitCodeError);
                 }
@@ -124,7 +129,7 @@ public class AtlasOfLivingAustraliaOptions : ITaskOptions
                 }
                 catch (Exception ex)
                 {
-                    Log.Logger.Fatal(ex, "Error parsing ModifiedBeforeDate, ensure string is in the format yyyy-MM-dd",
+                    Log.Logger.Fatal(ex, "Error parsing ModifiedBeforeDate {ModifiedBeforeDate}, ensure string is in the format yyyy-MM-dd",
                         ModifiedBeforeDate);
                     Environment.Exit(Constants.ExitCodeError);
                 }
