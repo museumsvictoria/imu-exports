@@ -1,12 +1,18 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
+using System.IO.Compression;
 using System.Text;
+using CommandLine;
 using CsvHelper;
 using CsvHelper.Configuration;
 using IMu;
+using ImuExports.Extensions;
 using ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Config;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
+using LiteDB;
 using Microsoft.Extensions.Options;
+using Renci.SshNet;
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia;
 
@@ -117,6 +123,121 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
 
                 csv.Context.RegisterClassMap<MultimediaClassMap>();
                 await csv.WriteRecordsAsync(multimedia, stoppingToken);
+            }
+            
+            // Copy meta.xml
+            Log.Logger.Information("Copying meta.xml");
+            File.Copy(@"meta.xml", _options.Destination + @"meta.xml", true);
+            
+            // Compress/Upload files to ALA if automated export
+            if (_options.IsAutomated)
+            {
+                // Determine filename
+                string startDate = null; 
+                string endDate;
+
+                if (_options.ParsedModifiedAfterDate.HasValue)
+                {
+                    startDate = _options.ParsedModifiedAfterDate?.ToString("yyyy-MM-dd");
+                }
+                
+                if (_options.ParsedModifiedBeforeDate.HasValue)
+                {
+                    endDate = _options.ParsedModifiedBeforeDate <= _options.DateStarted
+                            ? _options.ParsedModifiedBeforeDate?.ToString("yyyy-MM-dd")
+                            : _options.DateStarted.ToString("yyyy-MM-dd");
+                }
+                else
+                {
+                    endDate = _options.DateStarted.ToString("yyyy-MM-dd");
+                }
+                
+                var zipFilename = startDate != null ? $"mv-dwca-{startDate}-to-{endDate}.zip" : $"mv-dwca-{endDate}.zip";
+                        
+                var tempFilepath = $"{Path.GetTempPath()}{Utils.RandomString(8)}.tmp";
+                var stopwatch = Stopwatch.StartNew();
+                
+                try
+                {
+                    // Zip Directory
+                    ZipFile.CreateFromDirectory(_options.Destination, tempFilepath,
+                        CompressionLevel.NoCompression, false);
+                    Log.Logger.Information(
+                        "Created temporary zip file {TempFilepath} in {Elapsed} ({ElapsedMilliseconds} ms)",
+                        tempFilepath,
+                        stopwatch.Elapsed, stopwatch.ElapsedMilliseconds);
+
+                    // Delete uncompressed files
+                    stopwatch.Restart();
+                    Directory.EnumerateFiles(_options.Destination).ToList().ForEach(File.Delete);
+                    Log.Logger.Information(
+                        "Deleted uncompressed files in {Destination} in {Elapsed} ({ElapsedMilliseconds} ms)",
+                        _options.Destination, stopwatch.Elapsed, stopwatch.ElapsedMilliseconds);
+
+                    // Move zip file
+                    stopwatch.Restart();
+                    File.Move(tempFilepath, $"{_options.Destination}{zipFilename}");
+                    Log.Logger.Information(
+                        "Moved zip file {zipFilename} to {Destination} in {Elapsed} ({ElapsedMilliseconds} ms)",
+                        zipFilename, _options.Destination, stopwatch.Elapsed,
+                        stopwatch.ElapsedMilliseconds);
+                }
+                catch (Exception ex)
+                {
+                    // Log and cleanup before exit
+                    Log.Logger.Fatal(ex, "Error creating zip archive");
+
+                    throw new OperationCanceledException();
+                }
+
+                try
+                {
+                    // Upload files
+                    using (var client = new SftpClient(_appSettings.AtlasOfLivingAustralia.Host,
+                        22, _appSettings.AtlasOfLivingAustralia.Username,
+                        _appSettings.AtlasOfLivingAustralia.Password))
+                    {
+                        Log.Logger.Information("Connecting to sftp server {Host}", _appSettings.AtlasOfLivingAustralia.Host);
+                        client.Connect();
+                        
+                        stopwatch.Restart();
+                        using (var fileStream = new FileStream($"{_options.Destination}{zipFilename}", FileMode.Open))
+                        {
+                            Log.Logger.Information(
+                                "Uploading zip {ZipFilename} ({Length})", zipFilename, Utils.BytesToString(fileStream.Length));
+                            client.BufferSize = 4 * 1024; // bypass Payload error large files
+                            client.UploadFile(fileStream, zipFilename);
+                        }
+                        
+                        stopwatch.Stop();
+                        Log.Logger.Information(
+                            "Uploaded {ZipFilename} in {Elapsed} ({ElapsedMilliseconds} ms)",
+                            zipFilename, stopwatch.Elapsed, stopwatch.ElapsedMilliseconds);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log and cleanup before exit
+                    Log.Logger.Fatal(ex, "Error uploading zip archive");
+                    
+                    throw new OperationCanceledException();
+                }
+
+                // Update/Insert application
+                using var db = new LiteRepository(new ConnectionString()
+                {
+                    Filename = $"{AppContext.BaseDirectory}{_appSettings.LiteDbFilename}",
+                    Upgrade = true
+                });
+                
+                var application = _options.Application;
+        
+                if (application != null)
+                {
+                    Log.Logger.Information("Updating ALA Application PreviousDateRun {PreviousDateRun} to {DateStarted}", application.PreviousDateRun, _options.DateStarted);
+                    application.PreviousDateRun = _options.DateStarted;
+                    db.Upsert(application);
+                }
             }
         }
     }

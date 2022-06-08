@@ -32,6 +32,7 @@
         <PackageReference Include="Serilog.Sinks.Seq" Version="5.1.1" />
         <PackageReference Include="SerilogMetrics" Version="2.1.0" />
         <PackageReference Include="SimpleInjector.Integration.GenericHost" Version="5.3.0" />
+        <PackageReference Include="SSH.NET" Version="2020.0.2" />
     </ItemGroup>
     
     <ItemGroup>
@@ -41,7 +42,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <AssetsSourceFiles Include="Tasks\AtlasOfLivingAustralia\Resources\meta.xml"/>
+        <AssetsSourceFiles Include="Tasks\AtlasOfLivingAustralia\Resources\meta.xml" />
     </ItemGroup>
 
     <Target Name="CopyCustomContent" AfterTargets="AfterBuild">

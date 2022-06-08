@@ -1,0 +1,6 @@
+﻿<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Publish ImuExports" type="DotNetFolderPublish" factoryName="Publish to folder">
+    <riderPublish configuration="Release" delete_existing_files="true" platform="Any CPU" produce_single_file="true" runtime="win-x64" target_folder="$PROJECT_DIR$/src/ImuExports/bin/Publish" target_framework="net6.0" uuid_high="7487415727040381397" uuid_low="-9050612545824804179" />
+    <method v="2" />
+  </configuration>
+</component>
