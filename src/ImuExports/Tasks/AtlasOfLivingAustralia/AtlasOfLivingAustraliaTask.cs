@@ -29,99 +29,96 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
 
     public async Task Run(CancellationToken stoppingToken)
     {
-        await Task.Run(async () =>
+        using (Log.Logger.BeginTimedOperation($"{GetType().Name} starting", $"{GetType().Name}.Run"))
         {
-            using (Log.Logger.BeginTimedOperation($"{GetType().Name} starting", $"{GetType().Name}.Run"))
+            // Cache Irns
+            var cachedIrns = new List<long>();
+
+            if (_options.ParsedModifiedAfterDate.HasValue ||
+                _options.ParsedModifiedBeforeDate.HasValue)
             {
-                // Cache Irns
-                var cachedIrns = new List<long>();
-            
-                if (_options.ParsedModifiedAfterDate.HasValue ||
-                    _options.ParsedModifiedBeforeDate.HasValue)
-                {
-                    foreach (var moduleSearchConfig in _moduleSearchConfigs)
-                    {
-                        stoppingToken.ThrowIfCancellationRequested();
-            
-                        var irns = await CacheIrns(moduleSearchConfig.ModuleName,
-                            moduleSearchConfig.ModuleSelectName,
-                            moduleSearchConfig.Terms,
-                            moduleSearchConfig.Columns,
-                            moduleSearchConfig.IrnSelectFunc,
-                            stoppingToken);
-            
-                        cachedIrns.AddRange(irns);
-                    }
-            
-                    // Remove any duplicates
-                    cachedIrns = cachedIrns.Distinct().ToList();
-                }
-                else
+                foreach (var moduleSearchConfig in _moduleSearchConfigs)
                 {
                     stoppingToken.ThrowIfCancellationRequested();
-            
-                    cachedIrns = (await this.CacheIrns("ecatalogue", this.BuildFullExportSearchTerms(), stoppingToken)).ToList();
-                }
-            
-                // Fetch data
-                var occurrences = new List<Occurrence>();
-                var offset = 0;
-                Log.Logger.Information("Fetching data");
-                while (true)
-                {
-                    stoppingToken.ThrowIfCancellationRequested();
-            
-                    using (var imuSession = new ImuSession("ecatalogue", _appSettings.Emu.Host, int.Parse(_appSettings.Emu.Port)))
-                    {
-                        var cachedIrnsBatch = cachedIrns
-                            .Skip(offset)
-                            .Take(Constants.DataBatchSize)
-                            .ToList();
-                        
-                        if (cachedIrnsBatch.Count == 0)
-                            break;
-            
-                        imuSession.FindKeys(cachedIrnsBatch);
-            
-                        var results = imuSession.Fetch("start", 0, -1, this.ExportColumns);
-            
-                        Log.Logger.Debug("Fetched {RecordCount} records from Imu", cachedIrnsBatch.Count);
-            
-                        occurrences.AddRange(results.Rows.Select(_occurrenceFactory.Make));
-            
-                        offset += results.Count;
-            
-                        Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset, cachedIrns.Count);
-                    }
-                }
-                
-                // Save data
-                Log.Logger.Information("Saving occurrence data as csv");
-                
-                var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
-                {
-                    HasHeaderRecord = true,
-                    SanitizeForInjection = false
-                };
 
-                using (var writer = new StreamWriter(_options.Destination + @"occurrences.csv", false, Encoding.UTF8))
-                using (var csv = new CsvWriter(writer, csvConfig))
-                {
-                    csv.Context.RegisterClassMap<OccurrenceClassMap>();
-                    csv.WriteRecords(occurrences);
+                    var irns = await CacheIrns(moduleSearchConfig.ModuleName,
+                        moduleSearchConfig.ModuleSelectName,
+                        moduleSearchConfig.Terms,
+                        moduleSearchConfig.Columns,
+                        moduleSearchConfig.IrnSelectFunc,
+                        stoppingToken);
+
+                    cachedIrns.AddRange(irns);
                 }
 
-                Log.Logger.Information("Saving multimedia data as csv");
-                using (var writer = new StreamWriter(_options.Destination + @"multimedia.csv", false, Encoding.UTF8))
-                using (var csv = new CsvWriter(writer, csvConfig))
-                {
-                    var multimedia = occurrences.SelectMany(x => x.Multimedia);
+                // Remove any duplicates
+                cachedIrns = cachedIrns.Distinct().ToList();
+            }
+            else
+            {
+                stoppingToken.ThrowIfCancellationRequested();
 
-                    csv.Context.RegisterClassMap<MultimediaClassMap>();
-                    csv.WriteRecords(multimedia);
+                cachedIrns = (await CacheIrns("ecatalogue", BuildFullExportSearchTerms(), stoppingToken)).ToList();
+            }
+
+            // Fetch data
+            var occurrences = new List<Occurrence>();
+            var offset = 0;
+            Log.Logger.Information("Fetching data");
+            while (true)
+            {
+                stoppingToken.ThrowIfCancellationRequested();
+
+                using (var imuSession = new ImuSession("ecatalogue", _appSettings.Emu.Host, int.Parse(_appSettings.Emu.Port)))
+                {
+                    var cachedIrnsBatch = cachedIrns
+                        .Skip(offset)
+                        .Take(Constants.DataBatchSize)
+                        .ToList();
+
+                    if (cachedIrnsBatch.Count == 0)
+                        break;
+
+                    imuSession.FindKeys(cachedIrnsBatch);
+
+                    var results = imuSession.Fetch("start", 0, -1, ExportColumns);
+
+                    Log.Logger.Debug("Fetched {RecordCount} records from Imu", cachedIrnsBatch.Count);
+
+                    occurrences.AddRange(results.Rows.Select(_occurrenceFactory.Make));
+
+                    offset += results.Count;
+
+                    Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset, cachedIrns.Count);
                 }
             }
-        }, stoppingToken);
+
+            // Save data
+            Log.Logger.Information("Saving occurrence data as csv");
+
+            var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = true,
+                SanitizeForInjection = false
+            };
+
+            await using (var writer = new StreamWriter(_options.Destination + @"occurrences.csv", false, Encoding.UTF8))
+            await using (var csv = new CsvWriter(writer, csvConfig))
+            {
+                csv.Context.RegisterClassMap<OccurrenceClassMap>();
+                await csv.WriteRecordsAsync(occurrences, stoppingToken);
+            }
+
+            Log.Logger.Information("Saving multimedia data as csv");
+            await using (var writer = new StreamWriter(_options.Destination + @"multimedia.csv", false, Encoding.UTF8))
+            await using (var csv = new CsvWriter(writer, csvConfig))
+            {
+                var multimedia = occurrences.SelectMany(x => x.Multimedia);
+
+                csv.Context.RegisterClassMap<MultimediaClassMap>();
+                await csv.WriteRecordsAsync(multimedia, stoppingToken);
+            }
+        }
     }
 
     private Terms BuildFullExportSearchTerms()

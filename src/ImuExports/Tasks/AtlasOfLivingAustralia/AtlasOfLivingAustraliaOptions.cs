@@ -45,14 +45,13 @@ public class AtlasOfLivingAustraliaOptions : ITaskOptions
             if (string.IsNullOrWhiteSpace(Destination))
             {
                 IsAutomated = true;
+                Destination = $"{AppContext.BaseDirectory}{Utils.RandomString(8)}";
                 Log.Logger.Debug("No destination specified... assuming task is automated");
-
-                Destination = $"{AppContext.BaseDirectory}\\{Utils.RandomString(8)}";
 
                 // Check for last import date
                 using var db = new LiteRepository(new ConnectionString()
                 {
-                    Filename = $"{AppContext.BaseDirectory}\\{appSettings.LiteDbFilename}",
+                    Filename = $"{AppContext.BaseDirectory}{appSettings.LiteDbFilename}",
                     Upgrade = true
                 });
 

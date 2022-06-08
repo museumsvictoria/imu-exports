@@ -12,6 +12,10 @@
         <FileVersion>2.0.0</FileVersion>
         <InformationalVersion>2.0.0</InformationalVersion>
     </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <PlatformTarget>AnyCPU</PlatformTarget>
+    </PropertyGroup>
     
     <ItemGroup>
         <PackageReference Include="CommandLineParser" Version="2.9.1" />
@@ -35,9 +39,17 @@
         <HintPath>..\..\dep\IMu\imu-1.0.03.dll</HintPath>
       </Reference>
     </ItemGroup>
-    
+
     <ItemGroup>
-      <Resource Include="Tasks\AtlasOfLivingAustralia\Resources\meta.xml" />
+        <AssetsSourceFiles Include="Tasks\AtlasOfLivingAustralia\Resources\meta.xml"/>
     </ItemGroup>
+
+    <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
+        <Copy SourceFiles="@(AssetsSourceFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    </Target>
+    
+    <Target Name="CopyCustomContentOnPublish" AfterTargets="Publish">
+        <Copy SourceFiles="@(AssetsSourceFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+    </Target>
 
 </Project>
