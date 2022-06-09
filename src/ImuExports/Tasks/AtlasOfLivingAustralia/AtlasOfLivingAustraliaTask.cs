@@ -127,7 +127,7 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
             
             // Copy meta.xml
             Log.Logger.Information("Copying meta.xml");
-            File.Copy(@"meta.xml", _options.Destination + @"meta.xml", true);
+            File.Copy(@$"{AppContext.BaseDirectory}meta.xml", _options.Destination + @"meta.xml", true);
             
             // Compress/Upload files to ALA if automated export
             if (_options.IsAutomated)
@@ -178,7 +178,7 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
                     stopwatch.Restart();
                     File.Move(tempFilepath, $"{_options.Destination}{zipFilename}");
                     Log.Logger.Information(
-                        "Moved zip file {zipFilename} to {Destination} in {Elapsed} ({ElapsedMilliseconds} ms)",
+                        "Moved zip file {ZipFilename} to {Destination} in {Elapsed} ({ElapsedMilliseconds} ms)",
                         zipFilename, _options.Destination, stopwatch.Elapsed,
                         stopwatch.ElapsedMilliseconds);
                 }
@@ -187,40 +187,39 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
                     // Log and cleanup before exit
                     Log.Logger.Fatal(ex, "Error creating zip archive");
 
-                    throw new OperationCanceledException();
+                    throw;
                 }
 
                 try
                 {
                     // Upload files
-                    using (var client = new SftpClient(_appSettings.AtlasOfLivingAustralia.Host,
+                    using var client = new SftpClient(_appSettings.AtlasOfLivingAustralia.Host,
                         22, _appSettings.AtlasOfLivingAustralia.Username,
-                        _appSettings.AtlasOfLivingAustralia.Password))
+                        _appSettings.AtlasOfLivingAustralia.Password);
+                    
+                    Log.Logger.Information("Connecting to sftp server {Host}", _appSettings.AtlasOfLivingAustralia.Host);
+                    client.Connect();
+                        
+                    stopwatch.Restart();
+                    await using (var fileStream = new FileStream($"{_options.Destination}{zipFilename}", FileMode.Open))
                     {
-                        Log.Logger.Information("Connecting to sftp server {Host}", _appSettings.AtlasOfLivingAustralia.Host);
-                        client.Connect();
-                        
-                        stopwatch.Restart();
-                        using (var fileStream = new FileStream($"{_options.Destination}{zipFilename}", FileMode.Open))
-                        {
-                            Log.Logger.Information(
-                                "Uploading zip {ZipFilename} ({Length})", zipFilename, Utils.BytesToString(fileStream.Length));
-                            client.BufferSize = 4 * 1024; // bypass Payload error large files
-                            client.UploadFile(fileStream, zipFilename);
-                        }
-                        
-                        stopwatch.Stop();
                         Log.Logger.Information(
-                            "Uploaded {ZipFilename} in {Elapsed} ({ElapsedMilliseconds} ms)",
-                            zipFilename, stopwatch.Elapsed, stopwatch.ElapsedMilliseconds);
+                            "Uploading zip {ZipFilename} ({Length})", zipFilename, Utils.BytesToString(fileStream.Length));
+                        client.BufferSize = 4 * 1024; // bypass Payload error large files
+                        client.UploadFile(fileStream, zipFilename);
                     }
+                        
+                    stopwatch.Stop();
+                    Log.Logger.Information(
+                        "Uploaded {ZipFilename} in {Elapsed} ({ElapsedMilliseconds} ms)",
+                        zipFilename, stopwatch.Elapsed, stopwatch.ElapsedMilliseconds);
                 }
                 catch (Exception ex)
                 {
                     // Log and cleanup before exit
                     Log.Logger.Fatal(ex, "Error uploading zip archive");
                     
-                    throw new OperationCanceledException();
+                    throw;
                 }
 
                 // Update/Insert application
