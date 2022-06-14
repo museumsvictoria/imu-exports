@@ -90,8 +90,8 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
                     var results = imuSession.Fetch("start", 0, -1, ExportColumns);
 
                     Log.Logger.Debug("Fetched {RecordCount} records from Imu", cachedIrnsBatch.Count);
-
-                    occurrences.AddRange(results.Rows.Select(_occurrenceFactory.Make));
+                    
+                    occurrences.AddRange(results.Rows.Select(map => _occurrenceFactory.Make(map, stoppingToken)));
 
                     offset += results.Count;
 

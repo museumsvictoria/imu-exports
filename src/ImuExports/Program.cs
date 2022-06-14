@@ -38,6 +38,7 @@ try
 
             services
                 .Configure<AppSettings>(configSection)
+                .Configure<HostOptions>(opts => opts.ShutdownTimeout = TimeSpan.FromSeconds(20))
                 .AddSimpleInjector(container, options =>
                 {
                     options.AddHostedService<TaskRunner>();

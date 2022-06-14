@@ -20,8 +20,10 @@ public class MultimediaFactory : IFactory<Multimedia>
         _appSettings = appSettings.Value;
     }
 
-    public Multimedia Make(Map map)
+    public Multimedia Make(Map map, CancellationToken stoppingToken)
     {
+        stoppingToken.ThrowIfCancellationRequested();
+        
         if (Assertions.IsMultimedia(map))
         {
             var irn = map.GetLong("irn");
@@ -74,7 +76,7 @@ public class MultimediaFactory : IFactory<Multimedia>
         return null;
     }
 
-    public IEnumerable<Multimedia> Make(IEnumerable<Map> maps)
+    public IEnumerable<Multimedia> Make(IEnumerable<Map> maps, CancellationToken stoppingToken)
     {
         var multimedias = new List<Multimedia>();
 
@@ -94,7 +96,7 @@ public class MultimediaFactory : IFactory<Multimedia>
         // Select only distinct mmr maps
         var distinctMediaMaps = groupedMediaMaps.Select(x => x.First());
 
-        multimedias.AddRange(distinctMediaMaps.Select(Make).Where(x => x != null));
+        multimedias.AddRange(distinctMediaMaps.Select(map => Make(map, stoppingToken)).Where(x => x != null));
 
         return multimedias;
     }

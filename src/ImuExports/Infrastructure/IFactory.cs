@@ -1,10 +1,11 @@
 ﻿using IMu;
+using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 
 namespace ImuExports.Infrastructure;
 
 public interface IFactory<out T>
 {
-    T Make(Map map);
+    T Make(Map map, CancellationToken stoppingToken);
 
-    IEnumerable<T> Make(IEnumerable<Map> maps);
+    IEnumerable<T> Make(IEnumerable<Map> maps, CancellationToken stoppingToken);
 }

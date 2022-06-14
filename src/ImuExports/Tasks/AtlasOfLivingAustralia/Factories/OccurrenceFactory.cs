@@ -17,8 +17,10 @@ public class OccurrenceFactory : IFactory<Occurrence>
         this.multimediaFactory = multimediaFactory;
     }
 
-    public Occurrence Make(Map map)
+    public Occurrence Make(Map map, CancellationToken stoppingToken)
     {
+        stoppingToken.ThrowIfCancellationRequested();
+        
         var occurrence = new Occurrence();
 
         // Occurrence core fields
@@ -375,7 +377,7 @@ public class OccurrenceFactory : IFactory<Occurrence>
         }
 
         // Multimedia extension fields
-        occurrence.Multimedia = multimediaFactory.Make(map.GetMaps("media")).ToList();
+        occurrence.Multimedia = multimediaFactory.Make(map.GetMaps("media"), stoppingToken).ToList();
 
         foreach (var multimedia in occurrence.Multimedia)
         {
@@ -392,9 +394,9 @@ public class OccurrenceFactory : IFactory<Occurrence>
         return occurrence;
     }
 
-    public IEnumerable<Occurrence> Make(IEnumerable<Map> maps)
+    public IEnumerable<Occurrence> Make(IEnumerable<Map> maps, CancellationToken stoppingToken)
     {
-        return maps.Select(Make);
+        return maps.Select(map => Make(map, stoppingToken));
     }
 
     private string MakePartyName(Map map)

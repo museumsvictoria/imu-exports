@@ -1,13 +1,24 @@
 ﻿<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Deploy ImuExports to Production" type="BatchConfigurationType" factoryName="Batch">
+  <configuration default="false" name="Deploy ImuExports.NetFramework472 to Production" type="BatchConfigurationType" factoryName="Batch">
     <module name="rider.module" />
     <option name="INTERPRETER_OPTIONS" value="" />
-    <option name="WORKING_DIRECTORY" value="./env/production" />
+    <option name="WORKING_DIRECTORY" value="./env/production/ImuExports.NetFramework472" />
     <option name="PARENT_ENVS" value="true" />
-    <option name="SCRIPT_NAME" value="./env/production/deploy-production.bat" />
+    <option name="SCRIPT_NAME" value="./env/production/ImuExports.NetFramework472/deploy-production.bat" />
     <option name="PARAMETERS" value="" />
     <method v="2">
       <option name="Build" default="false" projectName="ImuExports.NetFramework472" projectPath="file://$PROJECT_DIR$/src/ImuExports.NetFramework472/ImuExports.NetFramework472.csproj" />
+    </method>
+  </configuration>
+  <configuration default="false" name="Deploy ImuExports to Production" type="BatchConfigurationType" factoryName="Batch">
+    <module name="rider.module" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="WORKING_DIRECTORY" value="./env/production/ImuExports/" />
+    <option name="PARENT_ENVS" value="true" />
+    <option name="SCRIPT_NAME" value="./env/production/ImuExports/deploy-production.bat" />
+    <option name="PARAMETERS" value="" />
+    <method v="2">
+      <option name="Build" default="false" projectName="ImuExports" projectPath="file://$PROJECT_DIR$/src/ImuExports/ImuExports.csproj" />
     </method>
   </configuration>
 </component>
