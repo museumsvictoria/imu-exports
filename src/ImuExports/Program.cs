@@ -1,6 +1,7 @@
 global using ImuExports.Configuration;
 global using ImuExports.Infrastructure;
 global using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
 using SimpleInjector;
 
 var configuration = new ConfigurationBuilder()
@@ -13,8 +14,10 @@ var configuration = new ConfigurationBuilder()
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(configuration)
-    .WriteTo.File(Path.Combine(AppContext.BaseDirectory, "logs/log.txt"),
-        rollingInterval: RollingInterval.Day)
+    .WriteTo.Console(theme: AnsiConsoleTheme.Code)
+    .WriteTo.File(Path.Combine(AppContext.BaseDirectory, "logs/log.txt"), rollingInterval: RollingInterval.Day)
+    .Enrich.WithEnvironmentName()
+    .Enrich.WithMachineName()
     .CreateLogger();
 
 try
