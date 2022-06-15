@@ -1,17 +1,16 @@
-﻿namespace ImuExports.Infrastructure
-{
-    public interface ITaskOptions
-    {
-        public Task Initialize(AppSettings appSettings)
-        {
-            return Task.CompletedTask;
-        }
+﻿namespace ImuExports.Infrastructure;
 
-        Type TypeOfTask { get; }
-        
-        public Task CleanUp(AppSettings appSettings)
-        {
-            return Task.CompletedTask;
-        }
+public interface ITaskOptions
+{
+    public Task Initialize(AppSettings appSettings)
+    {
+        return Task.CompletedTask;
+    }
+
+    Type TypeOfTask { get; }
+
+    public Task CleanUp(AppSettings appSettings)
+    {
+        return Task.CompletedTask;
     }
 }

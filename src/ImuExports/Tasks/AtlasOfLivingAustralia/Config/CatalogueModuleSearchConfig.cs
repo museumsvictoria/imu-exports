@@ -2,7 +2,7 @@
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config;
 
-internal class CatalogueModuleSearchConfig : IModuleSearchConfig
+public class CatalogueModuleSearchConfig : IModuleSearchConfig
 {
     private readonly AtlasOfLivingAustraliaOptions _options = (AtlasOfLivingAustraliaOptions)CommandOptions.TaskOptions;
     

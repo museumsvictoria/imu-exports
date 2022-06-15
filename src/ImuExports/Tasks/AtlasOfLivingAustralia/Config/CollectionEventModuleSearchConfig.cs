@@ -3,7 +3,7 @@ using ImuExports.Extensions;
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config;
 
-internal class CollectionEventModuleSearchConfig : IModuleSearchConfig
+public class CollectionEventModuleSearchConfig : IModuleSearchConfig
 {
     private readonly AtlasOfLivingAustraliaOptions _options = (AtlasOfLivingAustraliaOptions)CommandOptions.TaskOptions;
 

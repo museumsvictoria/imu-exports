@@ -25,7 +25,7 @@ try
     // Parse command line options
     CommandOptions.Initialize(args);
 
-    Log.Debug("CollectionsOnline Tasks starting up...");
+    Log.Debug("ImuExports starting up...");
     
     // Create DI container as we need to add it while configuring host
     var container = new Container();
@@ -59,7 +59,7 @@ try
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "CollectionsOnline Tasks startup failed...");
+    Log.Fatal(ex, "ImuExports startup failed...");
 }
 finally
 {
