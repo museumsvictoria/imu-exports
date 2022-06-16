@@ -2,10 +2,8 @@
 using System.Text.RegularExpressions;
 using ImageMagick;
 using IMu;
-using ImuExports.Extensions;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Helpers;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
-using ImuExports.Utilities;
 using Microsoft.Extensions.Options;
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories;

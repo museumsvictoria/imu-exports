@@ -1,5 +1,7 @@
 global using ImuExports.Configuration;
+global using ImuExports.Extensions;
 global using ImuExports.Infrastructure;
+global using ImuExports.Utilities;
 global using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using SimpleInjector;

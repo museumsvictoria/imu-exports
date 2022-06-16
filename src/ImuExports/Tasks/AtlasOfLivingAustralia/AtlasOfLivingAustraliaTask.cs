@@ -2,11 +2,9 @@
 using System.Globalization;
 using System.IO.Compression;
 using System.Text;
-using CommandLine;
 using CsvHelper;
 using CsvHelper.Configuration;
 using IMu;
-using ImuExports.Extensions;
 using ImuExports.Tasks.AtlasOfLivingAustralia.ClassMaps;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Config;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
