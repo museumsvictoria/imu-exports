@@ -1,48 +1,54 @@
-﻿using System;
-using System.Collections.Generic;
-using Serilog;
+using Microsoft.Extensions.Options;
+namespace ImuExports.Infrastructure;
 
-namespace ImuExports.Infrastructure
+public class TaskRunner : BackgroundService
 {
-    public class TaskRunner
+    private readonly AppSettings _appSettings;
+    private readonly IHostApplicationLifetime _appLifetime;
+    private readonly ITask _task;
+
+    public TaskRunner(IOptions<AppSettings> appSettings,
+        IHostApplicationLifetime appLifetime,
+        ITask task)
     {
-        private readonly IEnumerable<ITask> tasks;
+        _appSettings = appSettings.Value;
+        _appLifetime = appLifetime;
+        _task = task;
+    }
 
-        public TaskRunner(IEnumerable<ITask> tasks)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        Log.Logger.Information("TaskRunner starting up");
+
+        try
         {
-            this.tasks = tasks;
+            // Initialize task
+            await CommandOptions.TaskOptions.Initialize(_appSettings);
+
+            // Run task
+            await _task.Run(stoppingToken);
+            
+            // Cleanup task
+            await CommandOptions.TaskOptions.CleanUp(_appSettings);
         }
-
-        public void RunAllTasks()
+        catch (Exception ex)
         {
-            var importHasFailed = false;
-
-            using (Log.Logger.BeginTimedOperation("Imu export tasks starting", "TaskRunner.RunAllTasks"))
+            if (ex is OperationCanceledException)
             {
-                try
-                {
-                    // Run all tasks
-                    foreach (var task in tasks)
-                    {
-                        if (Program.ImportCanceled)
-                            break;
-
-                        task.Run();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    importHasFailed = true;
-                    Log.Logger.Error(ex, "Exception occured running export");
-                }
-
-                if (Program.ImportCanceled || importHasFailed)
-                    Log.Logger.Information("Imu export tasks have been stopped prematurely {@Reason}", new { Program.ImportCanceled, importHasFailed });
-                else
-                    Log.Logger.Information("All Imu export tasks finished successfully");
+                Log.Logger.Information("TaskRunner has been cancelled prematurely");
             }
+            else
+                Log.Logger.Error(ex, "Exception occured running task");
+            
+            // Attempt to cleanup
+            await CommandOptions.TaskOptions.CleanUp(_appSettings);
 
-            Log.CloseAndFlush();
+            throw;
         }
+
+        if (!stoppingToken.IsCancellationRequested)
+            Log.Logger.Information("TaskRunner finished successfully");
+
+        _appLifetime.StopApplication();
     }
 }

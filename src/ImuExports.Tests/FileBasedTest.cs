@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using ImuExports.Tests.Resources;
-
-namespace ImuExports.Tests
+﻿namespace ImuExports.Tests
 {
     public class FileBasedTest : IDisposable
     {

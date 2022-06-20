@@ -1,80 +1,66 @@
-﻿﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using ImuExports.Infrastructure;
-using ImuExports.Config;
-using ImuExports.Extensions;
-using IMu;
+﻿using IMu;
 
- namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
+namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config;
+
+public class SiteModuleSearchConfig : IModuleSearchConfig
 {
-    class SiteModuleSearchConfig : IModuleSearchConfig
+    private readonly AtlasOfLivingAustraliaOptions _options = (AtlasOfLivingAustraliaOptions)CommandOptions.TaskOptions;
+
+    string IModuleSearchConfig.ModuleName => "esites";
+
+    string IModuleSearchConfig.ModuleSelectName => "catalogue";
+
+    string[] IModuleSearchConfig.Columns => new[]
     {
-        string IModuleSearchConfig.ModuleName => "esites";
-        
-        string IModuleSearchConfig.ModuleSelectName => "catalogue";
+        "irn",
+        "cat=<ecatalogue:SitSiteRef>.(irn,MdaDataSets_tab,AdmPublishWebNoPassword)",
+        "colevent=<ecollectionevents:ColSiteRef>.(irn,cat=<ecatalogue:ColCollectionEventRef>.(irn,MdaDataSets_tab,AdmPublishWebNoPassword))"
+    };
 
-        string[] IModuleSearchConfig.Columns => new[]
+    Terms IModuleSearchConfig.Terms
+    {
+        get
         {
-            "irn",
-            "cat=<ecatalogue:SitSiteRef>.(irn,MdaDataSets_tab,AdmPublishWebNoPassword)",
-            "colevent=<ecollectionevents:ColSiteRef>.(irn,cat=<ecatalogue:ColCollectionEventRef>.(irn,MdaDataSets_tab,AdmPublishWebNoPassword))"
-        };
+            var terms = new Terms();
+            
+            if (_options.ParsedModifiedAfterDate.HasValue)
+                terms.Add("AdmDateModified", _options.ParsedModifiedAfterDate.Value.ToString("MMM dd yyyy"), ">=");
+            if (_options.ParsedModifiedBeforeDate.HasValue)
+                terms.Add("AdmDateModified", _options.ParsedModifiedBeforeDate.Value.ToString("MMM dd yyyy"), "<=");
 
-        Terms IModuleSearchConfig.Terms
+            return terms;
+        }
+    }
+
+    Func<Map, IEnumerable<long>> IModuleSearchConfig.IrnSelectFunc => map =>
+    {
+        // Find catalogue irns joined directly to site module 
+        var sitSiteRefIrns = new List<long>();
+        foreach (var catalogue in map.GetMaps("cat"))
+            if (catalogue != null &&
+                catalogue.GetTrimStrings("MdaDataSets_tab")
+                    .Contains(AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString) &&
+                string.Equals(catalogue.GetTrimString("AdmPublishWebNoPassword"), "yes",
+                    StringComparison.OrdinalIgnoreCase))
+                sitSiteRefIrns.Add(catalogue.GetLong("irn"));
+
+        // Find catalogue irns indirectly linked to sites via collection event module
+        var colSiteRefIrns = new List<long>();
+        foreach (var collectionEvent in map.GetMaps("colevent"))
         {
-            get
-            {
-                var terms = new Terms();
-                if (GlobalOptions.Options.Ala.ParsedModifiedAfterDate.HasValue)
-                {
-                    terms.Add("AdmDateModified", GlobalOptions.Options.Ala.ParsedModifiedAfterDate.Value.ToString("MMM dd yyyy"), ">=");
-                }
-                if (GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.HasValue)
-                {
-                    terms.Add("AdmDateModified", GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.Value.ToString("MMM dd yyyy"), "<=");
-                }
+            var colEventIrns = new List<long>();
 
-                return terms;
-            }
+            foreach (var cat in collectionEvent.GetMaps("cat"))
+                if (cat != null &&
+                    cat.GetTrimStrings("MdaDataSets_tab")
+                        .Contains(AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString) &&
+                    string.Equals(cat.GetTrimString("AdmPublishWebNoPassword"), "yes",
+                        StringComparison.OrdinalIgnoreCase))
+                    colEventIrns.Add(cat.GetLong("irn"));
+
+            colSiteRefIrns.AddRange(colEventIrns);
         }
 
-        Func<Map, IEnumerable<long>> IModuleSearchConfig.IrnSelectFunc => map =>
-        {
-            // Find catalogue irns joined directly to site module 
-            var sitSiteRefIrns = new List<long>();
-            foreach (var catalogue in map.GetMaps("cat"))
-            {
-                if (catalogue != null &&
-                    catalogue.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString) &&
-                    string.Equals(catalogue.GetTrimString("AdmPublishWebNoPassword"), "yes",
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    sitSiteRefIrns.Add(catalogue.GetLong("irn"));
-                }
-            }
-            
-            // Find catalogue irns indirectly linked to sites via collection event module
-            var colSiteRefIrns = new List<long>();
-            foreach (var collectionEvent in map.GetMaps("colevent"))
-            {
-                var colEventIrns = new List<long>();
-                
-                foreach (var cat in collectionEvent.GetMaps("cat"))
-                {
-                    if (cat != null &&
-                        cat.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString) &&
-                        string.Equals(cat.GetTrimString("AdmPublishWebNoPassword"), "yes",
-                            StringComparison.OrdinalIgnoreCase))
-                    {
-                        colEventIrns.Add(cat.GetLong("irn"));
-                    }
-                }
-
-                colSiteRefIrns.AddRange(colEventIrns);
-            }
-            
-            return sitSiteRefIrns.Concat(colSiteRefIrns).Distinct();
-        };
-    }
+        return sitSiteRefIrns.Concat(colSiteRefIrns).Distinct();
+    };
 }

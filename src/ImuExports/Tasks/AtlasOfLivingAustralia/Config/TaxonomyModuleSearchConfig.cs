@@ -1,63 +1,53 @@
-﻿using System;
-using System.Collections.Generic;
-using ImuExports.Infrastructure;
-using ImuExports.Config;
-using ImuExports.Extensions;
-using IMu;
+﻿using IMu;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Helpers;
 
-namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
+namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config;
+
+public class TaxonomyModuleSearchConfig : IModuleSearchConfig
 {
-    class TaxonomyModuleSearchConfig : IModuleSearchConfig
+    private readonly AtlasOfLivingAustraliaOptions _options = (AtlasOfLivingAustraliaOptions)CommandOptions.TaskOptions;
+
+    string IModuleSearchConfig.ModuleName => "etaxonomy";
+
+    string IModuleSearchConfig.ModuleSelectName => "catalogue";
+
+    string[] IModuleSearchConfig.Columns => new[]
     {
-        string IModuleSearchConfig.ModuleName => "etaxonomy";
-        
-        string IModuleSearchConfig.ModuleSelectName => "catalogue";
+        "irn",
+        "cat=<ecatalogue:TaxTaxonomyRef_tab>.(irn,MdaDataSets_tab,AdmPublishWebNoPassword,identifications=[IdeTypeStatus_tab,IdeCurrentNameLocal_tab,taxa=TaxTaxonomyRef_tab.(irn)])"
+    };
 
-        string[] IModuleSearchConfig.Columns => new[]
+    Terms IModuleSearchConfig.Terms
+    {
+        get
         {
-            "irn",
-            "cat=<ecatalogue:TaxTaxonomyRef_tab>.(irn,MdaDataSets_tab,AdmPublishWebNoPassword,identifications=[IdeTypeStatus_tab,IdeCurrentNameLocal_tab,taxa=TaxTaxonomyRef_tab.(irn)])"
-        };
+            var terms = new Terms();
+            
+            if (_options.ParsedModifiedAfterDate.HasValue)
+                terms.Add("AdmDateModified", _options.ParsedModifiedAfterDate.Value.ToString("MMM dd yyyy"), ">=");
+            if (_options.ParsedModifiedBeforeDate.HasValue)
+                terms.Add("AdmDateModified", _options.ParsedModifiedBeforeDate.Value.ToString("MMM dd yyyy"), "<=");
 
-        Terms IModuleSearchConfig.Terms
-        {
-            get
-            {
-                var terms = new Terms();
-                if (GlobalOptions.Options.Ala.ParsedModifiedAfterDate.HasValue)
-                {
-                    terms.Add("AdmDateModified", GlobalOptions.Options.Ala.ParsedModifiedAfterDate.Value.ToString("MMM dd yyyy"), ">=");
-                }
-                if (GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.HasValue)
-                {
-                    terms.Add("AdmDateModified", GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.Value.ToString("MMM dd yyyy"), "<=");
-                }
-
-                return terms;
-            }
+            return terms;
         }
-
-        Func<Map, IEnumerable<long>> IModuleSearchConfig.IrnSelectFunc => map =>
-        {
-            var irns = new List<long>();
-            foreach (var cat in map.GetMaps("cat"))
-            {
-                if (cat != null &&
-                    cat.GetTrimStrings("MdaDataSets_tab").Contains(AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString) &&
-                    string.Equals(cat.GetTrimString("AdmPublishWebNoPassword"), "yes",
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    var identification = MapSearches.GetIdentification(cat);
-                    var taxonomy = identification?.GetMap("taxa");
-
-                    if (taxonomy != null && taxonomy.GetLong("irn") == map.GetLong("irn"))
-                    {
-                        irns.Add(cat.GetLong("irn"));
-                    }
-                }
-            }
-            return irns;
-        };
     }
+
+    Func<Map, IEnumerable<long>> IModuleSearchConfig.IrnSelectFunc => map =>
+    {
+        var irns = new List<long>();
+        foreach (var cat in map.GetMaps("cat"))
+            if (cat != null &&
+                cat.GetTrimStrings("MdaDataSets_tab")
+                    .Contains(AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString) &&
+                string.Equals(cat.GetTrimString("AdmPublishWebNoPassword"), "yes",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                var identification = MapSearches.GetIdentification(cat);
+                var taxonomy = identification?.GetMap("taxa");
+
+                if (taxonomy != null && taxonomy.GetLong("irn") == map.GetLong("irn")) irns.Add(cat.GetLong("irn"));
+            }
+
+        return irns;
+    };
 }

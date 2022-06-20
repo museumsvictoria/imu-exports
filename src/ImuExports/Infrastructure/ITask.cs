@@ -1,7 +1,6 @@
-﻿namespace ImuExports.Infrastructure
+﻿namespace ImuExports.Infrastructure;
+
+public interface ITask
 {
-    public interface ITask
-    {
-        void Run();
-    }
+    Task Run(CancellationToken stoppingToken);
 }

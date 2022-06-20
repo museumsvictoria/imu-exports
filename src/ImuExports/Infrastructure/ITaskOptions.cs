@@ -1,11 +1,16 @@
-﻿using System;
+﻿namespace ImuExports.Infrastructure;
 
-namespace ImuExports.Infrastructure
+public interface ITaskOptions
 {
-    public interface ITaskOptions
+    public Task Initialize(AppSettings appSettings)
     {
-        void Initialize();
+        return Task.CompletedTask;
+    }
 
-        Type TypeOfTask { get; }
+    Type TypeOfTask { get; }
+
+    public Task CleanUp(AppSettings appSettings)
+    {
+        return Task.CompletedTask;
     }
 }

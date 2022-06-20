@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using IMu;
+﻿using IMu;
 
-namespace ImuExports.Infrastructure
+namespace ImuExports.Infrastructure;
+
+public interface IFactory<out T>
 {
-    public interface IFactory<out T>
-    {
-        T Make(Map map);
+    T Make(Map map, CancellationToken stoppingToken);
 
-        IEnumerable<T> Make(IEnumerable<Map> maps);
-    }
+    IEnumerable<T> Make(IEnumerable<Map> maps, CancellationToken stoppingToken);
 }

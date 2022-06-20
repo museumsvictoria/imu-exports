@@ -1,44 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using ImuExports.Infrastructure;
-using ImuExports.Config;
-using IMu;
+﻿using IMu;
 
-namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config
+namespace ImuExports.Tasks.AtlasOfLivingAustralia.Config;
+
+public class CatalogueModuleSearchConfig : IModuleSearchConfig
 {
-    class CatalogueModuleSearchConfig : IModuleSearchConfig
+    private readonly AtlasOfLivingAustraliaOptions _options = (AtlasOfLivingAustraliaOptions)CommandOptions.TaskOptions;
+    
+    string IModuleSearchConfig.ModuleName => "ecatalogue";
+
+    string IModuleSearchConfig.ModuleSelectName => "catalogue";
+
+    string[] IModuleSearchConfig.Columns => new[]
     {
-        string IModuleSearchConfig.ModuleName => "ecatalogue";
+        "irn"
+    };
 
-        string IModuleSearchConfig.ModuleSelectName => "catalogue";
-
-        string[] IModuleSearchConfig.Columns => new[]
+    Terms IModuleSearchConfig.Terms
+    {
+        get
         {
-            "irn"
-        };
+            var terms = new Terms();
+            
+            if (_options.ParsedModifiedAfterDate.HasValue)
+                terms.Add("AdmDateModified", _options.ParsedModifiedAfterDate.Value.ToString("MMM dd yyyy"), ">=");
+            if (_options.ParsedModifiedBeforeDate.HasValue)
+                terms.Add("AdmDateModified", _options.ParsedModifiedBeforeDate.Value.ToString("MMM dd yyyy"), "<=");
+            terms.Add("ColCategory", "Natural Sciences");
+            terms.Add("MdaDataSets_tab", AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString);
+            terms.Add("AdmPublishWebNoPassword", "Yes");
 
-        Terms IModuleSearchConfig.Terms
-        {
-            get
-            {
-                var terms = new Terms();
-                if (GlobalOptions.Options.Ala.ParsedModifiedAfterDate.HasValue)
-                {
-                    terms.Add("AdmDateModified", GlobalOptions.Options.Ala.ParsedModifiedAfterDate.Value.ToString("MMM dd yyyy"), ">=");
-                }
-                if (GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.HasValue)
-                {
-                    terms.Add("AdmDateModified", GlobalOptions.Options.Ala.ParsedModifiedBeforeDate.Value.ToString("MMM dd yyyy"), "<=");
-                }
-                terms.Add("ColCategory", "Natural Sciences");
-                terms.Add("MdaDataSets_tab", AtlasOfLivingAustraliaConstants.ImuAtlasOfLivingAustraliaQueryString);
-                terms.Add("AdmPublishWebNoPassword", "Yes");
-
-                return terms;
-            }
+            return terms;
         }
-
-        Func<Map, IEnumerable<long>> IModuleSearchConfig.IrnSelectFunc => map => new[] { map.GetLong("irn") }.ToList();
     }
+
+    Func<Map, IEnumerable<long>> IModuleSearchConfig.IrnSelectFunc => map => new[] { map.GetLong("irn") }.ToList();
 }

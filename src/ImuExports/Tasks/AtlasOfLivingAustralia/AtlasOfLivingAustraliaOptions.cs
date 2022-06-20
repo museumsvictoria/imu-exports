@@ -1,136 +1,149 @@
-﻿using System;
-using System.Configuration;
-using System.Globalization;
-using System.IO;
-using System.Reflection;
+﻿using System.Globalization;
 using CommandLine;
-using ImuExports.Extensions;
-using ImuExports.Infrastructure;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 using LiteDB;
-using Serilog;
 
-namespace ImuExports.Tasks.AtlasOfLivingAustralia
+namespace ImuExports.Tasks.AtlasOfLivingAustralia;
+
+[Verb("ala", HelpText = "Export records for the Atlas of Living Australia.")]
+public class AtlasOfLivingAustraliaOptions : ITaskOptions
 {
-    public class AtlasOfLivingAustraliaOptions : ITaskOptions
+    [Option('d', "dest", HelpText = "Destination directory for csv and images.")]
+    public string Destination { get; set; }
+
+    [Option('a', "modified-after", HelpText = "Get all records after modified date >=")]
+    public string ModifiedAfterDate { get; set; }
+
+    [Option('b', "modified-before", HelpText = "Get all records before modified date <=")]
+    public string ModifiedBeforeDate { get; set; }
+
+    public Type TypeOfTask => typeof(AtlasOfLivingAustraliaTask);
+
+    public DateTime? ParsedModifiedAfterDate { get; set; }
+
+    public DateTime? ParsedModifiedBeforeDate { get; set; }
+
+    public bool IsAutomated { get; set; }
+
+    public AtlasOfLivingAustraliaApplication Application { get; set; }
+
+    public DateTime DateStarted { get; }
+
+    public AtlasOfLivingAustraliaOptions()
     {
-        [Option('d', "dest", HelpText = "Destination directory for csv and images.")]
-        public string Destination { get; set; }
+        DateStarted = DateTime.Now;
+    }
 
-        [Option('a', "modified-after", HelpText = "Get all records after modified date >=")]
-        public string ModifiedAfterDate { get; set; }
-
-        [Option('b', "modified-before", HelpText = "Get all records before modified date <=")]
-        public string ModifiedBeforeDate { get; set; }
-
-        public Type TypeOfTask => typeof (AtlasOfLivingAustraliaTask);
-
-        public DateTime? ParsedModifiedAfterDate { get; set; }
-
-        public DateTime? ParsedModifiedBeforeDate { get; set; }
-
-        public bool IsAutomated { get; set; }
-        
-        public AtlasOfLivingAustraliaApplication Application { get; set; }
-
-        public DateTime DateStarted { get; private set; }
-        
-        public AtlasOfLivingAustraliaOptions()
-        {
-            DateStarted = DateTime.Now;
-        }
-
-        public void Initialize()
+    public async Task Initialize(AppSettings appSettings)
+    {
+        await Task.Run(() =>
         {
             Log.Logger.Information("Initializing {TypeOfTask}", TypeOfTask);
-            
-            // Task is automated if no destination specified, create random temporary directory
-            if (string.IsNullOrWhiteSpace(this.Destination))
-            {
-                this.Destination = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\{Utils.RandomString(8)}";
-                this.IsAutomated = true;
 
-                Log.Logger.Information("No destination specified... assuming task is automated");
-                Log.Logger.Information("Exporting to directory {Destination}", Destination);
+            // Task is automated if no destination specified, create random temporary directory
+            if (string.IsNullOrWhiteSpace(Destination))
+            {
+                IsAutomated = true;
+                Destination = $"{AppContext.BaseDirectory}{Utils.RandomString(8)}";
+                Log.Logger.Debug("No destination specified... assuming task is automated");
 
                 // Check for last import date
-                using (var db = new LiteRepository(ConfigurationManager.ConnectionStrings["LiteDB"].ConnectionString))
+                using var db = new LiteRepository(new ConnectionString()
                 {
-                    this.Application = db.Query<AtlasOfLivingAustraliaApplication>().FirstOrDefault();
+                    Filename = $"{AppContext.BaseDirectory}{appSettings.LiteDbFilename}",
+                    Upgrade = true
+                });
 
-                    if (this.Application == null)
-                    {
-                        this.Application = new AtlasOfLivingAustraliaApplication();
-                        Log.Logger.Information("No AtlasOfLivingAustralia Application found... creating new application");
-                    }
-                    else
-                    {
-                        ParsedModifiedAfterDate = this.Application.PreviousDateRun;
-                        Log.Logger.Information("AtlasOfLivingAustralia Application found");
-                        
-                        Log.Logger.Information("Setting ParsedModifiedAfterDate to application.PreviousDateRun {ParsedModifiedAfterDate}", ParsedModifiedAfterDate?.ToString("yyyy-MM-dd"));
-                    }
+                Application = db.Query<AtlasOfLivingAustraliaApplication>().FirstOrDefault();
+
+                if (Application == null)
+                {
+                    Application = new AtlasOfLivingAustraliaApplication();
+                    Log.Logger.Debug("No AtlasOfLivingAustralia Application found... creating new application");
+                }
+                else
+                {
+                    ParsedModifiedAfterDate = Application.PreviousDateRun;
+                    Log.Logger.Debug("AtlasOfLivingAustralia Application found");
+
+                    Log.Logger.Debug(
+                        "Setting ParsedModifiedAfterDate to application.PreviousDateRun {ParsedModifiedAfterDate}",
+                        ParsedModifiedAfterDate?.ToString("yyyy-MM-dd"));
                 }
             }
             else
             {
-                Log.Logger.Information("Destination specified... assuming task is being run manually");
-                Log.Logger.Information("Exporting to directory {Destination}", Destination);
+                Log.Logger.Debug("Destination specified... assuming task is being run manually");
             }
 
             // Add backslash if it doesnt exist to our destination directory
-            if (!this.Destination.EndsWith(@"\"))
-            {
-                this.Destination += @"\";
-            }
+            if (!Destination.EndsWith(@"\")) Destination += @"\";
 
-            // Make sure destination directory exists
-            if (!Directory.Exists(this.Destination))
+            if (!Path.IsPathFullyQualified(Destination))
             {
+                Destination = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, Destination));
+            }
+            
+            // Make sure destination directory exists
+            if (!Directory.Exists(Destination))
                 try
                 {
-                    Directory.CreateDirectory(this.Destination);
+                    Directory.CreateDirectory(Destination);
                 }
                 catch (Exception ex)
                 {
-                    Log.Logger.Fatal(ex, "Error creating {Destination} directory", this.Destination);
-                    Environment.Exit(Parser.DefaultExitCodeFail);
+                    Log.Logger.Fatal(ex, "Error creating {Destination} directory", Destination);
+                    Environment.Exit(Constants.ExitCodeError);
                 }
-            }
+            
+            Log.Logger.Information("Exporting to directory {Destination}", Destination);
 
             // Parse ModifiedAfterDate
-            if (!string.IsNullOrWhiteSpace(this.ModifiedAfterDate))
-            {
+            if (!string.IsNullOrWhiteSpace(ModifiedAfterDate))
                 try
                 {
-                    this.ParsedModifiedAfterDate = DateTime.ParseExact(this.ModifiedAfterDate, "yyyy-MM-dd",
+                    ParsedModifiedAfterDate = DateTime.ParseExact(ModifiedAfterDate, "yyyy-MM-dd",
                         CultureInfo.InvariantCulture, DateTimeStyles.None);
-                    Log.Logger.Information("ModifiedAfterDate flag found... Setting ParsedModifiedAfterDate to {ParsedModifiedAfterDate}", ParsedModifiedAfterDate?.ToString("yyyy-MM-dd"));
+                    Log.Logger.Debug(
+                        "ModifiedAfterDate flag found... Setting ParsedModifiedAfterDate to {ParsedModifiedAfterDate}",
+                        ParsedModifiedAfterDate?.ToString("yyyy-MM-dd"));
                 }
                 catch (Exception ex)
                 {
-                    Log.Logger.Fatal(ex, "Error parsing ModifiedAfterDate, ensure string is in the format yyyy-MM-dd",
-                        this.ModifiedAfterDate);
-                    Environment.Exit(Parser.DefaultExitCodeFail);
+                    Log.Logger.Fatal(ex, "Error parsing ModifiedAfterDate {ModifiedAfterDate}, ensure string is in the format yyyy-MM-dd",
+                        ModifiedAfterDate);
+                    Environment.Exit(Constants.ExitCodeError);
                 }
-            }
 
             // Parse ModifiedBeforeDate
-            if (!string.IsNullOrWhiteSpace(this.ModifiedBeforeDate))
-            {
+            if (!string.IsNullOrWhiteSpace(ModifiedBeforeDate))
                 try
                 {
-                    this.ParsedModifiedBeforeDate = DateTime.ParseExact(this.ModifiedBeforeDate, "yyyy-MM-dd",
+                    ParsedModifiedBeforeDate = DateTime.ParseExact(ModifiedBeforeDate, "yyyy-MM-dd",
                         CultureInfo.InvariantCulture, DateTimeStyles.None);
-                    Log.Logger.Information("ModifiedBeforeDate flag found...Setting ParsedModifiedBeforeDate to {ParsedModifiedBeforeDate}", ParsedModifiedBeforeDate?.ToString("yyyy-MM-dd"));
+                    Log.Logger.Debug(
+                        "ModifiedBeforeDate flag found...Setting ParsedModifiedBeforeDate to {ParsedModifiedBeforeDate}",
+                        ParsedModifiedBeforeDate?.ToString("yyyy-MM-dd"));
                 }
                 catch (Exception ex)
                 {
-                    Log.Logger.Fatal(ex, "Error parsing ModifiedBeforeDate, ensure string is in the format yyyy-MM-dd",
-                        this.ModifiedBeforeDate);
-                    Environment.Exit(Parser.DefaultExitCodeFail);
+                    Log.Logger.Fatal(ex, "Error parsing ModifiedBeforeDate {ModifiedBeforeDate}, ensure string is in the format yyyy-MM-dd",
+                        ModifiedBeforeDate);
+                    Environment.Exit(Constants.ExitCodeError);
                 }
+        });
+    }
+
+    public async Task CleanUp(AppSettings appSettings)
+    {
+        await Task.Run(() =>
+        {
+            // Remove any temporary files and directory if running automated export
+            if (IsAutomated)
+            {
+                Log.Logger.Information("Deleting temporary directory {Destination}", Destination);
+                Directory.Delete(Destination, true);
             }
-        }
+        });
     }
 }

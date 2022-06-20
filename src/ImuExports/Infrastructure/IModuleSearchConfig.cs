@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using IMu;
+﻿using IMu;
 
-namespace ImuExports.Infrastructure
+namespace ImuExports.Infrastructure;
+
+public interface IModuleSearchConfig
 {
-    public interface IModuleSearchConfig
-    {
-        string ModuleName { get; }
-        
-        string ModuleSelectName { get; }
+    string ModuleName { get; }
 
-        string[] Columns { get; }
+    string ModuleSelectName { get; }
 
-        Terms Terms { get; }
+    string[] Columns { get; }
 
-        Func<Map, IEnumerable<long>> IrnSelectFunc { get; }
-    }
+    Terms Terms { get; }
+
+    Func<Map, IEnumerable<long>> IrnSelectFunc { get; }
 }

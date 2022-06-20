@@ -1,30 +1,69 @@
-﻿using System;
-using ImuExports.Config;
-using ImuExports.Infrastructure;
-using Serilog;
+global using ImuExports.Configuration;
+global using ImuExports.Extensions;
+global using ImuExports.Infrastructure;
+global using ImuExports.Utilities;
+global using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
+using SimpleInjector;
 
-namespace ImuExports
+var configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json", false, true)
+    .AddJsonFile(
+        $"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production"}.json",
+        true)
+    .AddEnvironmentVariables()
+    .Build();
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(configuration)
+    .WriteTo.Console(theme: AnsiConsoleTheme.Code)
+    .WriteTo.File(Path.Combine(AppContext.BaseDirectory, "logs/log.txt"), rollingInterval: RollingInterval.Day)
+    .Enrich.WithEnvironmentName()
+    .Enrich.WithMachineName()
+    .CreateLogger();
+
+try
 {
-    static class Program
-    {
-        public static volatile bool ImportCanceled = false;
+    // Parse command line options
+    CommandOptions.Initialize(args);
 
-        static void Main(string[] args)
+    Log.Debug("ImuExports starting up...");
+    
+    // Create DI container as we need to add it while configuring host
+    var container = new Container();
+
+    // Configure host
+    var host = Host.CreateDefaultBuilder(args)
+        .ConfigureServices((context, services) =>
         {
-            // Configure serilog
-            SerilogConfig.Initialize();
-            
-            // Configure Program
-            ProgramConfig.Initialize();
+            var configSection = context.Configuration.GetSection(AppSettings.SECTION_NAME);
 
-            // Parse command line options and run any task initialization steps
-            GlobalOptions.Initialize(args);
+            services
+                .Configure<AppSettings>(configSection)
+                .Configure<HostOptions>(opts => opts.ShutdownTimeout = TimeSpan.FromSeconds(20))
+                .AddSimpleInjector(container, options =>
+                {
+                    options.AddHostedService<TaskRunner>();
+                    options.AddLogging();
+                });
+        })
+        .UseConsoleLifetime()
+        .UseSerilog()
+        .Build()
+        .UseSimpleInjector(container);
 
-            // Wire up ioc
-            var container = ContainerConfig.Initialize();
-
-            // Begin export
-            container.GetInstance<TaskRunner>().RunAllTasks();
-        }
-    }
+    // Configure and verify DI container
+    container
+        .Initialize()
+        .Verify();
+    
+    await host.RunAsync();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "ImuExports startup failed...");
+}
+finally
+{
+    Log.CloseAndFlush();
 }
