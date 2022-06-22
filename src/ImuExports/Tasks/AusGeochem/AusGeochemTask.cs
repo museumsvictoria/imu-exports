@@ -14,14 +14,14 @@ public class AusGeochemTask : ImuTaskBase, ITask
 {
     private readonly AusGeochemOptions _options = (AusGeochemOptions)CommandOptions.TaskOptions;
     private readonly AppSettings _appSettings;
-    private readonly IFactory<Specimen> _specimenFactory;
+    private readonly IFactory<Sample> _sampleFactory;
 
     public AusGeochemTask(
         IOptions<AppSettings> appSettings,
-        IFactory<Specimen> specimenFactory) : base(appSettings)
+        IFactory<Sample> sampleFactory) : base(appSettings)
     {
         _appSettings = appSettings.Value;
-        _specimenFactory = specimenFactory;
+        _sampleFactory = sampleFactory;
     }
 
     public async Task Run(CancellationToken stoppingToken)
@@ -29,12 +29,12 @@ public class AusGeochemTask : ImuTaskBase, ITask
         using (Log.Logger.BeginTimedOperation($"{GetType().Name} starting", $"{GetType().Name}.Run"))
         {
             stoppingToken.ThrowIfCancellationRequested();
-            
-            // Cache Irns
-            var cachedIrns = await CacheIrns("ecatalogue", this.BuildExportSearchTerms(), stoppingToken);
 
-            // Fetch data
-            var specimens = new List<Specimen>();
+            // Cache Mineralogy Irns
+            var cachedIrns = await CacheIrns("ecatalogue", this.BuildMineralogySearchTerms(), stoppingToken);
+
+            // Fetch Mineralogy data
+            var mineralogySamples = new List<Sample>();
             var offset = 0;
             Log.Logger.Information("Fetching data");
             while (true)
@@ -57,14 +57,49 @@ public class AusGeochemTask : ImuTaskBase, ITask
 
                     Log.Logger.Debug("Fetched {RecordCount} records from Imu", cachedIrnsBatch.Count);
 
-                    specimens.AddRange(results.Rows.Select(map => _specimenFactory.Make(map, stoppingToken)));
+                    mineralogySamples.AddRange(results.Rows.Select(map => _sampleFactory.Make(map, stoppingToken)));
 
                     offset += results.Count;
 
                     Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset, cachedIrns.Count);
                 }
             }
-
+            
+            // Cache Mineralogy Irns
+            cachedIrns = await CacheIrns("ecatalogue", this.BuildPetrologySearchTerms(), stoppingToken);
+            
+            // Fetch Mineralogy data
+            var petrologySamples = new List<Sample>();
+            offset = 0;
+            Log.Logger.Information("Fetching data");
+            while (true)
+            {
+                stoppingToken.ThrowIfCancellationRequested();
+            
+                using (var imuSession = new ImuSession("ecatalogue", _appSettings.Emu.Host, int.Parse(_appSettings.Emu.Port)))
+                {
+                    var cachedIrnsBatch = cachedIrns
+                        .Skip(offset)
+                        .Take(Constants.DataBatchSize)
+                        .ToList();
+            
+                    if (cachedIrnsBatch.Count == 0)
+                        break;
+            
+                    imuSession.FindKeys(cachedIrnsBatch);
+            
+                    var results = imuSession.Fetch("start", 0, -1, this.ExportColumns);
+            
+                    Log.Logger.Debug("Fetched {RecordCount} records from Imu", cachedIrnsBatch.Count);
+            
+                    petrologySamples.AddRange(results.Rows.Select(map => _sampleFactory.Make(map, stoppingToken)));
+            
+                    offset += results.Count;
+            
+                    Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset, cachedIrns.Count);
+                }
+            }
+            
             // Save data
             Log.Logger.Information("Saving specimen data as csv");
             
@@ -74,19 +109,36 @@ public class AusGeochemTask : ImuTaskBase, ITask
                 SanitizeForInjection = false
             };
             
-            await using (var writer = new StreamWriter(_options.Destination + @"specimens.csv", false, Encoding.UTF8))
+            await using (var writer = new StreamWriter(_options.Destination + @"mineralogy-samples.csv", false, Encoding.UTF8))
             await using (var csv = new CsvWriter(writer, csvConfig))
             {
-                csv.Context.RegisterClassMap<SpecimenClassMap>();
-                await csv.WriteRecordsAsync(specimens, stoppingToken);
+                csv.Context.RegisterClassMap<MineralogySampleClassMap>();
+                await csv.WriteRecordsAsync(mineralogySamples, stoppingToken);
+            }
+            
+            await using (var writer = new StreamWriter(_options.Destination + @"petrology-samples.csv", false, Encoding.UTF8))
+            await using (var csv = new CsvWriter(writer, csvConfig))
+            {
+                csv.Context.RegisterClassMap<PetrologySampleClassMap>();
+                await csv.WriteRecordsAsync(petrologySamples, stoppingToken);
             }
         }
     }
 
-    private Terms BuildExportSearchTerms()
+    private Terms BuildMineralogySearchTerms()
     {
         var searchTerms = new Terms();
-        searchTerms.Add("ColCategory", "Natural Sciences");
+        searchTerms.Add("ColDiscipline", "Mineralogy");
+        searchTerms.Add("MdaDataSets_tab", AusGeochemConstants.QueryString);
+        searchTerms.Add("AdmPublishWebNoPassword", "Yes");
+
+        return searchTerms;
+    }
+    
+    private Terms BuildPetrologySearchTerms()
+    {
+        var searchTerms = new Terms();
+        searchTerms.Add("ColDiscipline", "Petrology");
         searchTerms.Add("MdaDataSets_tab", AusGeochemConstants.QueryString);
         searchTerms.Add("AdmPublishWebNoPassword", "Yes");
 
