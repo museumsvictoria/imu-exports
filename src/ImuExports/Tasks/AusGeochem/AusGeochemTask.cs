@@ -6,7 +6,11 @@ using IMu;
 using ImuExports.Tasks.AusGeochem.ClassMaps;
 using ImuExports.Tasks.AusGeochem.Config;
 using ImuExports.Tasks.AusGeochem.Models;
+using ImuExports.Tasks.AusGeochem.Models.Api;
+using LiteDB;
 using Microsoft.Extensions.Options;
+using RestSharp;
+using RestSharp.Authenticators;
 
 namespace ImuExports.Tasks.AusGeochem;
 
@@ -32,6 +36,9 @@ public class AusGeochemTask : ImuTaskBase, ITask
 
             // Cache Mineralogy Irns
             var cachedIrns = await CacheIrns("ecatalogue", this.BuildMineralogySearchTerms(), stoppingToken);
+
+            // TODO: remove after testing complete
+            cachedIrns = cachedIrns.Take(10).ToList();
 
             // Fetch Mineralogy data
             var mineralogySamples = new List<Sample>();
@@ -65,10 +72,13 @@ public class AusGeochemTask : ImuTaskBase, ITask
                 }
             }
             
-            // Cache Mineralogy Irns
+            // Cache Petrology Irns
             cachedIrns = await CacheIrns("ecatalogue", this.BuildPetrologySearchTerms(), stoppingToken);
             
-            // Fetch Mineralogy data
+            // TODO: remove after testing complete
+            cachedIrns = cachedIrns.Take(10).ToList();
+            
+            // Fetch Petrology data
             var petrologySamples = new List<Sample>();
             offset = 0;
             Log.Logger.Information("Fetching data");
@@ -100,27 +110,73 @@ public class AusGeochemTask : ImuTaskBase, ITask
                 }
             }
             
-            // Save data
-            Log.Logger.Information("Saving specimen data as csv");
             
-            var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
+            if (!string.IsNullOrWhiteSpace(_options.Destination))
             {
-                HasHeaderRecord = true,
-                SanitizeForInjection = false
-            };
+                // Save to CSV if destination specified
+                Log.Logger.Information("Saving sample data as csv");
             
-            await using (var writer = new StreamWriter(_options.Destination + @"mineralogy-samples.csv", false, Encoding.UTF8))
-            await using (var csv = new CsvWriter(writer, csvConfig))
-            {
-                csv.Context.RegisterClassMap<MineralogySampleClassMap>();
-                await csv.WriteRecordsAsync(mineralogySamples, stoppingToken);
+                var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
+                {
+                    HasHeaderRecord = true,
+                    SanitizeForInjection = false
+                };
+            
+                await using (var writer = new StreamWriter(_options.Destination + @"mineralogy-samples.csv", false, Encoding.UTF8))
+                await using (var csv = new CsvWriter(writer, csvConfig))
+                {
+                    csv.Context.RegisterClassMap<MineralogySampleClassMap>();
+                    await csv.WriteRecordsAsync(mineralogySamples, stoppingToken);
+                }
+            
+                await using (var writer = new StreamWriter(_options.Destination + @"petrology-samples.csv", false, Encoding.UTF8))
+                await using (var csv = new CsvWriter(writer, csvConfig))
+                {
+                    csv.Context.RegisterClassMap<PetrologySampleClassMap>();
+                    await csv.WriteRecordsAsync(petrologySamples, stoppingToken);
+                }
             }
-            
-            await using (var writer = new StreamWriter(_options.Destination + @"petrology-samples.csv", false, Encoding.UTF8))
-            await using (var csv = new CsvWriter(writer, csvConfig))
+            else
             {
-                csv.Context.RegisterClassMap<PetrologySampleClassMap>();
-                await csv.WriteRecordsAsync(petrologySamples, stoppingToken);
+                // Send directly to AusGeochem via API
+                Log.Logger.Information("Sending sample data via API");
+                
+                var client = new RestClient(_appSettings.AusGeochem.BaseUrl);
+
+                // Request JWT
+                var request = new RestRequest("authenticate", Method.Post).AddJsonBody(new LoginRequest()
+                {
+                    Password = _appSettings.AusGeochem.Password,
+                    Username = _appSettings.AusGeochem.Username
+                });
+
+                var response = await client.ExecuteAsync<LoginResponse>(request, stoppingToken);
+
+                if (!response.IsSuccessful)
+                {
+                    Log.Logger.Error(response.ErrorException, "Could not successfully authenticate, exiting");
+                    Environment.Exit(Constants.ExitCodeError);
+                }
+                else if (!string.IsNullOrWhiteSpace(response.Data?.Token))
+                {
+                    client.Authenticator = new JwtAuthenticator(response.Data.Token);                
+                }
+                
+                // Update/Insert application
+                using var db = new LiteRepository(new ConnectionString()
+                {
+                    Filename = $"{AppContext.BaseDirectory}{_appSettings.LiteDbFilename}",
+                    Upgrade = true
+                });
+                
+                var application = _options.Application;
+        
+                if (application != null)
+                {
+                    Log.Logger.Information("Updating AusGeochem Application PreviousDateRun {PreviousDateRun} to {DateStarted}", application.PreviousDateRun, _options.DateStarted);
+                    application.PreviousDateRun = _options.DateStarted;
+                    db.Upsert(application);
+                }
             }
         }
     }
