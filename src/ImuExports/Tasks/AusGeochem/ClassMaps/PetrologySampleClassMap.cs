@@ -4,6 +4,6 @@ public sealed class PetrologySampleClassMap : SampleClassMap
 {
     public PetrologySampleClassMap()
     {
-        Map(m => m.Comment).Index(20).Name("lithology comment");
+        Map(m => m.Comment).Index(19).Name("lithology comment");
     }
 }

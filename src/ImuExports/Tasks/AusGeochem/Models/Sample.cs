@@ -14,8 +14,6 @@ public class Sample
     
     public string DateGeoreferenced { get; set; }
 
-    public string LocationName { get; set; }
-    
     public string LocationNotes { get; set; }
     
     public string UnitName { get; set; }
@@ -27,8 +25,6 @@ public class Sample
     public string DepthMin { get; set; }
 
     public string DepthMax { get; set; }
-    
-    public string Collector { get; set; }
     
     public string PersonRole { get; set; }
     

@@ -4,6 +4,6 @@ public sealed class MineralogySampleClassMap : SampleClassMap
 {
     public MineralogySampleClassMap()
     {
-        Map(m => m.Comment).Index(20).Name("mineral comment");
+        Map(m => m.Comment).Index(19).Name("mineral comment");
     }
 }

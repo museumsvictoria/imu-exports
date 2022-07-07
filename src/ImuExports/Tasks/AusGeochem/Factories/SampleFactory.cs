@@ -70,8 +70,6 @@ public class SampleFactory : IFactory<Sample>
                 }.Concatenate(", ");
             }
 
-            sample.LocationName = site.GetTrimString("LocPreciseLocation");
-
             var geo = site.GetMaps("geo").FirstOrDefault();
             string geoLocationNotes = null;
             if (geo != null)
@@ -119,11 +117,6 @@ public class SampleFactory : IFactory<Sample>
             sample.DepthMin = site.GetTrimString("EraDepthFromMt");
             sample.DepthMax = site.GetTrimString("EraDepthToMt");
         }
-
-        sample.Collector = map.GetMaps("collectors").Select(MakePartyName).Concatenate(", ");
-
-        if (!string.IsNullOrWhiteSpace(sample.Collector))
-            sample.PersonRole = "Collector";
 
         if (DateTime.TryParseExact(map.GetTrimString("LocDateCollectedFrom"), "dd/MM/yyyy",
                 new CultureInfo("en-AU"), DateTimeStyles.None, out var dateCollectedMin))
