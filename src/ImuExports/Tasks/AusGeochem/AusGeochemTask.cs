@@ -1,16 +1,21 @@
 ﻿using System.Globalization;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using CsvHelper;
 using CsvHelper.Configuration;
 using IMu;
 using ImuExports.Tasks.AusGeochem.ClassMaps;
 using ImuExports.Tasks.AusGeochem.Config;
+using ImuExports.Tasks.AusGeochem.Extensions;
 using ImuExports.Tasks.AusGeochem.Models;
 using ImuExports.Tasks.AusGeochem.Models.Api;
 using LiteDB;
 using Microsoft.Extensions.Options;
 using RestSharp;
 using RestSharp.Authenticators;
+using RestSharp.Serializers.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace ImuExports.Tasks.AusGeochem;
 
@@ -38,7 +43,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
             var cachedIrns = await CacheIrns("ecatalogue", this.BuildMineralogySearchTerms(), stoppingToken);
 
             // TODO: remove after testing complete
-            cachedIrns = cachedIrns.Take(10).ToList();
+            cachedIrns = cachedIrns.Take(1).ToList();
 
             // Fetch Mineralogy data
             var mineralogySamples = new List<Sample>();
@@ -76,7 +81,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
             cachedIrns = await CacheIrns("ecatalogue", this.BuildPetrologySearchTerms(), stoppingToken);
             
             // TODO: remove after testing complete
-            cachedIrns = cachedIrns.Take(10).ToList();
+            cachedIrns = cachedIrns.Take(1).ToList();
             
             // Fetch Petrology data
             var petrologySamples = new List<Sample>();
@@ -141,8 +146,13 @@ public class AusGeochemTask : ImuTaskBase, ITask
                 // Send directly to AusGeochem via API
                 Log.Logger.Information("Sending sample data via API");
                 
-                var client = new RestClient(_appSettings.AusGeochem.BaseUrl);
+                using var client = new RestClient(_appSettings.AusGeochem.BaseUrl);
 
+                client.UseSystemTextJson(new JsonSerializerOptions(JsonSerializerDefaults.Web)
+                {
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                });
+                
                 // Request JWT
                 var request = new RestRequest("authenticate", Method.Post).AddJsonBody(new LoginRequest()
                 {
@@ -160,6 +170,20 @@ public class AusGeochemTask : ImuTaskBase, ITask
                 else if (!string.IsNullOrWhiteSpace(response.Data?.Token))
                 {
                     client.Authenticator = new JwtAuthenticator(response.Data.Token);                
+                }
+
+                // Test sending mineralogy samples
+                foreach (var sample in mineralogySamples)
+                {
+                    var dto = sample.ToSampleWithLocationDto();
+                    
+                    dto.SampleDto.DataPackageId = 3133263;
+                    dto.SampleDto.MaterialName = "Basalt";
+                    dto.SampleDto.MaterialId = 108735;
+                    
+                    var sampleRequest = new RestRequest("core/sample-with-locations", Method.Post).AddJsonBody(dto);
+                
+                    var sampleResponse = await client.ExecuteAsync(sampleRequest, stoppingToken);
                 }
                 
                 // Update/Insert application
