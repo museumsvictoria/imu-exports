@@ -1,21 +1,17 @@
 ﻿using System.Globalization;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using CsvHelper;
 using CsvHelper.Configuration;
 using IMu;
 using ImuExports.Tasks.AusGeochem.ClassMaps;
+using ImuExports.Tasks.AusGeochem.Clients;
 using ImuExports.Tasks.AusGeochem.Config;
-using ImuExports.Tasks.AusGeochem.Extensions;
 using ImuExports.Tasks.AusGeochem.Models;
 using ImuExports.Tasks.AusGeochem.Models.Api;
 using LiteDB;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using RestSharp;
-using RestSharp.Authenticators;
-using RestSharp.Serializers.Json;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace ImuExports.Tasks.AusGeochem;
 
@@ -24,13 +20,16 @@ public class AusGeochemTask : ImuTaskBase, ITask
     private readonly AusGeochemOptions _options = (AusGeochemOptions)CommandOptions.TaskOptions;
     private readonly AppSettings _appSettings;
     private readonly IFactory<Sample> _sampleFactory;
+    private readonly IAusGeochemClient _ausGeochemClient;
 
     public AusGeochemTask(
         IOptions<AppSettings> appSettings,
-        IFactory<Sample> sampleFactory) : base(appSettings)
+        IFactory<Sample> sampleFactory,
+        IAusGeochemClient ausGeochemClient) : base(appSettings)
     {
         _appSettings = appSettings.Value;
         _sampleFactory = sampleFactory;
+        _ausGeochemClient = ausGeochemClient;
     }
 
     public async Task Run(CancellationToken stoppingToken)
@@ -114,8 +113,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
                     Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset, cachedIrns.Count);
                 }
             }
-            
-            
+
             if (!string.IsNullOrWhiteSpace(_options.Destination))
             {
                 // Save to CSV if destination specified
@@ -144,48 +142,26 @@ public class AusGeochemTask : ImuTaskBase, ITask
             else
             {
                 // Send directly to AusGeochem via API
-                Log.Logger.Information("Sending sample data via API");
+                await _ausGeochemClient.Authenticate(stoppingToken);
                 
-                using var client = new RestClient(_appSettings.AusGeochem.BaseUrl);
-
-                client.UseSystemTextJson(new JsonSerializerOptions(JsonSerializerDefaults.Web)
-                {
-                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-                });
+                // Extract all material names and Id's for Oskar
+                Log.Logger.Information("Retrieving all materials");
+                var materials= await _ausGeochemClient.GetMaterials(stoppingToken);
                 
-                // Request JWT
-                var request = new RestRequest("authenticate", Method.Post).AddJsonBody(new LoginRequest()
+                Log.Logger.Information("Saving materials to csv");
+                var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
                 {
-                    Password = _appSettings.AusGeochem.Password,
-                    Username = _appSettings.AusGeochem.Username
-                });
-
-                var response = await client.ExecuteAsync<LoginResponse>(request, stoppingToken);
-
-                if (!response.IsSuccessful)
+                    HasHeaderRecord = true,
+                    SanitizeForInjection = false
+                };
+                
+                await using (var writer = new StreamWriter(_options.Destination + @"materials.csv", false, Encoding.UTF8))
+                await using (var csv = new CsvWriter(writer, csvConfig))
                 {
-                    Log.Logger.Error(response.ErrorException, "Could not successfully authenticate, exiting");
-                    Environment.Exit(Constants.ExitCodeError);
-                }
-                else if (!string.IsNullOrWhiteSpace(response.Data?.Token))
-                {
-                    client.Authenticator = new JwtAuthenticator(response.Data.Token);                
+                    csv.Context.RegisterClassMap<MaterialsClassMap>();
+                    await csv.WriteRecordsAsync(materials, stoppingToken);
                 }
 
-                // Test sending mineralogy samples
-                foreach (var sample in mineralogySamples)
-                {
-                    var dto = sample.ToSampleWithLocationDto();
-                    
-                    dto.SampleDto.DataPackageId = 3133263;
-                    dto.SampleDto.MaterialName = "Basalt";
-                    dto.SampleDto.MaterialId = 108735;
-                    
-                    var sampleRequest = new RestRequest("core/sample-with-locations", Method.Post).AddJsonBody(dto);
-                
-                    var sampleResponse = await client.ExecuteAsync(sampleRequest, stoppingToken);
-                }
-                
                 // Update/Insert application
                 using var db = new LiteRepository(new ConnectionString()
                 {

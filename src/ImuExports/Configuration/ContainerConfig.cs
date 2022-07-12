@@ -1,4 +1,6 @@
-﻿using SimpleInjector;
+﻿using ImuExports.Tasks.AusGeochem;
+using ImuExports.Tasks.AusGeochem.Clients;
+using SimpleInjector;
 
 namespace ImuExports.Configuration;
 
@@ -30,7 +32,13 @@ public static class ContainerConfig
         {
             container.Register(registration.Service, registration.Implementation, Lifestyle.Singleton);
         }
-
+        
+        // AusGeochemTask specific
+        if (CommandOptions.TaskOptions.TypeOfTask == typeof(AusGeochemTask))
+        {
+            container.Register<IAusGeochemClient, AusGeochemClient>(Lifestyle.Singleton);            
+        }
+        
         return container;
     }
 }
