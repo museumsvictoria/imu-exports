@@ -7,4 +7,6 @@ public static class Constants
     public static int CachedDataBatchSize = 1000;
 
     public static int DataBatchSize = 10;
+
+    public static int RestClientPageSize = 1000;
 }

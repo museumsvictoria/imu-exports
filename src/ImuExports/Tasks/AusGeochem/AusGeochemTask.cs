@@ -7,11 +7,8 @@ using ImuExports.Tasks.AusGeochem.ClassMaps;
 using ImuExports.Tasks.AusGeochem.Clients;
 using ImuExports.Tasks.AusGeochem.Config;
 using ImuExports.Tasks.AusGeochem.Models;
-using ImuExports.Tasks.AusGeochem.Models.Api;
 using LiteDB;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
-using RestSharp;
 
 namespace ImuExports.Tasks.AusGeochem;
 
@@ -142,25 +139,18 @@ public class AusGeochemTask : ImuTaskBase, ITask
             else
             {
                 // Send directly to AusGeochem via API
+                
+                // Authenticate
                 await _ausGeochemClient.Authenticate(stoppingToken);
                 
-                // Extract all material names and Id's for Oskar
-                Log.Logger.Information("Retrieving all materials");
-                var materials= await _ausGeochemClient.GetMaterials(stoppingToken);
+                // Fetch lookup lists
+                await _ausGeochemClient.FetchLookups(stoppingToken);
                 
-                Log.Logger.Information("Saving materials to csv");
-                var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
-                {
-                    HasHeaderRecord = true,
-                    SanitizeForInjection = false
-                };
+                // Send mineralogy samples
+                await _ausGeochemClient.SendSamples(mineralogySamples, _appSettings.AusGeochem.MineralogyDataPackageId, stoppingToken);
                 
-                await using (var writer = new StreamWriter(_options.Destination + @"materials.csv", false, Encoding.UTF8))
-                await using (var csv = new CsvWriter(writer, csvConfig))
-                {
-                    csv.Context.RegisterClassMap<MaterialsClassMap>();
-                    await csv.WriteRecordsAsync(materials, stoppingToken);
-                }
+                // Send petrology samples
+                await _ausGeochemClient.SendSamples(petrologySamples, _appSettings.AusGeochem.PetrologyDataPackageId, stoppingToken);
 
                 // Update/Insert application
                 using var db = new LiteRepository(new ConnectionString()

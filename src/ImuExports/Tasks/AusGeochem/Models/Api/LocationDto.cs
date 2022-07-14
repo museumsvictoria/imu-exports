@@ -26,13 +26,13 @@ public class LocationDto
         public int? Id { get; set; }
 
         [JsonPropertyName("lat")]
-        public long? Lat { get; set; }
+        public double? Lat { get; set; }
 
         [JsonPropertyName("latLonPrecision")]
         public int? LatLonPrecision { get; set; }
 
         [JsonPropertyName("lon")]
-        public long? Lon { get; set; }
+        public double? Lon { get; set; }
 
         [JsonPropertyName("name")]
         public string Name { get; set; }

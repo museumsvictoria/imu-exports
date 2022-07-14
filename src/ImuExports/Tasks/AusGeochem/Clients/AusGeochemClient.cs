@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using ImuExports.Tasks.AusGeochem.Models;
 using ImuExports.Tasks.AusGeochem.Models.Api;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
@@ -13,13 +14,18 @@ public interface IAusGeochemClient
 {
     Task Authenticate(CancellationToken stoppingToken);
 
-    Task<IList<MaterialDto>> GetMaterials(CancellationToken stoppingToken);
+    Task FetchLookups(CancellationToken stoppingToken);
+
+    Task SendSamples(IList<Sample> samples, string dataPackageId, CancellationToken stoppingToken);
 }
 
 public class AusGeochemClient : IAusGeochemClient, IDisposable
 {
     private readonly AppSettings _appSettings;
     private readonly RestClient _client;
+    private IList<LocationKindDto> _locationKinds;
+    private IList<MaterialDto> _materials;
+    private IList<SampleKindDto> _sampleKinds;
 
     public AusGeochemClient(
         IOptions<AppSettings> appSettings)
@@ -55,26 +61,53 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         }
     }
 
-    public async Task<IList<MaterialDto>> GetMaterials(CancellationToken stoppingToken)
+    public async Task FetchLookups(CancellationToken stoppingToken)
     {
-        var materials = new List<MaterialDto>();
+        _sampleKinds = await FetchAll<SampleKindDto>("core/l-sample-kinds", stoppingToken);
+        _locationKinds = await FetchAll<LocationKindDto>("core/l-location-kinds", stoppingToken);
+        _materials = await this.FetchAll<MaterialDto>("core/materials", stoppingToken);
+    }
+
+    public async Task SendSamples(IList<Sample> samples, string dataPackageId, CancellationToken stoppingToken)
+    {
+        // Fetch current MV records in AusGeochem
+        var parameters = new ParametersCollection();
+        parameters.AddParameter(new QueryParameter("dataPackageId.equals", dataPackageId));
+        var currentSamples = await FetchAll<SampleWithLocationDto>("core/sample-with-locations", stoppingToken, parameters);
+    }
+
+    private async Task<IList<T>> FetchAll<T>(string resource, CancellationToken stoppingToken, ParametersCollection parameters = null)
+    {
+        var dtos = new List<T>();
+        var request = new RestRequest(resource);
         
-        var materialsRequest = new RestRequest("core/materials");
-        materialsRequest.AddQueryParameter("size", "1000");
+        request.AddQueryParameter("size", Constants.RestClientPageSize);
+
+        if (parameters != null)
+        {
+            foreach (var parameter in parameters)
+            {
+                request.AddParameter(parameter);
+            }
+        }
         
         while (true)
         {
             stoppingToken.ThrowIfCancellationRequested();
             
-            var materialsResponse = await _client.ExecuteAsync<List<MaterialDto>>(materialsRequest, stoppingToken);
+            var response = await _client.ExecuteAsync<IList<T>>(request, stoppingToken);
             
-            if(materialsResponse.Data != null)
-                materials.AddRange(materialsResponse.Data);
+            if(response.Data != null)
+                dtos.AddRange(response.Data);
         
-            var linkHeaderParameter = materialsResponse.Headers?.First(x =>
+            var linkHeaderParameter = response.Headers?.First(x =>
                 string.Equals(x.Name, "link", StringComparison.OrdinalIgnoreCase)).Value?.ToString();
         
             var linkHeader = LinkHeader.LinksFromHeader(linkHeaderParameter);
+            
+            var totalCount = response.Headers?.First(x => string.Equals(x.Name, "x-total-count", StringComparison.OrdinalIgnoreCase)).Value;
+            
+            Log.Logger.Information("FetchAllDtos ({Name}) progress... {Count}/{TotalCount}", typeof(T).Name, dtos.Count, totalCount);
         
             if (linkHeader?.NextLink != null)
             {
@@ -82,26 +115,21 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         
                 var newPageParameter = nextLinkQueryString.FirstOrDefault(x =>
                     string.Equals(x.Key, "page", StringComparison.OrdinalIgnoreCase));
-                var oldPageParameter = materialsRequest.Parameters.TryFind("page");
+                var oldPageParameter = request.Parameters.TryFind("page");
                 
                 if (oldPageParameter != null)
                 {
-                    materialsRequest.RemoveParameter(oldPageParameter);
+                    request.RemoveParameter(oldPageParameter);
                 }
                 
-                materialsRequest.AddQueryParameter(newPageParameter.Key, newPageParameter.Value);
-                
-                var totalCount = materialsResponse.Headers?.First(x => string.Equals(x.Name, "x-total-count", StringComparison.OrdinalIgnoreCase)).Value;
-                
-                Log.Logger.Information("Materials progress... {materialsCount}/{totalCount}", materials.Count, totalCount);
+                request.AddQueryParameter(newPageParameter.Key, newPageParameter.Value);
             }
             else
                 break;
         }
 
-        return materials;
+        return dtos;
     }
-    
 
     public void Dispose()
     {
