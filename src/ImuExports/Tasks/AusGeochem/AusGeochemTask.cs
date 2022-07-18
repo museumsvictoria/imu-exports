@@ -38,9 +38,6 @@ public class AusGeochemTask : ImuTaskBase, ITask
             // Cache Mineralogy Irns
             var cachedIrns = await CacheIrns("ecatalogue", this.BuildMineralogySearchTerms(), stoppingToken);
 
-            // TODO: remove after testing complete
-            cachedIrns = cachedIrns.Take(1).ToList();
-
             // Fetch Mineralogy data
             var mineralogySamples = new List<Sample>();
             var offset = 0;
@@ -73,12 +70,12 @@ public class AusGeochemTask : ImuTaskBase, ITask
                 }
             }
             
+            // TODO: remove after testing complete
+            mineralogySamples = mineralogySamples.Where(x => !string.IsNullOrWhiteSpace(x.UnitName)).Take(5).ToList();
+            
             // Cache Petrology Irns
             cachedIrns = await CacheIrns("ecatalogue", this.BuildPetrologySearchTerms(), stoppingToken);
-            
-            // TODO: remove after testing complete
-            cachedIrns = cachedIrns.Take(1).ToList();
-            
+
             // Fetch Petrology data
             var petrologySamples = new List<Sample>();
             offset = 0;
@@ -110,6 +107,9 @@ public class AusGeochemTask : ImuTaskBase, ITask
                     Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset, cachedIrns.Count);
                 }
             }
+            
+            // TODO: remove after testing complete
+            petrologySamples = petrologySamples.Where(x => !string.IsNullOrWhiteSpace(x.UnitName)).Take(5).ToList();
 
             if (!string.IsNullOrWhiteSpace(_options.Destination))
             {

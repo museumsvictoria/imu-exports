@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using ImuExports.Tasks.AusGeochem.Extensions;
 using ImuExports.Tasks.AusGeochem.Models;
 using ImuExports.Tasks.AusGeochem.Models.Api;
 using Microsoft.AspNetCore.WebUtilities;
@@ -70,10 +71,29 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
 
     public async Task SendSamples(IList<Sample> samples, string dataPackageId, CancellationToken stoppingToken)
     {
+        var createDtos = new List<SampleWithLocationDto>();
+        var updateDtos = new List<SampleWithLocationDto>();
+        
         // Fetch current MV records in AusGeochem
         var parameters = new ParametersCollection();
         parameters.AddParameter(new QueryParameter("dataPackageId.equals", dataPackageId));
-        var currentSamples = await FetchAll<SampleWithLocationDto>("core/sample-with-locations", stoppingToken, parameters);
+        var currentDtos = await FetchAll<SampleWithLocationDto>("core/sample-with-locations", stoppingToken, parameters);
+
+        foreach (var sample in samples)
+        {
+            var existingDto = currentDtos.SingleOrDefault(x => string.Equals(x.SampleDto.SourceId, sample.SampleId, StringComparison.OrdinalIgnoreCase));
+            
+            if (existingDto != null)
+                updateDtos.Add(existingDto.UpdateFromSample(sample, _locationKinds, _materials, _sampleKinds));
+            else
+                createDtos.Add(sample.CreateSampleWithLocationDto(_locationKinds, _materials, _sampleKinds, dataPackageId));
+        }
+
+        foreach (var dto in createDtos)
+        {
+            var request = new RestRequest("core/sample-with-locations", Method.Post).AddJsonBody(dto);
+            var response = await _client.ExecuteAsync(request, stoppingToken);
+        }
     }
 
     private async Task<IList<T>> FetchAll<T>(string resource, CancellationToken stoppingToken, ParametersCollection parameters = null)

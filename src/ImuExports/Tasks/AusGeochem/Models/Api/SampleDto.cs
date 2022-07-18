@@ -80,7 +80,7 @@ public class SampleDto
         public string Name { get; set; }
 
         [JsonPropertyName("referenceElevation")]
-        public int? ReferenceElevation { get; set; }
+        public double? ReferenceElevation { get; set; }
 
         [JsonPropertyName("referenceElevationKindId")]
         public int? ReferenceElevationKindId { get; set; }
@@ -95,22 +95,22 @@ public class SampleDto
         public string ReferenceElevationSource { get; set; }
 
         [JsonPropertyName("relativeElevationAccuracy")]
-        public int? RelativeElevationAccuracy { get; set; }
+        public double? RelativeElevationAccuracy { get; set; }
 
         [JsonPropertyName("relativeElevationMax")]
-        public int? RelativeElevationMax { get; set; }
+        public double? RelativeElevationMax { get; set; }
 
         [JsonPropertyName("relativeElevationMin")]
-        public int? RelativeElevationMin { get; set; }
+        public double? RelativeElevationMin { get; set; }
 
         [JsonPropertyName("rockUnitAgeDescription")]
         public string RockUnitAgeDescription { get; set; }
 
         [JsonPropertyName("rockUnitAgeMax")]
-        public int? RockUnitAgeMax { get; set; }
+        public double? RockUnitAgeMax { get; set; }
 
         [JsonPropertyName("rockUnitAgeMin")]
-        public int? RockUnitAgeMin { get; set; }
+        public double? RockUnitAgeMin { get; set; }
 
         [JsonPropertyName("sampleID")]
         public string SampleId { get; set; }
