@@ -74,6 +74,12 @@ public static class SampleExtensions
         // DepthMin => RelativeElevationMax
         if(int.TryParse(sample.DepthMax, out var depthMax))
             dto.SampleDto.RelativeElevationMin = depthMax;
+        
+        // CollectDateMin => DateCollectedMin
+        dto.SampleDto.CollectDateMin = sample.DateCollectedMin;
+
+        // CollectDateMax => DateCollectedMax
+        dto.SampleDto.CollectDateMax = sample.DateCollectedMax;
 
         // SampleKind => SampleDto.SampleKindId, SampleDto.SampleKindName
         var sampleKind = sampleKinds.FirstOrDefault(x => string.Equals(x.Name, sample.SampleKind, StringComparison.OrdinalIgnoreCase));
