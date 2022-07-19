@@ -8,18 +8,19 @@ public static class SampleExtensions
     public static SampleWithLocationDto UpdateFromSample(this SampleWithLocationDto dto,
         Sample sample, IList<LocationKindDto> locationKinds, IList<MaterialDto> materials, IList<SampleKindDto> sampleKinds)
     {
-        return ToSampleWithLocationDto(sample, locationKinds, materials, sampleKinds, null, dto);
+        return ToSampleWithLocationDto(sample, locationKinds, materials, sampleKinds, null, null, dto);
     }
     
     public static SampleWithLocationDto CreateSampleWithLocationDto(this Sample sample,
-        IList<LocationKindDto> locationKinds, IList<MaterialDto> materials, IList<SampleKindDto> sampleKinds, string dataPackageId)
+        IList<LocationKindDto> locationKinds, IList<MaterialDto> materials, IList<SampleKindDto> sampleKinds,
+        int? dataPackageId, int? archiveId = null)
     {
-        return ToSampleWithLocationDto(sample, locationKinds, materials, sampleKinds, dataPackageId);
+        return ToSampleWithLocationDto(sample, locationKinds, materials, sampleKinds, dataPackageId, archiveId);
     }
 
     private static SampleWithLocationDto ToSampleWithLocationDto(Sample sample,
         IList<LocationKindDto> locationKinds, IList<MaterialDto> materials, IList<SampleKindDto> sampleKinds,
-        string dataPackageId = null, SampleWithLocationDto dto = null)
+        int? dataPackageId = null, int? archiveId = null, SampleWithLocationDto dto = null)
     {
         // If there is a current DTO we are Updating otherwise we are Creating
         if (dto != null)
@@ -30,10 +31,13 @@ public static class SampleExtensions
                 SampleDto = new SampleDto(),
                 LocationDto = new LocationDto(),
                 ShortName = sample.SampleId
-            };            
+            };
 
         if (dataPackageId != null)
-            dto.SampleDto.DataPackageId = int.Parse(dataPackageId);
+            dto.SampleDto.DataPackageId = dataPackageId;
+        
+        if (archiveId != null)
+            dto.SampleDto.ArchiveId = archiveId;
 
         // SampleId => SampleDto.ShortName, SampleDto.Name, SampleDto.SourceId
         dto.ShortName = dto.SampleDto.Name = dto.SampleDto.SourceId = sample.SampleId;

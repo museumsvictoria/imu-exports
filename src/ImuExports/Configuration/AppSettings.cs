@@ -37,7 +37,9 @@ public class AusGeochem
     
     public string BaseUrl { get; set; } = string.Empty;
     
-    public string MineralogyDataPackageId { get; set; } = string.Empty;
+    public int? MineralogyDataPackageId { get; set; }
     
-    public string PetrologyDataPackageId { get; set; } = string.Empty;
+    public int? PetrologyDataPackageId { get; set; }
+    
+    public int? ArchiveId { get; set; }
 }
