@@ -1,5 +1,4 @@
 ﻿using ImuExports.Tasks.AusGeochem;
-using ImuExports.Tasks.AusGeochem.Clients;
 using SimpleInjector;
 
 namespace ImuExports.Configuration;

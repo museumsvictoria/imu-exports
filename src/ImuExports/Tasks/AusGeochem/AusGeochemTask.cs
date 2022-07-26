@@ -4,11 +4,13 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using IMu;
 using ImuExports.Tasks.AusGeochem.ClassMaps;
-using ImuExports.Tasks.AusGeochem.Clients;
 using ImuExports.Tasks.AusGeochem.Config;
+using ImuExports.Tasks.AusGeochem.Extensions;
 using ImuExports.Tasks.AusGeochem.Models;
+using ImuExports.Tasks.AusGeochem.Models.Api;
 using LiteDB;
 using Microsoft.Extensions.Options;
+using RestSharp;
 
 namespace ImuExports.Tasks.AusGeochem;
 
@@ -18,7 +20,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
     private readonly AppSettings _appSettings;
     private readonly IFactory<Sample> _sampleFactory;
     private readonly IAusGeochemClient _ausGeochemClient;
-
+    
     public AusGeochemTask(
         IOptions<AppSettings> appSettings,
         IFactory<Sample> sampleFactory,
@@ -144,13 +146,13 @@ public class AusGeochemTask : ImuTaskBase, ITask
                 await _ausGeochemClient.Authenticate(stoppingToken);
                 
                 // Fetch lookup lists
-                await _ausGeochemClient.FetchLookups(stoppingToken);
-                
+                var (locationKinds, materials, sampleKinds, materialsLookup) = await _ausGeochemClient.FetchLookups(stoppingToken);
+
                 // Send mineralogy samples
-                await _ausGeochemClient.SendSamples(mineralogySamples, _appSettings.AusGeochem.MineralogyDataPackageId, stoppingToken);
+                await SendSamples(locationKinds, materials, sampleKinds, materialsLookup, mineralogySamples, _appSettings.AusGeochem.MineralogyDataPackageId, stoppingToken);
                 
                 // Send petrology samples
-                await _ausGeochemClient.SendSamples(petrologySamples, _appSettings.AusGeochem.PetrologyDataPackageId, stoppingToken);
+                await SendSamples(locationKinds, materials, sampleKinds, materialsLookup, petrologySamples, _appSettings.AusGeochem.PetrologyDataPackageId, stoppingToken);
 
                 // Update/Insert application
                 using var db = new LiteRepository(new ConnectionString()
@@ -217,4 +219,51 @@ public class AusGeochemTask : ImuTaskBase, ITask
         "collectors=LocCollectorsRef_tab.(NamPartyType,NamFullName,NamOrganisation,NamBranch,NamDepartment,NamOrganisation,NamOrganisationOtherNames_tab,NamSource,AddPhysStreet,AddPhysCity,AddPhysState,AddPhysCountry,ColCollaborationName)",
         "prevno=[ManPreviousCollectionName_tab,ManPreviousNumbers_tab]"
     };
+
+    private async Task SendSamples(IList<LocationKindDto> locationKinds, IList<MaterialDto> materials,
+        IList<SampleKindDto> sampleKinds, IList<MaterialLookup> materialsLookup, IList<Sample> samples,
+        int? dataPackageId, CancellationToken stoppingToken)
+    {
+        // Exit if DataPackageId not known
+        if (dataPackageId == null)
+        {
+            Log.Logger.Fatal("DataPackageId is null, cannot continue without one, exiting");
+            Environment.Exit(Constants.ExitCodeError);
+        }
+
+        Log.Logger.Information("Sending sample data to AusGeochem API where DataPackageId {DataPackageId}",
+            dataPackageId);
+
+        // Fetch all current SampleWithLocationDtos
+        var currentDtos = await _ausGeochemClient.FetchCurrentSamples(dataPackageId.Value, stoppingToken);
+
+        var offset = 0;
+        foreach (var sample in samples)
+        {
+            var existingDto = currentDtos.SingleOrDefault(x =>
+                string.Equals(x.SampleDto.SourceId, sample.SampleId, StringComparison.OrdinalIgnoreCase));
+
+            if (existingDto != null)
+            {
+                var dto = existingDto.UpdateFromSample(sample, locationKinds, materials, sampleKinds, materialsLookup);
+
+                Log.Logger.Debug("Updating existing Dto {ShortName}", dto.ShortName);
+
+                await _ausGeochemClient.SendSample(dto, Method.Put, stoppingToken);
+            }
+            else
+            {
+                var dto = sample.CreateSampleWithLocationDto(locationKinds, materials, sampleKinds, materialsLookup,
+                    dataPackageId,
+                    _appSettings.AusGeochem.ArchiveId);
+
+                Log.Logger.Debug("Creating new Dto {ShortName}", dto.ShortName);
+
+                await _ausGeochemClient.SendSample(dto, Method.Post, stoppingToken);
+            }
+
+            offset++;
+            Log.Logger.Information("Api upload progress... {Offset}/{TotalResults}", offset, samples.Count);
+        }
+    }
 }

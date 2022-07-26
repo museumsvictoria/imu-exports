@@ -1,6 +1,9 @@
-﻿using System.Text.Json;
+﻿using System.Globalization;
+using System.Text.Json;
 using System.Text.Json.Serialization;
-using ImuExports.Tasks.AusGeochem.Extensions;
+using CsvHelper;
+using CsvHelper.Configuration;
+using ImuExports.Tasks.AusGeochem.ClassMaps;
 using ImuExports.Tasks.AusGeochem.Models;
 using ImuExports.Tasks.AusGeochem.Models.Api;
 using Microsoft.AspNetCore.WebUtilities;
@@ -9,24 +12,23 @@ using RestSharp;
 using RestSharp.Authenticators;
 using RestSharp.Serializers.Json;
 
-namespace ImuExports.Tasks.AusGeochem.Clients;
+namespace ImuExports.Tasks.AusGeochem;
 
 public interface IAusGeochemClient
 {
     Task Authenticate(CancellationToken stoppingToken);
 
-    Task FetchLookups(CancellationToken stoppingToken);
+    Task<IList<SampleWithLocationDto>> FetchCurrentSamples(int dataPackageId, CancellationToken stoppingToken);
 
-    Task SendSamples(IList<Sample> samples, int? dataPackageId, CancellationToken stoppingToken);
+    Task<(IList<LocationKindDto>, IList<MaterialDto>, IList<SampleKindDto>, IList<MaterialLookup>)> FetchLookups(CancellationToken stoppingToken);
+
+    Task SendSample(SampleWithLocationDto dto, Method method, CancellationToken stoppingToken);
 }
 
 public class AusGeochemClient : IAusGeochemClient, IDisposable
 {
     private readonly AppSettings _appSettings;
     private readonly RestClient _client;
-    private IList<LocationKindDto> _locationKinds;
-    private IList<MaterialDto> _materials;
-    private IList<SampleKindDto> _sampleKinds;
 
     public AusGeochemClient(
         IOptions<AppSettings> appSettings)
@@ -66,64 +68,53 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         Log.Logger.Debug("Api authentication successful");
     }
 
-    public async Task FetchLookups(CancellationToken stoppingToken)
-    {
-        _sampleKinds = await FetchAll<SampleKindDto>("core/l-sample-kinds", stoppingToken);
-        _locationKinds = await FetchAll<LocationKindDto>("core/l-location-kinds", stoppingToken);
-        _materials = await FetchAll<MaterialDto>("core/materials", stoppingToken);
-    }
-
-    public async Task SendSamples(IList<Sample> samples, int? dataPackageId, CancellationToken stoppingToken)
+    public async Task<IList<SampleWithLocationDto>> FetchCurrentSamples(int dataPackageId, CancellationToken stoppingToken)
     {
         // Fetch current MV records in AusGeochem
         var parameters = new ParametersCollection();
         
-        // Add data package id as a query parameter, otherwise exit as theres no point doing anything if that's not there
-        if (dataPackageId != null)
-            parameters.AddParameter(new QueryParameter("dataPackageId.equals", dataPackageId.ToString()));
-        else
+        parameters.AddParameter(new QueryParameter("dataPackageId.equals", dataPackageId.ToString()));
+        
+        return await FetchAll<SampleWithLocationDto>("core/sample-with-locations", stoppingToken, parameters);
+    }
+
+    public async Task<(IList<LocationKindDto>, IList<MaterialDto>, IList<SampleKindDto>, IList<MaterialLookup>)> FetchLookups(CancellationToken stoppingToken)
+    {
+        // Lookups fetched from API
+        var locationKinds = await FetchAll<LocationKindDto>("core/l-location-kinds", stoppingToken);
+        var materials = await FetchAll<MaterialDto>("core/materials", stoppingToken);
+        var sampleKinds = await FetchAll<SampleKindDto>("core/l-sample-kinds", stoppingToken);
+        
+        // CSV lookup
+        var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
-            Log.Logger.Fatal("DataPackageId is null, cannot continue without one, exiting");
-            Environment.Exit(Constants.ExitCodeError);
-        }
+            HasHeaderRecord = true
+        };
+        using var reader = new StreamReader($"{AppContext.BaseDirectory}Resources\\materials-lookup.csv");
+        using var csv = new CsvReader(reader, csvConfig);
+        csv.Context.RegisterClassMap<MaterialsLookupClassMap>();
+        var materialsLookup = csv.GetRecords<MaterialLookup>().ToList();
 
-        var currentDtos =
-            await FetchAll<SampleWithLocationDto>("core/sample-with-locations", stoppingToken, parameters);
-
-        Log.Logger.Information("Sending sample data to AusGeochem API where DataPackageId {DataPackageId}",
-            dataPackageId);
-
-        var offset = 0;
-        foreach (var sample in samples)
+        return (locationKinds, materials, sampleKinds, materialsLookup);
+    }
+    
+    public async Task SendSample(SampleWithLocationDto dto, Method method, CancellationToken stoppingToken)
+    {
+        // Build request
+        var request = new RestRequest("core/sample-with-locations")
         {
-            var existingDto = currentDtos.SingleOrDefault(x =>
-                string.Equals(x.SampleDto.SourceId, sample.SampleId, StringComparison.OrdinalIgnoreCase));
+            Method = method
+        };
 
-            var request = new RestRequest("core/sample-with-locations");
+        // Add dto
+        request.AddJsonBody(dto);
 
-            if (existingDto != null)
-            {
-                var dto = existingDto.UpdateFromSample(sample, _locationKinds, _materials, _sampleKinds);
-                request.Method = Method.Put;
-                request.AddJsonBody(dto);
-            }
-            else
-            {
-                var dto = sample.CreateSampleWithLocationDto(_locationKinds, _materials, _sampleKinds, dataPackageId,
-                    _appSettings.AusGeochem.ArchiveId);
-                request.Method = Method.Post;
-                request.AddJsonBody(dto);
-            }
+        // Send sample
+        var response = await _client.ExecuteAsync(request, stoppingToken);
 
-            var response = await _client.ExecuteAsync(request, stoppingToken);
-
-            if (!response.IsSuccessful)
-                Log.Logger.Error("Error occured sending sample via {Method}, {ErrorMessage}", request.Method,
-                    response.ErrorMessage);
-
-            offset++;
-            Log.Logger.Information("Api upload progress... {Offset}/{TotalResults}", offset, samples.Count);
-        }
+        if (!response.IsSuccessful)
+            Log.Logger.Error("Error occured sending sample via {Method}, {ErrorMessage}", request.Method,
+                response.ErrorMessage);
     }
 
     private async Task<IList<T>> FetchAll<T>(string resource, CancellationToken stoppingToken,

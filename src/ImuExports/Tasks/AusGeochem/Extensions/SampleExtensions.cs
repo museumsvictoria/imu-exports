@@ -6,21 +6,24 @@ namespace ImuExports.Tasks.AusGeochem.Extensions;
 public static class SampleExtensions
 {
     public static SampleWithLocationDto UpdateFromSample(this SampleWithLocationDto dto,
-        Sample sample, IList<LocationKindDto> locationKinds, IList<MaterialDto> materials, IList<SampleKindDto> sampleKinds)
+        Sample sample, IList<LocationKindDto> locationKinds, IList<MaterialDto> materials,
+        IList<SampleKindDto> sampleKinds, IList<MaterialLookup> materialsLookup)
     {
-        return ToSampleWithLocationDto(sample, locationKinds, materials, sampleKinds, null, null, dto);
+        return ToSampleWithLocationDto(sample, locationKinds, materials, sampleKinds, materialsLookup, null, null, dto);
     }
-    
+
     public static SampleWithLocationDto CreateSampleWithLocationDto(this Sample sample,
         IList<LocationKindDto> locationKinds, IList<MaterialDto> materials, IList<SampleKindDto> sampleKinds,
-        int? dataPackageId, int? archiveId = null)
+        IList<MaterialLookup> materialsLookup, int? dataPackageId, int? archiveId = null)
     {
-        return ToSampleWithLocationDto(sample, locationKinds, materials, sampleKinds, dataPackageId, archiveId);
+        return ToSampleWithLocationDto(sample, locationKinds, materials, sampleKinds, materialsLookup, dataPackageId,
+            archiveId);
     }
 
     private static SampleWithLocationDto ToSampleWithLocationDto(Sample sample,
         IList<LocationKindDto> locationKinds, IList<MaterialDto> materials, IList<SampleKindDto> sampleKinds,
-        int? dataPackageId = null, int? archiveId = null, SampleWithLocationDto dto = null)
+        IList<MaterialLookup> materialsLookup, int? dataPackageId = null, int? archiveId = null,
+        SampleWithLocationDto dto = null)
     {
         // If there is a current DTO we are Updating otherwise we are Creating
         if (dto != null)
@@ -35,50 +38,66 @@ public static class SampleExtensions
 
         if (dataPackageId != null)
             dto.SampleDto.DataPackageId = dataPackageId;
-        
+
         if (archiveId != null)
             dto.SampleDto.ArchiveId = archiveId;
 
         // SampleId => SampleDto.ShortName, SampleDto.Name, SampleDto.SourceId
         dto.ShortName = dto.SampleDto.Name = dto.SampleDto.SourceId = sample.SampleId;
-       
+
         // ArchiveNotes => SampleDto.ArchiveNote
         dto.SampleDto.ArchiveNote = sample.ArchiveNotes;
-        
+
         // Latitude => LocationDto.Lat
-        if(double.TryParse(sample.Latitude, out var latitude))
+        if (double.TryParse(sample.Latitude, out var latitude))
             dto.LocationDto.Lat = latitude;
-        
+
         // Longitude => LocationDto.Lon
-        if(double.TryParse(sample.Longitude, out var longitude))
+        if (double.TryParse(sample.Longitude, out var longitude))
             dto.LocationDto.Lon = longitude;
-        
+
         // LatLongPrecision => LocationDto.LatLonPrecision
-        if(double.TryParse(sample.LatLongPrecision, out var latLongPrecision))
+        if (double.TryParse(sample.LatLongPrecision, out var latLongPrecision))
             dto.LocationDto.LatLonPrecision = latLongPrecision;
-        
+
         // LocationNotes => LocationDto.Description
         dto.LocationDto.Description = sample.LocationNotes;
-        
+
         // UnitName => SampleDto.StratographicUnitName
         dto.SampleDto.StratographicUnitName = sample.UnitName;
 
         // LocationKind => SampleDto.LocationKindId, SampleDto.LocationKindName 
-        var locationKind = locationKinds.FirstOrDefault(x => string.Equals(x.Name, sample.LocationKind, StringComparison.OrdinalIgnoreCase));
+        var locationKind = locationKinds.FirstOrDefault(x =>
+            string.Equals(x.Name, sample.LocationKind, StringComparison.OrdinalIgnoreCase));
         if (locationKind != null)
         {
             dto.SampleDto.LocationKindId = locationKind.Id;
             dto.SampleDto.LocationKindName = locationKind.Name;
         }
-        
+
+        // Material
+        var materialsLookupMatch = materialsLookup.FirstOrDefault(x =>
+            string.Equals(x.MvName, sample.MineralId, StringComparison.OrdinalIgnoreCase));
+
+        if (materialsLookupMatch != null)
+        {
+            var material = materials.FirstOrDefault(x =>
+                string.Equals(x.Name, materialsLookupMatch.AusGeochemName, StringComparison.OrdinalIgnoreCase));
+            if (material != null)
+            {
+                dto.SampleDto.MaterialId = material.Id;
+                dto.SampleDto.MaterialName = material.Name;
+            }
+        }
+
         // DepthMin => RelativeElevationMax
-        if(int.TryParse(sample.DepthMin, out var depthMin))
+        if (int.TryParse(sample.DepthMin, out var depthMin))
             dto.SampleDto.RelativeElevationMax = depthMin;
-        
+
         // DepthMin => RelativeElevationMax
-        if(int.TryParse(sample.DepthMax, out var depthMax))
+        if (int.TryParse(sample.DepthMax, out var depthMax))
             dto.SampleDto.RelativeElevationMin = depthMax;
-        
+
         // CollectDateMin => DateCollectedMin
         dto.SampleDto.CollectDateMin = sample.DateCollectedMin;
 
@@ -86,13 +105,14 @@ public static class SampleExtensions
         dto.SampleDto.CollectDateMax = sample.DateCollectedMax;
 
         // SampleKind => SampleDto.SampleKindId, SampleDto.SampleKindName
-        var sampleKind = sampleKinds.FirstOrDefault(x => string.Equals(x.Name, sample.SampleKind, StringComparison.OrdinalIgnoreCase));
+        var sampleKind = sampleKinds.FirstOrDefault(x =>
+            string.Equals(x.Name, sample.SampleKind, StringComparison.OrdinalIgnoreCase));
         if (sampleKind != null)
         {
             dto.SampleDto.SampleKindId = sampleKind.Id;
             dto.SampleDto.SampleKindName = sampleKind.Name;
         }
-        
+
         // Comment => SampleDto.Description
         dto.SampleDto.Description = sample.Comment;
 

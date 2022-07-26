@@ -46,6 +46,12 @@
         <AssetsSourceFiles Include="Tasks\AtlasOfLivingAustralia\Resources\meta.xml" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Resources\materials-lookup.csv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
     <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
         <Copy SourceFiles="@(AssetsSourceFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
     </Target>
