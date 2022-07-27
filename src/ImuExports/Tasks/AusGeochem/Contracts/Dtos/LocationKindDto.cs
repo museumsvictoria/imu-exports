@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ImuExports.Tasks.AusGeochem.Models.Api;
+namespace ImuExports.Tasks.AusGeochem.Contracts.Dtos;
 
-public class MaterialDto
+public class LocationKindDto
 {
     [JsonPropertyName("id")]
     public int Id { get; set; }
@@ -13,5 +13,3 @@ public class MaterialDto
     [JsonPropertyName("description")]
     public string Description { get; set; }
 }
-
-

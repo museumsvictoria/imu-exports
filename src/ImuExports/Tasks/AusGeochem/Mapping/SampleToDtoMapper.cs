@@ -1,9 +1,9 @@
-﻿using ImuExports.Tasks.AusGeochem.Models;
-using ImuExports.Tasks.AusGeochem.Models.Api;
+﻿using ImuExports.Tasks.AusGeochem.Contracts.Dtos;
+using ImuExports.Tasks.AusGeochem.Models;
 
-namespace ImuExports.Tasks.AusGeochem.Extensions;
+namespace ImuExports.Tasks.AusGeochem.Mapping;
 
-public static class SampleExtensions
+public static class SampleToDtoMapper
 {
     public static SampleWithLocationDto UpdateFromSample(this SampleWithLocationDto dto,
         Sample sample, IList<LocationKindDto> locationKinds, IList<MaterialDto> materials,

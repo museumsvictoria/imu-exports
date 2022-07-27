@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ImuExports.Tasks.AusGeochem.Models.Api;
+namespace ImuExports.Tasks.AusGeochem.Contracts.Dtos;
 
 public class SampleWithLocationDto
 {

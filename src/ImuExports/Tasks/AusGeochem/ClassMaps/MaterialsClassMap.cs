@@ -1,5 +1,5 @@
 ﻿using CsvHelper.Configuration;
-using ImuExports.Tasks.AusGeochem.Models.Api;
+using ImuExports.Tasks.AusGeochem.Contracts.Dtos;
 
 namespace ImuExports.Tasks.AusGeochem.ClassMaps;
 
