@@ -5,25 +5,20 @@ namespace ImuExports.Tasks.AusGeochem.Mapping;
 
 public static class SampleToDtoMapper
 {
-    public static SampleWithLocationDto UpdateFromSample(this SampleWithLocationDto dto,
-        Sample sample, IList<LocationKindDto> locationKinds, IList<MaterialDto> materials,
-        IList<SampleKindDto> sampleKinds, IList<MaterialLookup> materialsLookup)
+    public static SampleWithLocationDto ToSampleWithLocationDto(this Sample sample, Lookups lookups,
+        SampleWithLocationDto dto)
     {
-        return ToSampleWithLocationDto(sample, locationKinds, materials, sampleKinds, materialsLookup, null, null, dto);
+        return SampleToDto(sample, lookups, null, null, dto);
     }
 
-    public static SampleWithLocationDto CreateSampleWithLocationDto(this Sample sample,
-        IList<LocationKindDto> locationKinds, IList<MaterialDto> materials, IList<SampleKindDto> sampleKinds,
-        IList<MaterialLookup> materialsLookup, int? dataPackageId, int? archiveId = null)
+    public static SampleWithLocationDto ToSampleWithLocationDto(this Sample sample, Lookups lookups, int? dataPackageId,
+        int? archiveId = null)
     {
-        return ToSampleWithLocationDto(sample, locationKinds, materials, sampleKinds, materialsLookup, dataPackageId,
-            archiveId);
+        return SampleToDto(sample, lookups, dataPackageId, archiveId);
     }
 
-    private static SampleWithLocationDto ToSampleWithLocationDto(Sample sample,
-        IList<LocationKindDto> locationKinds, IList<MaterialDto> materials, IList<SampleKindDto> sampleKinds,
-        IList<MaterialLookup> materialsLookup, int? dataPackageId = null, int? archiveId = null,
-        SampleWithLocationDto dto = null)
+    private static SampleWithLocationDto SampleToDto(Sample sample, Lookups lookups, int? dataPackageId = null,
+        int? archiveId = null, SampleWithLocationDto dto = null)
     {
         // If there is a current DTO we are Updating otherwise we are Creating
         if (dto != null)
@@ -67,7 +62,7 @@ public static class SampleToDtoMapper
         dto.SampleDto.StratographicUnitName = sample.UnitName;
 
         // LocationKind => SampleDto.LocationKindId, SampleDto.LocationKindName 
-        var locationKind = locationKinds.FirstOrDefault(x =>
+        var locationKind = lookups.LocationKindDtos.FirstOrDefault(x =>
             string.Equals(x.Name, sample.LocationKind, StringComparison.OrdinalIgnoreCase));
         if (locationKind != null)
         {
@@ -76,12 +71,12 @@ public static class SampleToDtoMapper
         }
 
         // Material
-        var materialsLookupMatch = materialsLookup.FirstOrDefault(x =>
+        var materialsLookupMatch = lookups.MaterialNamePairs.FirstOrDefault(x =>
             string.Equals(x.MvName, sample.MineralId, StringComparison.OrdinalIgnoreCase));
 
         if (materialsLookupMatch != null)
         {
-            var material = materials.FirstOrDefault(x =>
+            var material = lookups.MaterialDtos.FirstOrDefault(x =>
                 string.Equals(x.Name, materialsLookupMatch.AusGeochemName, StringComparison.OrdinalIgnoreCase));
             if (material != null)
             {
@@ -105,7 +100,7 @@ public static class SampleToDtoMapper
         dto.SampleDto.CollectDateMax = sample.DateCollectedMax;
 
         // SampleKind => SampleDto.SampleKindId, SampleDto.SampleKindName
-        var sampleKind = sampleKinds.FirstOrDefault(x =>
+        var sampleKind = lookups.SampleKindDtos.FirstOrDefault(x =>
             string.Equals(x.Name, sample.SampleKind, StringComparison.OrdinalIgnoreCase));
         if (sampleKind != null)
         {

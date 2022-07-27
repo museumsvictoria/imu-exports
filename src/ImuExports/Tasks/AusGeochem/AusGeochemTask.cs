@@ -5,7 +5,6 @@ using CsvHelper.Configuration;
 using IMu;
 using ImuExports.Tasks.AusGeochem.ClassMaps;
 using ImuExports.Tasks.AusGeochem.Config;
-using ImuExports.Tasks.AusGeochem.Contracts.Dtos;
 using ImuExports.Tasks.AusGeochem.Mapping;
 using ImuExports.Tasks.AusGeochem.Models;
 using LiteDB;
@@ -146,13 +145,13 @@ public class AusGeochemTask : ImuTaskBase, ITask
                 await _ausGeochemClient.Authenticate(stoppingToken);
                 
                 // Fetch lookup lists
-                var (locationKinds, materials, sampleKinds, materialsLookup) = await _ausGeochemClient.FetchLookups(stoppingToken);
+                var lookups = await _ausGeochemClient.FetchLookups(stoppingToken);
 
                 // Send mineralogy samples
-                await SendSamples(locationKinds, materials, sampleKinds, materialsLookup, mineralogySamples, _appSettings.AusGeochem.MineralogyDataPackageId, stoppingToken);
+                await SendSamples(lookups, mineralogySamples, _appSettings.AusGeochem.MineralogyDataPackageId, stoppingToken);
                 
                 // Send petrology samples
-                await SendSamples(locationKinds, materials, sampleKinds, materialsLookup, petrologySamples, _appSettings.AusGeochem.PetrologyDataPackageId, stoppingToken);
+                await SendSamples(lookups, petrologySamples, _appSettings.AusGeochem.PetrologyDataPackageId, stoppingToken);
 
                 // Update/Insert application
                 using var db = new LiteRepository(new ConnectionString()
@@ -220,8 +219,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
         "prevno=[ManPreviousCollectionName_tab,ManPreviousNumbers_tab]"
     };
 
-    private async Task SendSamples(IList<LocationKindDto> locationKinds, IList<MaterialDto> materials,
-        IList<SampleKindDto> sampleKinds, IList<MaterialLookup> materialsLookup, IList<Sample> samples,
+    private async Task SendSamples(Lookups lookups, IList<Sample> samples,
         int? dataPackageId, CancellationToken stoppingToken)
     {
         // Exit if DataPackageId not known
@@ -245,7 +243,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
 
             if (existingDto != null)
             {
-                var dto = existingDto.UpdateFromSample(sample, locationKinds, materials, sampleKinds, materialsLookup);
+                var dto = sample.ToSampleWithLocationDto(lookups, existingDto);
 
                 Log.Logger.Debug("Updating existing Dto {ShortName}", dto.ShortName);
 
@@ -253,9 +251,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
             }
             else
             {
-                var dto = sample.CreateSampleWithLocationDto(locationKinds, materials, sampleKinds, materialsLookup,
-                    dataPackageId,
-                    _appSettings.AusGeochem.ArchiveId);
+                var dto = sample.ToSampleWithLocationDto(lookups, dataPackageId, _appSettings.AusGeochem.ArchiveId);
 
                 Log.Logger.Debug("Creating new Dto {ShortName}", dto.ShortName);
 

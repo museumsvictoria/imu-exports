@@ -22,7 +22,7 @@ public interface IAusGeochemClient
 
     Task<IList<SampleWithLocationDto>> FetchCurrentSamples(int dataPackageId, CancellationToken stoppingToken);
 
-    Task<(IList<LocationKindDto>, IList<MaterialDto>, IList<SampleKindDto>, IList<MaterialLookup>)> FetchLookups(CancellationToken stoppingToken);
+    Task<Lookups> FetchLookups(CancellationToken stoppingToken);
 
     Task SendSample(SampleWithLocationDto dto, Method method, CancellationToken stoppingToken);
 }
@@ -80,24 +80,30 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         return await FetchAll<SampleWithLocationDto>("core/sample-with-locations", stoppingToken, parameters);
     }
 
-    public async Task<(IList<LocationKindDto>, IList<MaterialDto>, IList<SampleKindDto>, IList<MaterialLookup>)> FetchLookups(CancellationToken stoppingToken)
+    public async Task<Lookups> FetchLookups(CancellationToken stoppingToken)
     {
         // Lookups fetched from API
-        var locationKinds = await FetchAll<LocationKindDto>("core/l-location-kinds", stoppingToken);
-        var materials = await FetchAll<MaterialDto>("core/materials", stoppingToken);
-        var sampleKinds = await FetchAll<SampleKindDto>("core/l-sample-kinds", stoppingToken);
+        var locationKindDtos = await FetchAll<LocationKindDto>("core/l-location-kinds", stoppingToken);
+        var materialDtos = await FetchAll<MaterialDto>("core/materials", stoppingToken);
+        var sampleKindDtos = await FetchAll<SampleKindDto>("core/l-sample-kinds", stoppingToken);
         
-        // CSV lookup
+        // CSV based material name pairs for matching MV material name to AusGeochem material name
         var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
             HasHeaderRecord = true
         };
         using var reader = new StreamReader($"{AppContext.BaseDirectory}materials-lookup.csv");
         using var csv = new CsvReader(reader, csvConfig);
-        csv.Context.RegisterClassMap<MaterialsLookupClassMap>();
-        var materialsLookup = csv.GetRecords<MaterialLookup>().ToList();
+        csv.Context.RegisterClassMap<MaterialNamePairClassMap>();
+        var materialNamePairs = csv.GetRecords<MaterialNamePair>().ToList();
 
-        return (locationKinds, materials, sampleKinds, materialsLookup);
+        return new Lookups()
+        {
+            LocationKindDtos = locationKindDtos,
+            MaterialDtos = materialDtos,
+            MaterialNamePairs = materialNamePairs,
+            SampleKindDtos = sampleKindDtos
+        };
     }
     
     public async Task SendSample(SampleWithLocationDto dto, Method method, CancellationToken stoppingToken)
@@ -115,8 +121,11 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         var response = await _client.ExecuteAsync(request, stoppingToken);
 
         if (!response.IsSuccessful)
-            Log.Logger.Error("Error occured sending sample via {Method}, {ErrorMessage}", request.Method,
+        {
+            Log.Logger.Fatal("Error occured sending sample via {Method} exiting, {ErrorMessage}", request.Method,
                 response.ErrorMessage);
+            Environment.Exit(Constants.ExitCodeError);
+        }
     }
 
     private async Task<IList<T>> FetchAll<T>(string resource, CancellationToken stoppingToken,
@@ -140,8 +149,11 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
             var response = await _client.ExecuteAsync<IList<T>>(request, stoppingToken);
 
             if (!response.IsSuccessful)
-                Log.Logger.Error("Error occured fetching {Name} at endpoint {Resource} via {Method}, {ErrorMessage}", 
+            {
+                Log.Logger.Fatal("Error occured fetching {Name} at endpoint {Resource} via {Method} exiting, {ErrorMessage}", 
                     typeof(T).Name, request.Resource, request.Method, response.ErrorMessage);
+                Environment.Exit(Constants.ExitCodeError);
+            }
 
             if (response.Data != null)
                 dtos.AddRange(response.Data);

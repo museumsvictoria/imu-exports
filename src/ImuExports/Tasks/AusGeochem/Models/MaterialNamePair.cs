@@ -1,6 +1,6 @@
 ﻿namespace ImuExports.Tasks.AusGeochem.Models;
 
-public class MaterialLookup
+public class MaterialNamePair
 {
     public string MvName { get; set; }
 

@@ -44,7 +44,7 @@
 
     <ItemGroup>
         <AssetsSourceFiles Include="Tasks\AtlasOfLivingAustralia\Resources\meta.xml" />
-        <AssetsSourceFiles Include="Tasks\AusGeochem\Resources\materials-lookup.csv" />
+        <AssetsSourceFiles Include="Tasks\AusGeochem\Resources\material-name-pairs.csv" />
     </ItemGroup>
 
     <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
