@@ -41,4 +41,6 @@ public class Sample
     public string Comment { get; set; }
     
     public string LastKnownLocation { get; set; }
+    
+    public bool Deleted { get; set; }
 }

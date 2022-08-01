@@ -25,6 +25,8 @@ public interface IAusGeochemClient
     Task<Lookups> FetchLookups(CancellationToken stoppingToken);
 
     Task SendSample(SampleWithLocationDto dto, Method method, CancellationToken stoppingToken);
+
+    Task DeleteSample(SampleWithLocationDto dto, CancellationToken stoppingToken);
 }
 
 public class AusGeochemClient : IAusGeochemClient, IDisposable
@@ -46,19 +48,18 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
 
     public async Task Authenticate(CancellationToken stoppingToken)
     {
-        var request = new RestRequest("authenticate", Method.Post).AddJsonBody(new LoginRequest()
+        var request = new RestRequest("authenticate", Method.Post).AddJsonBody(new LoginRequest
         {
             Password = _appSettings.AusGeochem.Password,
             Username = _appSettings.AusGeochem.Username
         });
-        
+
         // Request JWT
         var response = await _client.ExecuteAsync<LoginResponse>(request, stoppingToken);
 
         if (!response.IsSuccessful)
         {
-            Log.Logger.Fatal("Could not successfully authenticate at endpoint {Resource} exiting, {ErrorMessage}", 
-                request.Resource, response.ErrorMessage);
+            Log.Logger.Fatal("Could not successfully authenticate, exiting, {ErrorMessage}", response.ErrorMessage);
             Environment.Exit(Constants.ExitCodeError);
         }
         else if (!string.IsNullOrWhiteSpace(response.Data?.Token))
@@ -70,13 +71,14 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         Log.Logger.Debug("Api authentication successful");
     }
 
-    public async Task<IList<SampleWithLocationDto>> FetchCurrentSamples(int dataPackageId, CancellationToken stoppingToken)
+    public async Task<IList<SampleWithLocationDto>> FetchCurrentSamples(int dataPackageId,
+        CancellationToken stoppingToken)
     {
         // Fetch current MV records in AusGeochem
         var parameters = new ParametersCollection();
-        
+
         parameters.AddParameter(new QueryParameter("dataPackageId.equals", dataPackageId.ToString()));
-        
+
         return await FetchAll<SampleWithLocationDto>("core/sample-with-locations", stoppingToken, parameters);
     }
 
@@ -86,7 +88,7 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         var locationKindDtos = await FetchAll<LocationKindDto>("core/l-location-kinds", stoppingToken);
         var materialDtos = await FetchAll<MaterialDto>("core/materials", stoppingToken);
         var sampleKindDtos = await FetchAll<SampleKindDto>("core/l-sample-kinds", stoppingToken);
-        
+
         // CSV based material name pairs for matching MV material name to AusGeochem material name
         var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
@@ -97,7 +99,7 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         csv.Context.RegisterClassMap<MaterialNamePairClassMap>();
         var materialNamePairs = csv.GetRecords<MaterialNamePair>().ToList();
 
-        return new Lookups()
+        return new Lookups
         {
             LocationKindDtos = locationKindDtos,
             MaterialDtos = materialDtos,
@@ -105,7 +107,7 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
             SampleKindDtos = sampleKindDtos
         };
     }
-    
+
     public async Task SendSample(SampleWithLocationDto dto, Method method, CancellationToken stoppingToken)
     {
         // Build request
@@ -122,9 +124,41 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
 
         if (!response.IsSuccessful)
         {
-            Log.Logger.Fatal("Error occured sending sample via {Method} exiting, {ErrorMessage}", request.Method,
-                response.ErrorMessage);
+            Log.Logger.Fatal("Error occured executing request for resource {Resource} via {Method} exiting, {ErrorMessage}", 
+                request.Resource, request.Method, response.ErrorMessage);
             Environment.Exit(Constants.ExitCodeError);
+        }
+        else
+        {
+            Log.Logger.Debug("Sent sample {ShortName} via {Method}, status {ResponseStatus}",
+                dto.ShortName, request.Method, response.ResponseStatus);
+        }
+    }
+
+    public async Task DeleteSample(SampleWithLocationDto dto, CancellationToken stoppingToken)
+    {
+        // Build request
+        var request = new RestRequest($"core/sample-with-locations/{dto.Id}")
+        {
+            Method = Method.Delete
+        };
+
+        // Add dto
+        request.AddJsonBody(dto);
+
+        // Send sample
+        var response = await _client.ExecuteAsync(request, stoppingToken);
+
+        if (!response.IsSuccessful)
+        {
+            Log.Logger.Fatal("Error occured executing request for resource {Resource} via {Method} exiting, {ErrorMessage}",
+                request.Resource, request.Method, response.ErrorMessage);
+            Environment.Exit(Constants.ExitCodeError);
+        }
+        else
+        {
+            Log.Logger.Debug("Deleted sample {ShortName}, status {ResponseStatus}",
+                dto.ShortName, response.ResponseStatus);
         }
     }
 
@@ -150,7 +184,7 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
 
             if (!response.IsSuccessful)
             {
-                Log.Logger.Fatal("Error occured fetching {Name} at endpoint {Resource} via {Method} exiting, {ErrorMessage}", 
+                Log.Logger.Fatal("Error occured fetching {Name} at endpoint {Resource} via {Method} exiting, {ErrorMessage}",
                     typeof(T).Name, request.Resource, request.Method, response.ErrorMessage);
                 Environment.Exit(Constants.ExitCodeError);
             }

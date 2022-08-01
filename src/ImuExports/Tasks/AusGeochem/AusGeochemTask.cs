@@ -36,10 +36,10 @@ public class AusGeochemTask : ImuTaskBase, ITask
         {
             stoppingToken.ThrowIfCancellationRequested();
 
-            // Cache Mineralogy Irns
+            // Cache Mineralogy Irns from EMu
             var cachedIrns = await CacheIrns("ecatalogue", this.BuildMineralogySearchTerms(), stoppingToken);
 
-            // Fetch Mineralogy data
+            // Fetch Mineralogy data from EMu
             var mineralogySamples = new List<Sample>();
             var offset = 0;
             Log.Logger.Information("Fetching data");
@@ -74,10 +74,10 @@ public class AusGeochemTask : ImuTaskBase, ITask
             // TODO: remove after testing complete
             mineralogySamples = mineralogySamples.Take(5).ToList();
             
-            // Cache Petrology Irns
+            // Cache Petrology Irns from EMu
             cachedIrns = await CacheIrns("ecatalogue", this.BuildPetrologySearchTerms(), stoppingToken);
 
-            // Fetch Petrology data
+            // Fetch Petrology data from EMu
             var petrologySamples = new List<Sample>();
             offset = 0;
             Log.Logger.Information("Fetching data");
@@ -139,19 +139,17 @@ public class AusGeochemTask : ImuTaskBase, ITask
             }
             else
             {
-                // Send directly to AusGeochem via API
-                
                 // Authenticate
                 await _ausGeochemClient.Authenticate(stoppingToken);
                 
                 // Fetch lookup lists
                 var lookups = await _ausGeochemClient.FetchLookups(stoppingToken);
 
-                // Send mineralogy samples
-                await SendSamples(lookups, mineralogySamples, _appSettings.AusGeochem.MineralogyDataPackageId, stoppingToken);
+                // Process mineralogy samples
+                await ProcessSamples(lookups, mineralogySamples, _appSettings.AusGeochem.MineralogyDataPackageId, stoppingToken);
                 
-                // Send petrology samples
-                await SendSamples(lookups, petrologySamples, _appSettings.AusGeochem.PetrologyDataPackageId, stoppingToken);
+                // Process petrology samples
+                await ProcessSamples(lookups, petrologySamples, _appSettings.AusGeochem.PetrologyDataPackageId, stoppingToken);
 
                 // Update/Insert application
                 using var db = new LiteRepository(new ConnectionString()
@@ -177,7 +175,6 @@ public class AusGeochemTask : ImuTaskBase, ITask
         var searchTerms = new Terms();
         searchTerms.Add("ColDiscipline", "Mineralogy");
         searchTerms.Add("MdaDataSets_tab", AusGeochemConstants.QueryString);
-        searchTerms.Add("AdmPublishWebNoPassword", "Yes");
 
         return searchTerms;
     }
@@ -187,7 +184,6 @@ public class AusGeochemTask : ImuTaskBase, ITask
         var searchTerms = new Terms();
         searchTerms.Add("ColDiscipline", "Petrology");
         searchTerms.Add("MdaDataSets_tab", AusGeochemConstants.QueryString);
-        searchTerms.Add("AdmPublishWebNoPassword", "Yes");
 
         return searchTerms;
     }
@@ -216,10 +212,11 @@ public class AusGeochemTask : ImuTaskBase, ITask
         "LocDateCollectedTo",
         "LocDateCollectedFrom",
         "collectors=LocCollectorsRef_tab.(NamPartyType,NamFullName,NamOrganisation,NamBranch,NamDepartment,NamOrganisation,NamOrganisationOtherNames_tab,NamSource,AddPhysStreet,AddPhysCity,AddPhysState,AddPhysCountry,ColCollaborationName)",
-        "prevno=[ManPreviousCollectionName_tab,ManPreviousNumbers_tab]"
+        "prevno=[ManPreviousCollectionName_tab,ManPreviousNumbers_tab]",
+        "AdmPublishWebNoPassword"
     };
 
-    private async Task SendSamples(Lookups lookups, IList<Sample> samples,
+    private async Task ProcessSamples(Lookups lookups, IList<Sample> samples,
         int? dataPackageId, CancellationToken stoppingToken)
     {
         // Exit if DataPackageId not known
@@ -228,9 +225,8 @@ public class AusGeochemTask : ImuTaskBase, ITask
             Log.Logger.Fatal("DataPackageId is null, cannot continue without one, exiting");
             Environment.Exit(Constants.ExitCodeError);
         }
-
-        Log.Logger.Information("Sending sample data to AusGeochem API where DataPackageId {DataPackageId}",
-            dataPackageId);
+        
+        Log.Logger.Information("Processing samples for DataPackageId {DataPackageId}", dataPackageId);
 
         // Fetch all current SampleWithLocationDtos
         var currentDtos = await _ausGeochemClient.FetchCurrentSamples(dataPackageId.Value, stoppingToken);
@@ -245,16 +241,18 @@ public class AusGeochemTask : ImuTaskBase, ITask
             {
                 var dto = sample.ToSampleWithLocationDto(lookups, existingDto);
 
-                Log.Logger.Debug("Updating existing Dto {ShortName}", dto.ShortName);
-
-                await _ausGeochemClient.SendSample(dto, Method.Put, stoppingToken);
+                if (sample.Deleted)
+                    // Delete
+                    await _ausGeochemClient.DeleteSample(dto, stoppingToken);
+                else
+                    // Update
+                    await _ausGeochemClient.SendSample(dto, Method.Put, stoppingToken);
             }
-            else
+            else if(!sample.Deleted)
             {
                 var dto = sample.ToSampleWithLocationDto(lookups, dataPackageId, _appSettings.AusGeochem.ArchiveId);
 
-                Log.Logger.Debug("Creating new Dto {ShortName}", dto.ShortName);
-
+                // Create
                 await _ausGeochemClient.SendSample(dto, Method.Post, stoppingToken);
             }
 

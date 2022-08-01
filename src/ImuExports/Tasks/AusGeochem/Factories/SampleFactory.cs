@@ -199,6 +199,8 @@ public class SampleFactory : IFactory<Sample>
         }
 
         sample.LastKnownLocation = "Museums Victoria";
+        
+        sample.Deleted = string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "no", StringComparison.OrdinalIgnoreCase);
 
         return sample;
     }
