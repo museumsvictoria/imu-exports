@@ -94,9 +94,11 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         {
             HasHeaderRecord = true
         };
+        
         using var reader = new StreamReader($"{AppContext.BaseDirectory}materials-lookup.csv");
         using var csv = new CsvReader(reader, csvConfig);
         csv.Context.RegisterClassMap<MaterialNamePairClassMap>();
+        
         var materialNamePairs = csv.GetRecords<MaterialNamePair>().ToList();
 
         return new Lookups

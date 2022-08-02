@@ -2,5 +2,5 @@
 
 public static class AusGeochemConstants
 {
-    public static string QueryString = "AuScope Geochemistry Network";
+    public static string ImuDataSetsQueryString = "AuScope Geochemistry Network";
 }
