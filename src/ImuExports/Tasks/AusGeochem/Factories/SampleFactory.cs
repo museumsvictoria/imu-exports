@@ -62,8 +62,6 @@ public class SampleFactory : IFactory<Sample>
 
                 latlongLocationNotes = new[]
                 {
-                    sample.Latitude,
-                    sample.Longitude,
                     string.IsNullOrWhiteSpace(latlong.GetTrimString("LatDatum_tab"))
                         ? "datum unknown"
                         : latlong.GetTrimString("LatDatum_tab")

@@ -31,6 +31,9 @@ public static class SampleToDtoMapper
                 ShortName = sample.SampleId
             };
 
+        if(sample.LocationKind == "Unknown" && string.IsNullOrWhiteSpace(sample.DepthMax) && string.IsNullOrWhiteSpace(sample.DepthMin))
+            dto.AutoSetElevationWriteConfig = true;
+
         if (dataPackageId != null)
             dto.SampleDto.DataPackageId = dataPackageId;
 
@@ -70,19 +73,29 @@ public static class SampleToDtoMapper
             dto.SampleDto.LocationKindName = locationKind.Name;
         }
 
-        // Material
+        // Find Material name based on external CSV
+        MaterialDto material;
         var materialsLookupMatch = lookups.MaterialNamePairs.FirstOrDefault(x =>
             string.Equals(x.MvName, sample.MineralId, StringComparison.OrdinalIgnoreCase));
 
         if (materialsLookupMatch != null)
         {
-            var material = lookups.MaterialDtos.FirstOrDefault(x =>
+            // Found match within material name pairs
+            material = lookups.MaterialDtos.FirstOrDefault(x =>
                 string.Equals(x.Name, materialsLookupMatch.AusGeochemName, StringComparison.OrdinalIgnoreCase));
-            if (material != null)
-            {
-                dto.SampleDto.MaterialId = material.Id;
-                dto.SampleDto.MaterialName = material.Name;
-            }
+        }
+        else
+        {
+            // Look for match within materialDtos directly
+            material = lookups.MaterialDtos.FirstOrDefault(x =>
+                string.Equals(x.Name, sample.MineralId, StringComparison.OrdinalIgnoreCase));
+        }
+        
+        // Assign material if match found
+        if (material != null)
+        {
+            dto.SampleDto.MaterialId = material.Id;
+            dto.SampleDto.MaterialName = material.Name;
         }
 
         // DepthMin => RelativeElevationMax
