@@ -14,15 +14,18 @@ public class AusGeochemTask : ImuTaskBase, ITask
     private readonly AppSettings _appSettings;
     private readonly IFactory<Sample> _sampleFactory;
     private readonly IAusGeochemClient _ausGeochemClient;
+    private readonly IEnumerable<IModuleSearchConfig> _moduleSearchConfigs;
     
     public AusGeochemTask(
         IOptions<AppSettings> appSettings,
         IFactory<Sample> sampleFactory,
-        IAusGeochemClient ausGeochemClient) : base(appSettings)
+        IAusGeochemClient ausGeochemClient,
+        IEnumerable<IModuleSearchConfig> moduleSearchConfigs) : base(appSettings)
     {
         _appSettings = appSettings.Value;
         _sampleFactory = sampleFactory;
         _ausGeochemClient = ausGeochemClient;
+        _moduleSearchConfigs = moduleSearchConfigs;
     }
 
     public async Task Run(CancellationToken stoppingToken)
@@ -73,14 +76,11 @@ public class AusGeochemTask : ImuTaskBase, ITask
 
     private Terms BuildTerms(string discipline)
     {
-        var searchTerms = new Terms();
-        searchTerms.Add("ColDiscipline", discipline);
-        searchTerms.Add("MdaDataSets_tab", AusGeochemConstants.ImuDataSetsQueryString);
+        var terms = new Terms();
+        terms.Add("ColDiscipline", discipline);
+        terms.Add("MdaDataSets_tab", AusGeochemConstants.ImuDataSetsQueryString);
         
-        if (_options.Application.PreviousDateRun.HasValue)
-            searchTerms.Add("AdmDateModified", _options.Application.PreviousDateRun.Value.ToString("MMM dd yyyy"), ">=");
-
-        return searchTerms;
+        return terms;
     }
 
     private string[] ExportColumns => new[]
@@ -114,7 +114,41 @@ public class AusGeochemTask : ImuTaskBase, ITask
     private async Task<List<Sample>> FetchSamples(string discipline, CancellationToken stoppingToken)
     {
         // Cache Irns from EMu
-        var cachedIrns = await CacheIrns("ecatalogue", this.BuildTerms(discipline), stoppingToken);
+        var cachedIrns = new List<long>();
+        
+        if (_options.Application.PreviousDateRun.HasValue)
+        {
+            foreach (var moduleSearchConfig in _moduleSearchConfigs)
+            {
+                stoppingToken.ThrowIfCancellationRequested();
+
+                if (moduleSearchConfig is IWithTermFilter filter)
+                {
+                    filter.TermFilters = new List<KeyValuePair<string, string>>()
+                    {
+                        new("ColDiscipline", discipline)
+                    };
+                }
+
+                var irns = await CacheIrns(moduleSearchConfig.ModuleName, 
+                    moduleSearchConfig.ModuleSelectName,
+                    moduleSearchConfig.Terms,
+                    moduleSearchConfig.Columns,
+                    moduleSearchConfig.IrnSelectFunc,
+                    stoppingToken);
+
+                cachedIrns.AddRange(irns);
+            }
+
+            // Remove any duplicates
+            cachedIrns = cachedIrns.Distinct().ToList();
+        }
+        else
+        {
+            stoppingToken.ThrowIfCancellationRequested();
+
+            cachedIrns = (await CacheIrns("ecatalogue", this.BuildTerms(discipline), stoppingToken)).ToList();
+        }
 
         // Fetch sample data from EMu
         var samples = new List<Sample>();
