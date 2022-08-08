@@ -34,16 +34,12 @@ public class AusGeochemTask : ImuTaskBase, ITask
         {
             stoppingToken.ThrowIfCancellationRequested();
 
+            // Fetch mineralogy data from EMu
             var mineralogySamples = await FetchSamples("Mineralogy", stoppingToken);
 
-            // TODO: remove after testing complete
-            mineralogySamples = mineralogySamples.Take(5).ToList();
-            
+            // Fetch petrology data from EMu
             var petrologySamples = await FetchSamples("Petrology", stoppingToken);
             
-            // TODO: remove after testing complete
-            petrologySamples = petrologySamples.Take(5).ToList();
-
             // Authenticate
             await _ausGeochemClient.Authenticate(stoppingToken);
             
@@ -113,7 +109,8 @@ public class AusGeochemTask : ImuTaskBase, ITask
 
     private async Task<List<Sample>> FetchSamples(string discipline, CancellationToken stoppingToken)
     {
-        // Cache Irns from EMu
+        // Cache Irns
+        Log.Logger.Information("Caching {Discipline} catalogue irns", discipline);
         var cachedIrns = new List<long>();
         
         if (_options.Application.PreviousDateRun.HasValue)
@@ -172,7 +169,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
 
             var results = imuSession.Fetch("start", 0, -1, this.ExportColumns);
 
-            Log.Logger.Debug("Fetched {RecordCount} {Discipline} records from Imu", cachedIrnsBatch.Count, discipline);
+            Log.Logger.Debug("Fetched {RecordCount} {Discipline} records from EMu", cachedIrnsBatch.Count, discipline);
 
             samples.AddRange(results.Rows.Select(map => _sampleFactory.Make(map, stoppingToken)));
 
