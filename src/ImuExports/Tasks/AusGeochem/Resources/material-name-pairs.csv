@@ -1,42 +1,988 @@
-﻿MV Material Name,AusGeoChem Material Name
-Ablykite,Ablykite
-Alvikite,Alvikite
-Astorite,Astorite
-Baramite,Baramite
-Chalcedon,Chalcedon
-Birch bog peat,Birch bog peat
-dynamogranite,dynamogranite
-Feldspathic Gneiss,Feldspathic Gneiss
-UM2007-19-PO:CaFeHMg,UM2007-19-PO:CaFeHMg
-Garbenschiefer,Garbenschiefer
-Gold ore,Gold ore
-Cobaltoan Smithsonite,Cobaltoan Smithsonite
-Infinite,Infinite
-Kyanite gneiss,Kyanite gneiss
-Hunchunite,Hunchunite
-Deltaita,Deltaita
-Marble,Marble
-Kyanite schist,Kyanite schist
-Cobaltoan Rhodochrosite,Cobaltoan Rhodochrosite
-Muscovite-biotite gneiss,Muscovite-biotite gneiss
-Ba-zeolite,Ba-zeolite
-Quartz-sericite schist,Quartz-sericite schist
-Vogesite,Vogesite
-Fleischerite Group,Fleischerite Group
-Patricianite,Patricianite
-Perhamite Group,Perhamite Group
-Phillipite,Phillipite
-Picrotephroite,Picrotephroite
-Plumbocuprite,Plumbocuprite
-Prasiolite,Prasiolite
-Pushcharovskite,Pushcharovskite
-Randite,Randite
-Red Beryl,Red Beryl
-Reinite,Reinite
-Riebeckrichterite,Riebeckrichterite
-Rozenite Group,Rozenite Group
-Saussurite,Saussurite
-Sazhinite,Sazhinite
-Shocked Quartz,Shocked Quartz
-Skiagite,Skiagite
-Sweetite,Sweetite
+MV Material Name,AusGeochem Material Name
+Glacial Pebbles,Pebbles
+Black Coal,Coal
+Almandine-chlorite schist,Schist
+Antimony ore,Ore
+Septarian nodule,Concretion
+Olivine Leucitite,Leucitite
+Lamprophyre var Malchite,Lamprophyre
+Staurolite Mica Schist,Schist
+Lamprophyre var Camptonite,Lamprophyre
+Lamprophyre var Vogesiite,Lamprophyre
+Dyke,Igneous rock
+Tachylitic Basalt,Basalt
+Chloritized Porphyrite Dyke,Porphyry
+Diorite Dyke,Diorite
+Silicified Dunite,Dunite
+Fossiliferous Quartz Sandstone,Sandstone
+Nepheline Syenite Breccia,Breccia
+Alnoite Breccia,Breccia
+Nickel-Copper-Cobalt ore,Ore
+Volcanic Lapilli,Lapilli Tuff
+Hedenbergite Sphalerite Rock,Rock of restricted mineralogy
+Garnet Sphalerite Rock,Rock of restricted mineralogy
+Epidote Sphalerite Rock,Rock of restricted mineralogy
+Trachy Phonolite,Phonolite
+Riebeckite Comendite,Comendite
+Goethite Accretion,Concretion
+Muscovite Feldspar Quartz Schist,Schist
+Ventifact,NA
+Auriferous Hornfels,Hornfels
+Chalcopyrite ore,Ore
+Ferruginous Conglomerate,Conglomerate
+Silicified Wood,Petrified Wood
+Garnet Pyroxenite,Pyroxenite
+Shattercone Sandstone,Sandstone
+Auriferous Ore,Ore
+Serpentinised Gabbro,Gabbro
+Biotite Garnet Cordierite Gneiss,Gneiss
+Diopside Diallage Gabbro,Gabbro
+Volcanic Bomb,Igneous rock
+Molybdenite Ore,Ore
+Malachite Hematite Copper Ore,Ore
+Tellurium Ore,Ore
+Granite Porphyry,Granite
+Danburite Hornfels,Hornfels
+Xenolith,NA
+Kauri Gum,Ambrite
+Quartz Feldspar Porphyry,Porphyry
+Wollastonite-rock,Rock of restricted mineralogy
+Topaz Sand,Topaz
+Washdirt,Ore
+Wash Dirt,Ore
+Volcanic Siltstone,Siltstone
+Diopside Garnet Skarn,Skarn
+Sandstone (Itacolumite),Sandstone
+Barite ore,Ore
+Lava Medallion,Igneous rock
+Volcanic bombs,Igneous rock
+Porphyritic Granodiorite,Granodiorite
+Calcite-Fluorite-Willemite rock,Rock of restricted mineralogy
+Grit,Sandstone
+Pebble,Pebbles
+Zebra Rock,Siltstone
+Varvite,Sedimentary rock
+Banded Jasper - Hematite,Jaspillite
+Varve,Sedimentary rock
+Eudialyte Pegmatite,Pegmatite
+Hornblende Pegmatite,Pegmatite
+Impact breccia,Breccia
+Mica Lamprophyre,Lamprophyre
+Talc Schist,Schist
+Quartz monzonite,Monzonite
+Trachytic Breccia,Breccia
+Manganese ore,Ore
+"Cassiterite, Stream Tin Ore",Ore
+Biotite Quartz Gneiss,Gneiss
+Bustamite Calcite Sphalerite Rock,Rock of restricted mineralogy
+Silver-lead ore,Ore
+Calcareous Concretion,Concretion
+Porphyry Dykes,Porphyry
+Doleritic Basalt,Basalt
+Fossil wood,Petrified Wood
+Vesicular basalt,Basalt
+Concretions,Concretion
+Spinel Forsterite Skarn,Skarn
+Garnet Biotite Muscovite Feldspar Gneiss,Gneiss
+Siliceous schist,Schist
+Biotite Feldspar Quartz Gneiss,Gneiss
+Biotite Feldspar Quartz Schist,Schist
+Garnet Muscovite Feldspar Quartz Gneiss,Gneiss
+Galena sphalerite ore,Ore
+Welded Andesite Tuff,Andesite
+Jasper Agate,Agate
+Calcite Accretions,Concretion
+Rhodonite-Galena Ore,Ore
+Mixed Sulphide Ore,Ore
+Vanadium bearing hematite,Rock of restricted mineralogy
+Eudialyte Thorite Amphibole Gneiss,Gneiss
+Biotite Muscovite Schist,Schist
+Malachite ore,Ore
+Rhizoconcretions,Concretion
+Graphitie Schist,Schist
+Muscovite Biotite Garnet Schist,Schist
+Mica Quartz Schist,Schist
+Amphibole Biotite Schist,Schist
+Basaltic Scoria,Basalt
+Diorite Porphyry,Diorite
+Fibrous Serpentinite,Serpentinite
+Quartz Trachyte,Trachyte
+Clinochlore Quartz Schist,Schist
+Muscovite Quartz Schist,Schist
+Feldspar Augen Gneiss,Gneiss
+Biotite Quartz Feldspar Gneiss,Gneiss
+Graphite Quartz Schist,Schist
+Ultramafic,Ultramafic-rock
+Pyrometamorphic Skarn,Skarn
+LeuciteTephrite,Tephrite
+Feldspar Muscovite Quartz Gneiss,Gneiss
+Amphibole Garnet Schist,Schist
+Fuschite Quartz Schist,Schist
+Tourmaline Quartz schist,Schist
+Tonalite Gneiss,Gneiss
+Toscanite,Rhyodacite
+Feldspar Quartz Gneiss,Gneiss
+Metadolerite - Gabbro 'Greenstone',Gabbro
+Hedenbergite Andradite Skarn,Skarn
+Quartz - Feldspar Porphyry,Porphyry
+Banded Hematitic Quartzite,Quartzite
+Feldspar Biotite Gneiss,Gneiss
+Richterite-Phlogophite-Diopside Lamproite,Lamproite
+Arsenopyrite ore,Ore
+Andradite Grossular Skarn,Skarn
+Apatite Augen Gneiss,Gneiss
+Scapolite-Sodalite Skarn,Skarn
+Skarn Ore,Ore
+Hypersthene Biotite Schist,Schist
+Feldspar Biotite Quartz Gneiss,Gneiss
+Almandine  Gedrite Schist,Schist
+Topazite,Rock of restricted mineralogy
+Amphibole Schist,Schist
+Garnet Sandstone,Sandstone
+Galena ore,Ore
+Fault Breccia,Breccia
+Biotite Muscovite Quartz Schist,Schist
+Muscovite Quartz Talc Schist,Schist
+Biotite Muscovite Clinochlore Feldspar Gneiss,Gneiss
+Garnet Amphibolite,Amphibolite
+Garnet Sillimanite Kyanite Schist,Schist
+Magnetite Biotite Quartz Schist,Schist
+Metamorphosed Dyke,Meta-igneous rock
+Biotite Garnet Feldspar Quartz Schist,Schist
+Hematite breccia,Breccia
+Fossiliferous Limestone,Limestone
+Corundum Biotite Schist,Schist
+Granite-Hornfels contact,Hornfels
+Biotite Garnet Feldspar Quartz Gneiss,Gneiss
+Pyroxene Hornfels,Hornfels
+Muscovite Feldspar Quartz Gneiss,Gneiss
+Nepheline Syenite,Syenite
+Rhodonite-bustamite rock,Rock of restricted mineralogy
+Danburite Ferroaxinite Skarn,Skarn
+Gedrite Gneiss,Gneiss
+Spinel-rich xenolith,NA
+Andalusite Biotite schist,Schist
+Sericite Schist,Schist
+Talc Carbonate Rock,Rock of restricted mineralogy
+Cuspidine Skarn,Skarn
+Meta-Granite,Granite
+Garnetiferous Quartz Feldspar Gneiss,Gneiss
+Orthoclase Epidote Clinochlore Gneiss,Gneiss
+Quartz Muscovite Schist,Schist
+Staurolite Muscovite Schist,Schist
+Amphibole Clinochlore Quartz Gneiss,Gneiss
+Biotite Feldspar Gneiss,Gneiss
+Amphibole Biotite Gneiss,Gneiss
+Muscovite Biotite Feldspar Schist,Schist
+Basalt Glass,Basalt
+Garnet Calcite Vesuvianite Skarn,Skarn
+Garnet Sillimanite Biotite Gneiss,Gneiss
+Biotite Calcite Quartz Schist,Schist
+Banded Quartzite- Hematite,Quartzite
+Polymitic Gritstone-Conglomerate,Conglomerate
+Lead-zinc ore,Ore
+Quartz Sericite Schist,Schist
+Opal Garnet Skarn,Skarn
+Quartz Feldspar Gneiss,Gneiss
+Muscovite Feldspar Gneiss,Gneiss
+Quartz Arenite,Arenite
+Calc-silicate Concretion,Concretion
+Andalusite-muscovite schist,Schist
+Terra Rossa,Regolith
+Garnet Diopside Wollastonite Skarn,Skarn
+Kyanite Quartz Schist,Schist
+Clay stone,Claystone
+Staurolite Biotite Schist,Schist
+Vesuvianite Garnet Skarn,Skarn
+Garnet Skarn,Skarn
+Garnet Staurolite Biotite Muscovite Schist,Schist
+Cordierite Biotite Feldspar Gneiss,Gneiss
+Clinochlore Amphibole Schist,Schist
+Garnet Muscovite Schist,Schist
+Clinochlore Tremolite Garnet Schist,Schist
+Tar Liquor,NA
+Welded Lamproite Agglomerate,Lamproite
+Stalagmite,Biochemical and chemical sedimentary rock
+Sandstone with watch and chain,Sandstone
+Lamproite Tuff,Lamproite
+Stalactite,Biochemical and chemical sedimentary rock
+Andradite Skarn,Skarn
+Quartz Feldspar Biotite Gneiss,Gneiss
+Stilpnomelane Quartz Schist,Schist
+Sovite,Carbonatite
+Muscovite Garnet Schist,Schist
+Leucite tephrite,Tephrite
+Garnet Staurolite Schist,Schist
+Chromium iron ore,Ore
+Silver sulphide ore,Ore
+Clinochlore Schist,Schist
+Marly-Limestone,Limestone
+Olivine-Diopside-Leucite Lamproite,Lamproite
+Spherulite,Spherulitic Obsidian
+Amphibole Feldspar Quartz Gneiss,Gneiss
+Weathered Phyllite,Phyllite
+Wollastonite Garnet Skarn,Skarn
+Calcite-Bustamite-Ferroan Tephroite Rock,Rock of restricted mineralogy
+Monticellite Diopside Akermanite skarn,Skarn
+Amphibole Epidote Schist,Schist
+Pyroxene Olivine Skarn,Skarn
+Epidotised  Amphibolite,Amphibolite
+Slag (Artificial),NA
+Monticellite Skarn,Skarn
+Muscovite Biotite Schist,Schist
+Quartzose Lapilli Tuff,Lapilli Tuff
+Olivine-Diopside-Richterite-Phlogophite-Leucite Lamproite,Lamproite
+Feldspar Quartz Biotite Gneiss,Gneiss
+Feldspar Muscovite Biotite Gneiss,Gneiss
+Siliceous Sediment,Sedimentary rock
+Epidote Skarn,Skarn
+Barium Feldspar Quartz Gneiss,Gneiss
+Quartzose Tuff,Tuff
+Muscovite Biotite Quartz Schist,Schist
+Clinochlore Muscovite Feldspar Quartz Gneiss,Gneiss
+Clinochlore Titanite Quartz Gneiss,Gneiss
+Quartz-Gahnite-Spessartine rock,Rock of restricted mineralogy
+Biotite Amphibole Feldspar Gneiss,Gneiss
+Garnet Diopside Skarn,Skarn
+Uranium Ore,Ore
+Wollastonite Skarn,Skarn
+Quartz porphyry dike,Porphyry
+Garnetized Leucogranite,Granite
+Biotite Garnet Gneiss,Gneiss
+Andesite Dyke,Andesite
+Feldspar Quartz Muscovite Biotite Gneiss,Gneiss
+Siliceous Rock,Rock of restricted mineralogy
+Topaz Quartz Gneiss,Gneiss
+Fluorite-Garnet-Lead ore,Ore
+Meta-Gabbro,Gabbro
+Bituminous Shale,Shale
+Wollastonite Calcite Skarn,Skarn
+Biotite Garnet Schist,Schist
+Biotite Muscovite Feldspar Quartz Gneiss,Gneiss
+Biotite Quartz Schist,Schist
+Diopside-Phlogophite-Leucite Lamproite,Lamproite
+Biotite Garnet Kyanite Gneiss,Gneiss
+Brucite Calciphyre,Calciphyre
+Hedenbergite Garnet Skarn,Skarn
+Basalt Scoria,Basalt
+Shatter Cones,Impactite
+Hematite Quartz Breccia,Breccia
+Garnet Quartz Pegmatite,Pegmatite
+Gahnite Chloritoid Schist,Schist
+"Garnet, Biotite, Pyroxene Granulite",Granulite
+Clinochlore Talc Schist,Schist
+Lead carbonate ore,Ore
+Biotite Quartz Feldspar Schist,Schist
+Feldspar Quartz Amphibole Biotite Gneiss,Gneiss
+Lepidolite Elbaite Pegmatite,Pegmatite
+Axinite Limestone Skarn,Skarn
+Garnet Hornfels,Hornfels
+Calcite Biotite Schist,Schist
+Siliceous Breccia,Breccia
+Eudialyte Arfvedsonite Mosandrite Feldspar Pegmatite,Pegmatite
+Diopside-Phlogopite-Pargasite-Dravite Calciphyre,Calciphyre
+Olivine-Diopside-Richterite Lamproite,Lamproite
+Amphibole Feldspar Schist,Schist
+Quartz Diopside Hornfels,Hornfels
+Tourmaline Muscovite Quartz Schist,Schist
+Lamproite Lapilli Tuff,Lamproite
+Crustal Xenolith,NA
+Garnet Biotite Schist,Schist
+MagnetiteTalc Schist,Schist
+Auriferous Slate,Slate
+Ferruginous Grit,Sandstone
+Quartz Garnet Skarn,Skarn
+Gabbroic Anorthosite Mylonite,Gabbro
+Prehnite Skarn,Skarn
+Garnet Muscovite Quartz Schist,Schist
+Quartz-Sanidine Porphyry,Porphyry
+Calcite-Knebelite-Rhodonite rock,Rock of restricted mineralogy
+DanburiteFerroaxinite Skarn,Skarn
+Feldspar Quartz Biotite Garnet Gneiss,Gneiss
+Glassy Dacitic Ignimbrite,Dacite
+Garnet Feldspar Quartz Gneiss,Gneiss
+Biotite Garnet Quartz Schist,Schist
+Norite Dyke,Norite
+Nepheline Skarn,Skarn
+Wollastonite Andradite Skarn,Skarn
+Leucitite Tephrite,Tephrite
+Serpentinised Chromatite,Chromatite
+Mica  Quartz Calcite Schist,Schist
+Stilpnomelane Clinochlore Schist,Schist
+Amphibole Biotite Feldspar Quartz Gneiss,Gneiss
+Amphibole Gneiss,Gneiss
+Eclogitic Amphibolite,Amphibolite
+Meta-Anorthosite,Anorthosite
+Basaltic Pumice,Basalt
+Serpentinised Harzburgite,Harzburgite
+Clinochlore Muscovite Schist,Schist
+Quartz Feldspar Biotite Schist,Schist
+Chlorite Garnet Magnetite Schist,Schist
+Vesicular Olivine-Diopside-Richterite-Leucite lamproite,Lamproite
+Andradite Sphalerite Skarn,Skarn
+Basalt Dyke,Basalt
+Feldspar Quartz Muscovite Gneiss,Gneiss
+Schorl-quartz,Rock of restricted mineralogy
+Diopside Skarn,Skarn
+Garnet Peridotite,Peridotite
+Scapolite Garnet Amphibole Gneiss,Gneiss
+Garnet Sillimanite Gneiss,Gneiss
+Feldspar Muscovite Biotite Quartz Gneiss,Gneiss
+Tremolite Schist,Schist
+Feldspar Garnet Biotite Gneiss,Gneiss
+Garnet Clinochlore Schist,Schist
+Ultrabasic xenoliths,Ultrabasite
+Muscovite Biotite Feldspar Quartz Schist,Schist
+Staurolite Quartzite,Quartzite
+Wollastonite Andradite Hedenbergite Skarn,Skarn
+Indurated Slate,Slate
+Wollastonite Garnet Vesuvianite Skarn,Skarn
+Quartzite Metaconglomerate,Conglomerate
+Garnet Muscovite Calcite Schist,Schist
+Albitite Crossite Aegirine Stilpnomelane Schist,Schist
+Olivine Leucite Lamproite,Lamproite
+Siliceous Mudstone,Mudstone
+Olivine Norite,Norite
+Feldspar Quartz Amphibole Gneiss,Gneiss
+Amphibolite Quartz Schist,Schist
+Andesitic Agglomerate,Agglomerate
+Magnetite Feldspar Quartz Gneiss,Gneiss
+Muscovite Clinochlore Quartz Schist,Schist
+Ferruginous Quartz Arenite,Arenite
+Forsterite-Phlogophite Calciphyre,Calciphyre
+Schorlite,Rock of restricted mineralogy
+Bustamite-sphalerite-spessartine Rock,Rock of restricted mineralogy
+Melilite Calcite Wollastonite Spurrite Skarn,Skarn
+Pyrrhotite-pyrite ore,Ore
+Biotite Kyanite Garnet Schist,Schist
+Scawtite Skarn,Skarn
+Carbonaceous Mylonite,Mylonite
+Copper-zinc ore,Ore
+Bustamite-Rhodonite-Quartz-Galena ore,Ore
+Tourmaline Chlorite Schist,Schist
+Chlorite Biotite Schist,Schist
+Muscovite Amphibole Quartz Schist,Schist
+Garnet Quartzite,Quartzite
+Rhodonite - Galena - Sphalerite ore,Ore
+Amphibolite Quartz Gneiss,Gneiss
+Brucite Apatite Skarn,Skarn
+Cassiterite Ore,Ore
+Chlorite Muscovite Schist,Schist
+Sericite Clinochlore Schist,Schist
+Vesuvianite Andradite Skarn,Skarn
+Saxonite,Peridotite
+Chlorite Magnetite Schist,Schist
+Chlorite Pyrite Quartz Schist,Schist
+Sancyite,Trachyandesite
+Epidote Feldspar Clinochlore Quartz Gneiss,Gneiss
+Amphibole Porphyry,Porphyry
+Orbicular Diorite,Diorite
+WeldedTuff,Tuff
+Porphyritic Andesite,Andesite
+Axinite Chalcopyrite Actinolite Skarn,Skarn
+Richterite-Phlogophite-Leucite Lamproite,Lamproite
+Cordierite - Andalusite Hornfels,Hornfels
+Ropy Lava,Igneous rock
+Meta Greywacke,Greywacke
+Diopside Calcite Skarn,Skarn
+Nepheline Gabbro,Gabbro
+Spinel Diopside Phlogopite Skarn,Skarn
+Diopside Andradite Vesuvianite Skarn,Skarn
+Wollastonite Diopside Skarn,Skarn
+Biotite Pyroxene Hornfels,Hornfels
+Pyritic ore,Ore
+Tourmaline Muscovite Garnet Schist,Schist
+Muscovite Biotite Feldspar Gneiss,Gneiss
+Feldspar Quartz Schist,Schist
+Rhyolite-Rhyodacite,Rhyodacite
+Muscovite Chlorite Garnet Schist,Schist
+Volcanic Mudstone,Mudstone
+Garnet Muscovite Feldspar Gneiss,Gneiss
+Chlorite Quartz Schist,Schist
+Muscovite Clinochlore Schist,Schist
+Basalt Volcanic Bomb,Basalt
+Hedenbergite Galena Skarn,Skarn
+Serpentine Rock,Serpentinite
+Quartz Latite Welded Tuff,Latite
+Epidote Feldspar Quartz Gneiss,Gneiss
+Rutile Clinochlore Schist,Schist
+Rhodonite-tephroite,Tephorite
+Retinasphalt,Asphalt
+Leucite Lamproite,Lamproite
+Opalized Breccia,Breccia
+Kyanite Biotite Schist,Schist
+Piemontite Quartz Rock,Rock of restricted mineralogy
+Forsterite Skarn,Skarn
+Antimony-gold ore,Ore
+Tephritic Leucitite,Leucitite
+Nepheline Tephrite,Tephrite
+Grossular Skarn,Skarn
+Amphibole Feldspar Garnet Gneiss,Gneiss
+Feldspar Serpentine Schist,Schist
+Resin Ellipsoids,NA
+Dolerite Dyke,Dolerite
+Silver Gold Ore,Ore
+Biotite Muscovite Feldspar Quartz Schist,Schist
+Refined tin,NA
+Talc Clinochlore Schist,Schist
+Granulite Gneiss,Gneiss
+Andradite Clinochlore Skarn,Skarn
+Enstatite Granulite,Granulite
+Schorlomite Skarn,Skarn
+Feldspar Quartz Cordierite Gneiss,Gneiss
+Piedmontite Muscovite Quartz Schist,Schist
+Sodalite Syenite,Syenite
+Clinochlore Feldspar Quartz Gneiss,Gneiss
+Muscovite Chlorite Schist,Schist
+Tilleyite Skarn,Skarn
+Orthoclase Biotite Gneiss,Gneiss
+Tephrite Scoria,Tephrite
+Melilite Skarn,Skarn
+Ferruginous Quartzite,Quartzite
+Magnetite Clinochlore Schist,Schist
+Spinel Forsterite Calciphyre,Calciphyre
+Fluorite-Bustamite-Sphalerite Ore,Ore
+Pyroxene Nepheline Syenite,Syenite
+Metasediment,Hornfels
+Spinel Geikielite Skarn,Skarn
+Wollastonite Calciphyre,Calciphyre
+Clinochlore Magnetite Schist,Schist
+Maar sediments-tuffs,Tuff
+Gahnite Mica Schist,Schist
+Garnet Cordierite Feldspar Quartz Gneiss,Gneiss
+Tungsten ore,Ore
+Reef Quartz,Rock of restricted mineralogy
+Radiolarian Earth,Radiolarite
+Quartz Albite Actinolite Skarn,Skarn
+Sillimanite Garnet Biotite Feldspar Gneiss,Gneiss
+Garnetiferous Augen Gneiss,Gneiss
+Quartz-vein,Rock of restricted mineralogy
+Calcite Quartz Schist,Schist
+Amphibole Biotite Feldspar Gneiss with Skarn Vein,Gneiss
+Hornblende Gabbro,Gabbro
+Amphibole Epidote Clinochlore Schist,Schist
+Pyrrhotite-bustamite ore,Ore
+Garnet Cordierite Hornfels,Hornfels
+Apatite Diopside Calciphyre,Calciphyre
+Diopside Calcite Phlogopite Skarn,Skarn
+Pegmatoidal Richterite Diopside Lamproite,Lamproite
+Garnet Biotite Clinochlore Schist,Schist
+Tourmaline Muscovite Schist,Schist
+Amphibole Anorthite Clinochlore Gneiss,Gneiss
+Muscovite Feldspar Garnet Amphibole Schist,Schist
+Limestone Skarn,Skarn
+Quartz-Sphalerite-Bustamite ore,Ore
+Quartz-Topaz Rock,Rock of restricted mineralogy
+Granite Breccia,Breccia
+Pyroxene Garnet Hornfels,Hornfels
+Feldspar Biotite Hornfels,Hornfels
+Weathered slate,Slate
+Tourmaline Quartz Rock,Rock of restricted mineralogy
+Banded Quartz Biotite Amphibole Schist,Schist
+Biotite Clinozoisite Garnet Schist,Schist
+Basalt with quartz xenoliths,Basalt
+Quartz Albite Garnet Skarn,Skarn
+Quartz-Gahnite rock,Rock of restricted mineralogy
+Schorl Quartz Pegmatite,Pegmatite
+Biotite Garnet Feldspar Gneiss,Gneiss
+Biotite Kyanite Schist,Schist
+Gold/Silver ore,Ore
+Olivine Pyroxenite,Pyroxenite
+Forsterite Calciphyre,Calciphyre
+Hornblende Porphyrite,Porphyry
+Calc-silicate Gneiss,Gneiss
+Welded Mudstone,Mudstone
+Aplitic Dyke,Aplite
+Diopside Phlogopite Skarn,Skarn
+Quartz Biotite Schist,Schist
+Phlogopite Calciphyre,Calciphyre
+Diopside Microcline Skarn,Skarn
+Trachy-Andesite,Andesite
+Chlorite Rock,Rock of restricted mineralogy
+Hypersthene Gabbro,Gabbro
+Muscovite Biotite Corderite Schist,Schist
+Sulphide ore (calcitic),Ore
+Marl Shale,Shale
+Phlogophite Pargasite Marble,Marble
+Scapolite marble,Marble
+Sillimanite Biotite Garnet Gneiss,Gneiss
+Porphyry Dyke,Porphyry
+Meta-Sandstone,Sandstone
+Fuschite Andalusite Schist,Schist
+Talc Dolomite Schist,Schist
+Monticellite Diopside Skarn,Skarn
+Garnet Gneiss,Gneiss
+Feldspar Quartz Muscovite Garnet Gneiss,Gneiss
+Lithic Gritstone Conglomerate,Conglomerate
+Glaucophane Epidote Schist,Schist
+Garnet Quartz Skarn,Skarn
+Kerosene Shale,Shale
+Hypersthene Andesite,Andesite
+Foliated Diorite,Diorite
+Diopside Grossular Skarn,Skarn
+Amphibole Andesite,Andesite
+Garnet Pyroxene Granulite,Granulite
+Charnockite Gneiss,Gneiss
+Lapilli,Lapilli Tuff
+Rhodonite Tephorite Skarn,Skarn
+Brucite Orthoclase Skarn,Skarn
+Pyroxene Garnet Tremolite Biotite Hornfels,Hornfels
+Welded Lamproite Tuff,Lamproite
+Copper-Lead-Zinc Ore,Ore
+Garnet Wollastonite Melilite Skarn,Skarn
+Phlogopite Brucite Skarn,Skarn
+Wollastonite Andradite Clinochlore Skarn,Skarn
+Sphalerite-Bustamite Ore,Ore
+Basalt Pillow lava,Basalt
+Phlogophite-Leucite Lamproite,Lamproite
+Polylithionite Muscovite Feldspar Quartz Gneiss,Gneiss
+Staurolite Kyanite Schist,Schist
+Phlogophite-Olivine-Richterite-Diopside-Leucite Lamproite,Lamproite
+Alnoite (lamprophyre),Lamprophyre
+Tinguait Porphyry,Porphyry
+Ottrelite Schist,Schist
+Hornblende Peridotite,Peridotite
+Clinochlore Feldspar Gneiss,Gneiss
+Quartz Mica Schist,Schist
+Quartz Feldspar Muscovite Schist,Schist
+Crossite Lawsonite Clinochlore Schist,Schist
+Cordierite K-feldspar Granulite,Granulite
+Epidote  Schist,Schist
+Hedenbergite Quartz Skarn,Skarn
+Quartz-Clinochlore-Carbonate Vein,Rock of restricted mineralogy
+oxidised lead ore,Ore
+Biotite Amphibole K feldspar Gneiss,Gneiss
+Pargasite Calciphyre,Calciphyre
+Muscovite Tourmaline Schist,Schist
+Corundum Monazite Schist,Schist
+"Magnetite Fluorite ""Wrigglite"" Skarn",Skarn
+Graphite Clinochlore Quartz Schist,Schist
+Quartz with arsenopyrite,Rock of restricted mineralogy
+Quartz Feldspar Muscovite Gneiss,Gneiss
+Garnet Quartz Granulite,Granulite
+Muscovite Clinochlore Feldspar Gneiss,Gneiss
+Metasediment (manganiferous),Metasedimentary rock
+Meta-Limestone,Limestone
+Foshagite Skarn,Skarn
+Piemontite Schist,Schist
+Quartz Hornfels,Hornfels
+Welded Trachyte Tuff,Trachyte
+Quartz vein with stibnite,Rock of restricted mineralogy
+Wollastonite Diopside Vesuvianite Skarn,Skarn
+Bustamite-Apatite-Quartz-Garnet rock,Rock of restricted mineralogy
+Garnet Andalusite Muscovite Schist,Schist
+Sanidine Sand,Sand
+Argillite rock,Rock of restricted mineralogy
+Mica  Quartz Feldspar Schist,Schist
+Spinel-Forsterite Calciphyre,Calciphyre
+Amphibole Clinochlore Pyrite Schist,Schist
+Sphalerite ore,Ore
+Diaspore-'Fuchsite'-Corundum Rock,Rock of restricted mineralogy
+Talc Carbonate Schist,Schist
+Volcanic Conglomerate,Conglomerate
+Basalt Pumice,Basalt
+Monzonite Dyke,Monzonite
+Ambrite (kauri gum),Ambrite
+Amphibole Muscovite Garnet Schist,Schist
+Garnet Sillimanite Biotite Schist,Schist
+Vesuvianite Diopside Skarn,Skarn
+Ottrelite-Muscovite Rock,Rock of restricted mineralogy
+Quartz Vein (Folded),Rock of restricted mineralogy
+Sideritic Claystone,Claystone
+Quartz vein,Rock of restricted mineralogy
+Quartz Reef,Rock of restricted mineralogy
+Dyke Rock,Igneous rock
+Mineral Sands,Sand
+Coal Concretion,Coal
+Cannel Coal,Coal
+Quartz Latite,Latite
+Tinguaite Porphyry,Porphyry
+Augite Basalt,Basalt
+Varved Clay,Claystone
+Pyroclastic Chert,Chert
+Scapolitized Diorite,Diorite
+Talc Clinochlore Dolomite Schist,Schist
+Chondrodite Amphibole Phlogopite Skarn,Skarn
+Serpentinite Skarn,Skarn
+Leucite Porphyry,Porphyry
+Diorite/Hornblendite,Diorite
+Pyro-bitumen,Bitumen
+Serpentinised Pyroxenite,Pyroxenite
+Pyroxene-Andesite,Andesite
+Varved Shale,Shale
+Vlasovite Amphibole Gneiss,Gneiss
+Pseudo-Meteorite,NA
+Leucite Basalt,Basalt
+Basalic Tuff,Tuff
+Phonolite Scoria,Phonolite
+Melanite Phonolite,Phonolite
+Welded BasaltTuff,Basalt
+Limestone Conglomerate,Conglomerate
+Banded Mudstone,Mudstone
+Silicified Conglomerate,Conglomerate
+Phosphate Rock,Phosphorite
+Pegmatoidal vein,Pegmatite
+Ferruginous Claystone,Claystone
+Paraffin Oil,NA
+Trachy-Dolerite,Dolerite
+Nepheline Phonolite,Phonolite
+Jasper Breccia,Breccia
+Clay Ironstone,Claystone
+Silicified Agglomerate,Agglomerate
+Eudialyte Amphibole Mosandrite Feldspar Gneiss,Gneiss
+Syenite Porphyry,Syenite
+Organic substance,NA
+Volcanic Agglomerate,Agglomerate
+Meta-Basalt,Basalt
+Sanidine Ha�yne Syenite Porphyry,Syenite
+Epidote Feldspar Gneiss,Gneiss
+Carbonaceous Sand,Sand
+Serpentinised Basalt,Basalt
+Augite Biotite Basalt,Basalt
+Olivine bomb,Olivine
+Slate nodule,Slate
+Serpentinized Porphyry,Porphyry
+Oil,NA
+Nosean-Leucitophyre,Leucitophyre
+Andesite Porphyry,Andesite
+Nepheline Pegmatoid,Pegmatoid
+Serpentinized Meta-Gabbro,Gabbro
+Fluroricterite Phlogophite Skarn,Skarn
+Epidotized Diorite Dyke,Diorite
+Scapolite Schist,Schist
+Ferruginous Breccia,Breccia
+Feldspathic Dyke,Felsite
+Welded Basalt Lapilli Tuff,Basalt
+Serpentinized Granite,Granite
+Nepheline Foidite,Foidite
+Eudialyte Amphibole Agrellite Gneiss,Gneiss
+Natural Wax,NA
+Natural Sinter,Sinter
+Welded Dacitic Tuff,Dacite
+Mica-Lamprophyre,Lamprophyre
+Fire Clay,Claystone
+Natural Resin,NA
+Natural Pitch,NA
+Quartz Diorite,Diorite
+Andesitic Pitchstone,Andesite
+Porphyritic Basalt,Basalt
+Clay-Shale,Shale
+Basalt Porphyry,Basalt
+Hornblende Syenite,Syenite
+Native Coke,Cokeite
+Quartz biotite gneiss,Gneiss
+Dacitic Ash-Flow,Dacite
+Phonolite tuff,Phonolite
+Mineral Pitch,NA
+Tourmaline Aplite,Aplite
+Meta-Diorite,Diorite
+Mineral Oil,NA
+Metamorphosed Arkose,Metasedimentary rock
+Porphyritic Breccia,Breccia
+Clinopyroxene Basalt,Basalt
+Sanidine Syenite Porphyry,Syenite
+Mineral concentrates,NA
+Dolerite Porphyry,Dolerite
+Diabase Porphyry,Diabase
+Coal Shale,Coal
+Glacial Conglomerate,Conglomerate
+Micaceous quartz reef,Rock of restricted mineralogy
+Micaceous Lava,Igneous rock
+Nepheline-Sodalite Syenite,Syenite
+Indurated Mudstone,Mudstone
+Meteoric Silica Glass,Impactite
+Scoriaceous Basalt,Basalt
+Bituminous Schist,Schist
+Trachytic lava,Trachyte
+Andesite Breccia,Breccia
+Nepheline Syenite Porphyry,Syenite
+Amphibole Microcline Gneiss,Gneiss
+Quartz Andesite,Andesite
+Amphibolite Schiat,Amphibolite
+Amphibole Biotite Feldspar Gneiss,Gneiss
+Meta-Siltstone,Metasiltstone
+Chrondrodite Molybdenite Skarn,Skarn
+Clay-slate,Slate
+Meta-Gypsum,Rock of restricted mineralogy
+Meta-Diabase,Metadolerite
+Diabase Breccia,Breccia
+Ottrelite Muscovite Schist,Schist
+Merensky Reef,Cumulate
+Quartz Feldspar Sericite Schist,Schist
+Massive Hematite,Rock of restricted mineralogy
+Leucopetrite,Felsite
+Tholeiitic Basalt 'Greenstone',Basalt
+Tourmaline Garnet Pegmatite,Pegmatite
+Breccia Conglomerate,Conglomerate
+Cumulate Dunite,Dunite
+Lava,Igneous rock
+Ferruginous Quartz Grit,Sandstone
+Brecciated Jaspilite,Breccia
+Laminated quartz,Rock of restricted mineralogy
+Eudialyte Amphibole Hiortdahlite Thorite Gneiss,Gneiss
+Silicified Grit,Sandstone
+Sheared Pebbles,Pebbles
+Kimberley Reef,Gold Ore
+Quartz Syenite,Syenite
+Paraffin Coal,Coal
+Latite Porphyry,Latite
+Keuper Marl,Marl
+Shale Oil,Shale
+Indicator,Sedimentary rock
+Coal Nodule,Coal
+Chert Conglomerate,Conglomerate
+Calcareous Sandstone,Sandstone
+Quartzite Breccia,Breccia
+Quartz Syenite Porphyry,Syenite
+Hypersthene Dacite,Dacite
+Humicite,Bitumen-rock
+Fossiliferous Clay,Claystone
+Hornblende-diopside,Rock of restricted mineralogy
+Meta-dolerite,Dolerite
+Heavy minerals,NA
+Slate Concretion,Slate
+Phosphatic Rock,Rock of restricted mineralogy
+Gossanous iron oxides,Gossan
+BasaltTuff,Basalt
+Gley,Regolith
+Heterolithic Breccia,Breccia
+Glass (frothed),NA
+Siliceous Ores,Ore
+Feldspar Porphyrite,Porphyry
+Glaciated boulder,Boulders
+Baritic ore,Ore
+Ferruginous Sandstone,Sandstone
+Microstromatolitic Limestone,Limestone
+Corundum rock,Rock of restricted mineralogy
+Quartzo-Feldspathic dyke,Felsite
+Glacial Till,Tillite
+Manganese nodule,Concretion
+Jeppe Shale,Shale
+Glacial Boulder,Boulders
+Copper-bismuth ore,Ore
+Gem Gravel,Gravel
+Bituminous Coal,Coal
+Secondary zinc ore,Ore
+Pyritic mica schist,Schist
+Amphibole Diorite,Diorite
+Bornite Ore,Ore
+Nepheline Sodalite Syenite Pegmatite,Pegmatite
+Felsitic Porphyry,Porphyry
+Gault,Clay
+Gangue,NA
+Galena sphalerite,Rock of restricted mineralogy
+Concretions in hematite,Concretion
+Septarian Concretion,Concretion
+Phosphate Nodule,Concretion
+pyrite-arsenopyrite ore,Ore
+Fossil Resin,Ambrite
+Ferruginous Siltstone,Siltstone
+Black slate with siliceous bands,Slate
+Garnet Muscovite Biotite Feldspar Gneiss,Gneiss
+Chalcopyrite-magnetite ore,Ore
+Banket Ore,Ore
+Pyrite Sphalerite Chalcopyrite Galena ore,Ore
+Silica Rock,Rock of restricted mineralogy
+Mineralised Quartzite,Quartzite
+Primary Ore vein,Ore
+Hydrothermically altered pyrite ore,Ore
+Banded Pyritic Basic Tuff,Tuff
+Ferruginous Quartz Gravel,Gravel
+Galena in quartz conglomerate,Conglomerate
+Ferruginous Gravel,Gravel
+Felsic Metavolcanic,Metafelsite
+Ejecta layer,Impactite
+Chloritic Crystal Tuff,Tuff
+Gypsum Rock,Rock of restricted mineralogy
+Pyritic Aplite,Aplite
+Mica Quartzite,Quartzite
+Dysodile,NA
+Porphyritic Adamellite,Adamellite
+Graphite Ore,Ore
+Dolomitic Oolite,Oolite
+Siliceous nodule in slate,Slate
+PhonoliticTephrite,Tephrite
+Auriferous Conglomerate,Conglomerate
+Auriferous Schist,Schist
+Copper Ore (high grade),Ore
+Distillate,NA
+Impact-Shocked Sandstone,Sandstone
+Monzonite Porphyry,Monzonite
+Nickel-copper ore,Ore
+Creosote Oil,NA
+vivianite nodule,Concretion
+Arkosic Conglomerate,Conglomerate
+Coquina,Limestone
+Sillimanite Garnet Biotite Gneiss,Gneiss
+Copper Matte,NA
+Barite Rock,Rock of restricted mineralogy
+Ferruginous Limestone,Limestone
+Hematite-quartz rock,Rock of restricted mineralogy
+Concentrate,NA
+Coke Residue,NA
+Coke,NA
+Cinders,NA
+Trachytic agglomerate,Trachyte
+Dacitic Tuff,Dacite
+Copper-gold ore,Ore
+Copper-Nickel-Cobalt Ore,Ore
+Secondary copper ore,Ore
+"Cassiterite, Alluvial",Gravel
+Copper-lead ore,Ore
+Cobolt ore,Ore
+Merensky Pyroxenite,Pyroxenite
+Siltstone Hornfels,Hornfels
+Anorthositic gabbro,Gabbro
+Phosphatic breccia,Breccia
+Kimberlite Breccia,Breccia
+Aplite Dyke,Aplite
+Calcite-garnet-diopside,Rock of restricted mineralogy
+Argentiferous Ore,Ore
+Sphalerite rock,Rock of restricted mineralogy
+Tachylitic Phonolite,Phonolite
+Piedmontite Phengite Schist,Schist
+Calcite-fluorite,Rock of restricted mineralogy
+Andalusite Mica Schist,Schist
+Biotite Amphibolite,Amphibolite
+Leucitite Scoria,Leucitite
+Quartz Topaz Rock,Rock of restricted mineralogy
+Leucitite Tuff,Leucitite
+Calcareous tubules,Limestone
+Feldspar Quartz Porphyry,Porphyry
+Biotite-Pyroxenite Ore,Ore
+Crinanite Basalt,Basalt
+Boulder,Boulders
+Frothy Basalt Lava,Basalt
+Amphibole Feldspar Syenite,Syenite
+Chloritised granodiorite,Granodiorite
+Dacite Porphyry,Dacite
+Latite Tuff,Latite
+Goethite Concretion,Concretion
+Corundum Clinochlore Gneiss,Gneiss
+Bitumenous Aphanitic Marble,Marble
+Metasedimentary xenolith,Metasedimentary rock
+Black Smoker,Ore
+Sillimanite Schist,Schist
+Bituminous Siltstone,Siltstone
+Coal Tar,Coal
+Glassy Basalt Lava,Basalt
+Chloritoid Schist,Schist
+Willemite ore,Ore
+Tourmaline-corundum-paragonite-schist,Schist
+Basaltic Ash,Basalt
+Molybdenum Ore,Ore
+Carbonaceous Sandstone,Sandstone
+Phosphatic nodule,Phosphorite
+Auriferous Meta-Conglomerate,Conglomerate
+Country Rock,NA
+Granite (Sheared),Granite
+Bitumenous Substance,Bitumen
+Garnet Amphibole Hornfels,Hornfels
+Biotite Vulsinite,Trachyandesite
+Garnet Calcite Skarn,Skarn
+Andesine Dolerite,Dolerite
+Nepheline Sodalite Syenite,Syenite
+Vesuvianite Skarn,Skarn
+Ferroaxinite Skarn,Skarn
+Slickensided Sandstone,Sandstone
+Biotite Rhyodacite,Rhyodacite
+Clay Fragments,Claystone
+Bat Guano,Guano
+Chlorite biotite schist (black schist),Schist
+Impact Breccia (Zhamanshinite),Breccia
+Banded jasperlite,Jaspillite
+Titanic Sand,Sand
+Banded chert,Chert
+Auriferous Stalactite,Biochemical and chemical sedimentary rock
+Graphic Pegmatite,Pegmatite
+Quartz-Feldspar Dyke,Felsite
+Ferroaxinite Tourmaline Skarn,Skarn
+Fused Sandstone,Sandstone
+"Sphalerite, Quartz, Calcite rock",Rock of restricted mineralogy
+Auriferous Siltstone,Siltstone
+Gneissose Granite,Gneiss
+Garnet Feldspar Quartz Graphite Gneiss,Gneiss
+Foraminiferal limestone,Limestone
+Borax Ore,Ore
+Granite with dyke,Granite
+MacKenzie River Granodiorite,Granodiorite
+Muscovite Granite,Granite
+Skarn Marble Contact,Skarn
+Epidote Hornblende Rock,Rock of restricted mineralogy
+Auriferous quartz,Rock of restricted mineralogy
+Auriferous Low-grade Siltstone,Siltstone
+Ankaramitic Basalt,Basalt
+Auriferous feldspar,Rock of restricted mineralogy
+Auriferous Bismuth Ore,Ore
+Halite Rock,Rock of restricted mineralogy
+Garnet Biotite Gneiss,Gneiss
+Diopside Olivine Leucite Lamproite,Lamproite
+Diaspore Fuchsite Corundum Rock,Rock of restricted mineralogy
+Diopside Leucite Lamproite,Lamproite
+Aurierous pyrite,Rock of restricted mineralogy
+Andalusite schist,Schist
+Biotite Amphibole Schist,Schist
+Biotite Calcite Schist,Schist
+Biotite Muscovite Corderite Schist,Schist
+Calcite Bustamite Pegmatite,Pegmatite
+Dravite Schist,Schist
+Epidote Clinochlore Schist,Schist
+Epidote Garnet Skarn,Skarn
+Feldspathic Sandstone,Sandstone
+Ferroan Tephroite Bustamite Calcite Rock,Rock of restricted mineralogy
+Garnet Biotite Sillimanite Gneiss,Gneiss
+Graphic Garnetiferous Pegmatite,Pegmatite
+Grossular Vesuvianite Skarn,Skarn
+Hyalophane Celsian Aplite,Aplite
+Argentiferous quartz,Rock of restricted mineralogy
+Mosandrite Amphibole Gneiss,Gneiss
+Olivine Diopside Leucite Lamproite,Lamproite
+Olivine Lamproite Lapilli Tuff,Lamproite
+Orthoclase Quartz Biotite Gneiss,Gneiss
+Phonolite Porphyry,Phonolite
+Argentiferous Pyrite,Rock of restricted mineralogy
+Pyroxene Andesite,Andesite
+Pyroxene Orthoclase Gneiss,Gneiss
+Quartz Sandstone,Sandstone
+Quartz Sericite Gneiss,Gneiss
+Quartzite with  Malachite,Quartzite
+Scapolite Pyroxenite Ore,Ore
+Shoshonitic Basalt,Basalt
+Silicified Jasper Breccia,Breccia
+Syenite Breccia,Breccia
+Trachy Dolerite,Dolerite
+Welded Basalt Tuff,Basalt
+Welded Leucitite Tuff,Leucitite
+Wollastonite Grossular Skarn,Skarn
+Xenolithic Leucite Diopside Lamproite,Lamproite
+Axinite Skarn,Skarn
+Fluorapatite-fluorite-sulphide ore,Ore
+Auriferous Gravels,Gravel
+Topazite Dyke,Rock of restricted mineralogy
+Quartz veined Pyrite Rhyolite,Rhyolite
+Magnetite Muscovite Schist,Schist
+Andalusite Slate,Slate
+Weathered schist,Schist
+Amphibole Chlorite Schist,Schist
+Barite Clinochlore Epidote Skarn,Skarn
+Talcose Metavolcanic Mudstone,Mudstone
+Nosean Phonolite,Phonolite
+Porphyritic Diorite,Diorite
+Pitch Coal,Coal
+Rhyolite Porphyry,Rhyolite
+Basaltic Dyke,Basalt
+Antimony oxide,Rock of restricted mineralogy
+Rhyolite Breccia,Breccia
+Marble Breccia,Breccia
+Trachyandesite ('macedonite'),Andesite
+Numerous Lithologies,NA
+Hematite Sericite Schist,Schist
+Sanadine Syenite Porphyry,Syenite
+Mica Shonkinite,Shonkinite
+Quartzose Sericitic Schist,Schist
+Trachyte Agglomerate,Trachyte
+Alnoite,Lamprophyre
+Trachytic Dyke,Trachyte
+Anorthoclase Trachyte,Trachyte
+Trachytic Pumice,Trachyte
+Anorthoclase-Pyroxene Trachyte,Trachyte

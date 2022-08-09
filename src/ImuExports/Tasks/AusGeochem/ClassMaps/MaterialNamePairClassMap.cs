@@ -8,6 +8,6 @@ public sealed class MaterialNamePairClassMap : ClassMap<MaterialNamePair>
     public MaterialNamePairClassMap()
     {
         Map(m => m.MvName).Name("MV Material Name");
-        Map(m => m.AusGeochemName).Name("AusGeoChem Material Name");
+        Map(m => m.AusGeochemName).Name("AusGeochem Material Name");
     }
 }
