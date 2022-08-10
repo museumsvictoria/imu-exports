@@ -24,9 +24,10 @@ public static class ContainerConfig
         var factoryRegistrations = typeof(IFactory<>).Assembly.GetExportedTypes()
             .Where(type => type.Namespace != null &&
                            type.Namespace.StartsWith(CommandOptions.TaskOptions.GetType().Namespace ?? string.Empty))
-            .Where(type => type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IFactory<>)))
-            .Select(type => new { Service = type.GetInterfaces().Single(), Implementation = type });
-
+            .Where(type => type.GetInterfaces().Any(i => i.IsGenericType && (i.GetGenericTypeDefinition() == typeof(IImuFactory<>) || i.GetGenericTypeDefinition() == typeof(IFactory<>))))
+            .Select(type => new { Service = type.GetInterfaces().Single(), Implementation = type })
+            .ToList();
+        
         foreach (var registration in factoryRegistrations)
         {
             container.Register(registration.Service, registration.Implementation, Lifestyle.Singleton);

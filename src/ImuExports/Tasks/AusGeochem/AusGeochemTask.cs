@@ -1,5 +1,6 @@
 ﻿using IMu;
 using ImuExports.Tasks.AusGeochem.Config;
+using ImuExports.Tasks.AusGeochem.Factories;
 using ImuExports.Tasks.AusGeochem.Mapping;
 using ImuExports.Tasks.AusGeochem.Models;
 using LiteDB;
@@ -12,18 +13,21 @@ public class AusGeochemTask : ImuTaskBase, ITask
 {
     private readonly AusGeochemOptions _options = (AusGeochemOptions)CommandOptions.TaskOptions;
     private readonly AppSettings _appSettings;
-    private readonly IFactory<Sample> _sampleFactory;
+    private readonly IImuFactory<Sample> _sampleFactory;
+    private readonly IFactory<Lookups> _lookupsFactory;
     private readonly IAusGeochemClient _ausGeochemClient;
     private readonly IEnumerable<IModuleSearchConfig> _moduleSearchConfigs;
     
     public AusGeochemTask(
         IOptions<AppSettings> appSettings,
-        IFactory<Sample> sampleFactory,
+        IImuFactory<Sample> sampleFactory,
+        IFactory<Lookups> lookupsFactory,
         IAusGeochemClient ausGeochemClient,
         IEnumerable<IModuleSearchConfig> moduleSearchConfigs) : base(appSettings)
     {
         _appSettings = appSettings.Value;
         _sampleFactory = sampleFactory;
+        _lookupsFactory = lookupsFactory;
         _ausGeochemClient = ausGeochemClient;
         _moduleSearchConfigs = moduleSearchConfigs;
     }
@@ -43,8 +47,8 @@ public class AusGeochemTask : ImuTaskBase, ITask
             // Authenticate
             await _ausGeochemClient.Authenticate(stoppingToken);
             
-            // Fetch lookup lists for use in creating Dtos to send
-            var lookups = await _ausGeochemClient.FetchLookups(stoppingToken);
+            // Make lookup lists for use in creating Dtos to send
+            var lookups = await _lookupsFactory.Make(stoppingToken);
 
             // Build and then send mineralogy sample Dtos
             await SendSamples(lookups, mineralogySamples, _appSettings.AusGeochem.MineralogyDataPackageId, stoppingToken);
@@ -194,6 +198,8 @@ public class AusGeochemTask : ImuTaskBase, ITask
         Log.Logger.Information("Fetching all current SampleWithLocationDtos within AusGeochem for DataPackageId {DataPackageId}", dataPackageId);
         var currentDtos = await _ausGeochemClient.FetchCurrentSamples(dataPackageId.Value, stoppingToken);
 
+        // Send/Delete samples
+        Log.Logger.Information("Sending samples for DataPackageId {DataPackageId}", dataPackageId);
         var offset = 0;
         foreach (var sample in samples)
         {

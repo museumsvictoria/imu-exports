@@ -18,12 +18,12 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
 {
     private readonly AtlasOfLivingAustraliaOptions _options = (AtlasOfLivingAustraliaOptions)CommandOptions.TaskOptions;
     private readonly AppSettings _appSettings;
-    private readonly IFactory<Occurrence> _occurrenceFactory;
+    private readonly IImuFactory<Occurrence> _occurrenceFactory;
     private readonly IEnumerable<IModuleSearchConfig> _moduleSearchConfigs;
     
     public AtlasOfLivingAustraliaTask(
         IOptions<AppSettings> appSettings,
-        IFactory<Occurrence> occurrenceFactory,
+        IImuFactory<Occurrence> occurrenceFactory,
         IEnumerable<IModuleSearchConfig> moduleSearchConfigs) : base(appSettings)
     {
         _appSettings = appSettings.Value;

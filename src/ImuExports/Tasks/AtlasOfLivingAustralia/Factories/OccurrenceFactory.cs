@@ -6,12 +6,12 @@ using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories;
 
-public class OccurrenceFactory : IFactory<Occurrence>
+public class OccurrenceFactory : IImuFactory<Occurrence>
 {
-    private readonly IFactory<Multimedia> multimediaFactory;
+    private readonly IImuFactory<Multimedia> multimediaFactory;
 
     public OccurrenceFactory(
-        IFactory<Multimedia> multimediaFactory)
+        IImuFactory<Multimedia> multimediaFactory)
     {
         this.multimediaFactory = multimediaFactory;
     }

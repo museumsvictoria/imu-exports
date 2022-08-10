@@ -1,10 +1,6 @@
-﻿using IMu;
+﻿namespace ImuExports.Infrastructure;
 
-namespace ImuExports.Infrastructure;
-
-public interface IFactory<out T>
+public interface IFactory<T>
 {
-    T Make(Map map, CancellationToken stoppingToken);
-
-    IEnumerable<T> Make(IEnumerable<Map> maps, CancellationToken stoppingToken);
+    Task<T> Make(CancellationToken stoppingToken);
 }

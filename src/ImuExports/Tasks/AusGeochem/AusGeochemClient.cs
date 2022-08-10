@@ -22,11 +22,12 @@ public interface IAusGeochemClient
 
     Task<IList<SampleWithLocationDto>> FetchCurrentSamples(int dataPackageId, CancellationToken stoppingToken);
 
-    Task<Lookups> FetchLookups(CancellationToken stoppingToken);
-
     Task SendSample(SampleWithLocationDto dto, Method method, CancellationToken stoppingToken);
 
     Task DeleteSample(SampleWithLocationDto dto, CancellationToken stoppingToken);
+
+    Task<IList<T>> FetchAll<T>(string resource, CancellationToken stoppingToken,
+        ParametersCollection parameters = null);
 }
 
 public class AusGeochemClient : IAusGeochemClient, IDisposable
@@ -80,34 +81,6 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         parameters.AddParameter(new QueryParameter("dataPackageId.equals", dataPackageId.ToString()));
 
         return await FetchAll<SampleWithLocationDto>("core/sample-with-locations", stoppingToken, parameters);
-    }
-
-    public async Task<Lookups> FetchLookups(CancellationToken stoppingToken)
-    {
-        // Lookups fetched from API
-        var locationKindDtos = await FetchAll<LocationKindDto>("core/l-location-kinds", stoppingToken);
-        var materialDtos = await FetchAll<MaterialDto>("core/materials", stoppingToken);
-        var sampleKindDtos = await FetchAll<SampleKindDto>("core/l-sample-kinds", stoppingToken);
-
-        // CSV based material name pairs for matching MV material name to AusGeochem material name
-        var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            HasHeaderRecord = true
-        };
-        
-        using var reader = new StreamReader($"{AppContext.BaseDirectory}material-name-pairs.csv");
-        using var csv = new CsvReader(reader, csvConfig);
-        csv.Context.RegisterClassMap<MaterialNamePairClassMap>();
-        
-        var materialNamePairs = csv.GetRecords<MaterialNamePair>().ToList();
-
-        return new Lookups
-        {
-            LocationKindDtos = locationKindDtos,
-            MaterialDtos = materialDtos,
-            MaterialNamePairs = materialNamePairs,
-            SampleKindDtos = sampleKindDtos
-        };
     }
 
     public async Task SendSample(SampleWithLocationDto dto, Method method, CancellationToken stoppingToken)
@@ -164,7 +137,7 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         }
     }
 
-    private async Task<IList<T>> FetchAll<T>(string resource, CancellationToken stoppingToken,
+    public async Task<IList<T>> FetchAll<T>(string resource, CancellationToken stoppingToken,
         ParametersCollection parameters = null)
     {
         var dtos = new List<T>();

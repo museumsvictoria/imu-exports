@@ -4,7 +4,7 @@ using ImuExports.Tasks.AusGeochem.Models;
 
 namespace ImuExports.Tasks.AusGeochem.Factories;
 
-public class SampleFactory : IFactory<Sample>
+public class SampleFactory : IImuFactory<Sample>
 {
     public Sample Make(Map map, CancellationToken stoppingToken)
     {

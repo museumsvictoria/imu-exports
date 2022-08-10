@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace ImuExports.Tasks.AtlasOfLivingAustralia.Factories;
 
-public class MultimediaFactory : IFactory<Multimedia>
+public class MultimediaFactory : IImuFactory<Multimedia>
 {
     private readonly AppSettings _appSettings;
     private readonly AtlasOfLivingAustraliaOptions _options = (AtlasOfLivingAustraliaOptions)CommandOptions.TaskOptions;
