@@ -18,6 +18,8 @@ public interface IAusGeochemClient
 
     Task<IList<SampleWithLocationDto>> GetSamplesByPackageId(int dataPackageId, CancellationToken stoppingToken);
     
+    Task<IList<SampleWithLocationDto>> GetSamplesByArchiveId(int archiveId, CancellationToken stoppingToken);
+    
     Task<SampleWithLocationDto> GetSampleBySourceId(string sourceId, CancellationToken stoppingToken);
 
     Task SendSample(SampleWithLocationDto dto, Method method, CancellationToken stoppingToken);
@@ -83,6 +85,16 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         // Build parameters
         var parameters = new ParametersCollection();
         parameters.AddParameter(new QueryParameter("dataPackageId.equals", dataPackageId.ToString()));
+
+        // GetAll SampleWithLocationDto
+        return await GetAll<SampleWithLocationDto>("core/sample-with-locations", stoppingToken, parameters);
+    }
+    
+    public async Task<IList<SampleWithLocationDto>> GetSamplesByArchiveId(int archiveId, CancellationToken stoppingToken)
+    {
+        // Build parameters
+        var parameters = new ParametersCollection();
+        parameters.AddParameter(new QueryParameter("archiveId.equals", archiveId.ToString()));
 
         // GetAll SampleWithLocationDto
         return await GetAll<SampleWithLocationDto>("core/sample-with-locations", stoppingToken, parameters);
@@ -268,7 +280,6 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
                 Log.Logger.Information("Fetch all completed, fetched {Count} {Name}", dtos.Count, typeof(T).Name);
                 return dtos;
             }
-                
 
             // Create link header
             var linkHeader = LinkHeader.LinksFromHeader(linkHeaderParameter);

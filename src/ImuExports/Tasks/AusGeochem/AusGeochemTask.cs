@@ -39,16 +39,24 @@ public class AusGeochemTask : ImuTaskBase, ITask
         using (Log.Logger.BeginTimedOperation($"{GetType().Name} starting", $"{GetType().Name}.Run"))
         {
             stoppingToken.ThrowIfCancellationRequested();
+            
+            // Authenticate
+            await _ausGeochemClient.Authenticate(stoppingToken);
+
+            // Delete all samples and images in AusGeochem 
+            if (_options.DeleteAll)
+            {
+                await DeleteAllEntities(stoppingToken);
+                
+                return;
+            }
 
             // Fetch mineralogy data from EMu
             var mineralogySamples = await FetchSamples("Mineralogy", stoppingToken);
             
             // Fetch petrology data from EMu
             var petrologySamples = await FetchSamples("Petrology", stoppingToken);
-            
-            // Authenticate
-            await _ausGeochemClient.Authenticate(stoppingToken);
-            
+
             // Make lookup lists for use in creating Dtos to send
             var lookups = await _lookupsFactory.Make(stoppingToken);
 
@@ -221,18 +229,15 @@ public class AusGeochemTask : ImuTaskBase, ITask
                     await _ausGeochemClient.DeleteSample(updatedSampleDto, stoppingToken);
                     
                     // Delete images
-                    if (sample.Images.Any())
-                    {
-                        IList<ImageReadDto> imageDtos = new List<ImageReadDto>();
-                        // Fetch all images associated with sample
-                        if (updatedSampleDto.Id != null)
-                            imageDtos = await _ausGeochemClient.GetImagesBySampleId(updatedSampleDto.Id.Value, stoppingToken);
+                    IList<ImageReadDto> imageDtos = new List<ImageReadDto>();
+                    // Fetch all images associated with sample
+                    if (updatedSampleDto.Id != null)
+                        imageDtos = await _ausGeochemClient.GetImagesBySampleId(updatedSampleDto.Id.Value, stoppingToken);
 
-                        // Delete all images
-                        foreach (var imageDto in imageDtos)
-                        {
-                            await _ausGeochemClient.DeleteImage(imageDto, stoppingToken);
-                        }
+                    // Delete all images
+                    foreach (var imageDto in imageDtos)
+                    {
+                        await _ausGeochemClient.DeleteImage(imageDto, stoppingToken);
                     }
                 }
                 else
@@ -241,28 +246,25 @@ public class AusGeochemTask : ImuTaskBase, ITask
                     await _ausGeochemClient.SendSample(updatedSampleDto, Method.Put, stoppingToken);
 
                     // Update images
-                    if (sample.Images.Any())
+                    IList<ImageReadDto> imageDtos = new List<ImageReadDto>();
+                    // Fetch all images associated with sample
+                    if (updatedSampleDto.Id != null)
+                        imageDtos = await _ausGeochemClient.GetImagesBySampleId(updatedSampleDto.Id.Value, stoppingToken);
+
+                    // Delete all images
+                    foreach (var imageDto in imageDtos)
                     {
-                        IList<ImageReadDto> imageDtos = new List<ImageReadDto>();
-                        // Fetch all images associated with sample
+                        await _ausGeochemClient.DeleteImage(imageDto, stoppingToken);
+                    }
+
+                    // Re-Send all images
+                    foreach (var image in sample.Images)
+                    {
+                        // Fetch image as base64 string from EMu
+                        var base64Image = await FetchImageAsBase64(stoppingToken, image);
+
                         if (updatedSampleDto.Id != null)
-                            imageDtos = await _ausGeochemClient.GetImagesBySampleId(updatedSampleDto.Id.Value, stoppingToken);
-
-                        // Delete all images
-                        foreach (var imageDto in imageDtos)
-                        {
-                            await _ausGeochemClient.DeleteImage(imageDto, stoppingToken);
-                        }
-
-                        // Re-Send all images
-                        foreach (var image in sample.Images)
-                        {
-                            // Fetch image as base64 string from EMu
-                            var base64Image = await FetchImageAsBase64(stoppingToken, image);
-
-                            if (updatedSampleDto.Id != null)
-                                await _ausGeochemClient.SendImage(image, base64Image, updatedSampleDto.Id.Value, stoppingToken);
-                        }
+                            await _ausGeochemClient.SendImage(image, base64Image, updatedSampleDto.Id.Value, stoppingToken);
                     }
                 }
             }
@@ -342,5 +344,41 @@ public class AusGeochemTask : ImuTaskBase, ITask
         }
         
         return null;
+    }
+
+    private async Task DeleteAllEntities(CancellationToken stoppingToken)
+    {
+        // Exit if DataPackageId not known
+        if (_appSettings.AusGeochem.ArchiveId == null)
+        {
+            Log.Logger.Fatal("ArchiveId is null, cannot continue without one, exiting");
+            Environment.Exit(Constants.ExitCodeError);
+        }
+        
+        // Fetch all current SampleWithLocationDtos
+        Log.Logger.Information("Fetching all current SampleWithLocationDtos within AusGeochem for ArchiveId {ArchiveId}", _appSettings.AusGeochem.ArchiveId);
+        var currentSampleDtos = await _ausGeochemClient.GetSamplesByArchiveId(_appSettings.AusGeochem.ArchiveId.Value, stoppingToken);
+
+        Log.Logger.Information("Deleting all entities for ArchiveId {ArchiveId}", _appSettings.AusGeochem.ArchiveId);
+        foreach (var sampleDto in currentSampleDtos)
+        {
+            stoppingToken.ThrowIfCancellationRequested();
+            
+            IList<ImageReadDto> imageDtos = new List<ImageReadDto>();
+            // Fetch all images associated with sample
+            if (sampleDto.Id != null)
+                imageDtos = await _ausGeochemClient.GetImagesBySampleId(sampleDto.Id.Value, stoppingToken);
+
+            // Delete all images
+            foreach (var imageDto in imageDtos)
+            {
+                stoppingToken.ThrowIfCancellationRequested();
+                
+                await _ausGeochemClient.DeleteImage(imageDto, stoppingToken);
+            }
+            
+            // Delete sample
+            await _ausGeochemClient.DeleteSample(sampleDto, stoppingToken);
+        }
     }
 }

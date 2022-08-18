@@ -7,6 +7,9 @@ namespace ImuExports.Tasks.AusGeochem;
 [Verb("agn", HelpText = "Export records for AusGeochem.")]
 public class AusGeochemOptions : ITaskOptions
 {
+    [Option('d', "delete-all", Required = false, HelpText = "Delete all MV records in AusGeochem")]
+    public bool DeleteAll { get; set; }
+    
     public Type TypeOfTask => typeof(AusGeochemTask);
     
     public AusGeochemApplication Application { get; set; }
