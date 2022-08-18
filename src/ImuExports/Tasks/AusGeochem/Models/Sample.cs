@@ -2,6 +2,13 @@
 
 public class Sample
 {
+    public Sample()
+    {
+        Images = new List<Image>();
+    }
+    
+    public IList<Image> Images { get; set; }
+    
     public string SampleId { get; set; }
     
     public string ArchiveNotes { get; set; }

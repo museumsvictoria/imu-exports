@@ -1,9 +1,5 @@
-﻿using System.Globalization;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using CsvHelper;
-using CsvHelper.Configuration;
-using ImuExports.Tasks.AusGeochem.ClassMaps;
 using ImuExports.Tasks.AusGeochem.Contracts.Dtos;
 using ImuExports.Tasks.AusGeochem.Contracts.Requests;
 using ImuExports.Tasks.AusGeochem.Contracts.Responses;
@@ -20,13 +16,21 @@ public interface IAusGeochemClient
 {
     Task Authenticate(CancellationToken stoppingToken);
 
-    Task<IList<SampleWithLocationDto>> FetchCurrentSamples(int dataPackageId, CancellationToken stoppingToken);
+    Task<IList<SampleWithLocationDto>> GetSamplesByPackageId(int dataPackageId, CancellationToken stoppingToken);
+    
+    Task<SampleWithLocationDto> GetSampleBySourceId(string sourceId, CancellationToken stoppingToken);
 
     Task SendSample(SampleWithLocationDto dto, Method method, CancellationToken stoppingToken);
 
     Task DeleteSample(SampleWithLocationDto dto, CancellationToken stoppingToken);
 
-    Task<IList<T>> FetchAll<T>(string resource, CancellationToken stoppingToken,
+    Task SendImage(Image image, string base64Image, int sampleId, CancellationToken stoppingToken);
+    
+    Task DeleteImage(ImageReadDto dto, CancellationToken stoppingToken);
+
+    Task<IList<ImageReadDto>> GetImagesBySampleId(int sampleId, CancellationToken stoppingToken);
+
+    Task<IList<T>> GetAll<T>(string resource, CancellationToken stoppingToken,
         ParametersCollection parameters = null);
 }
 
@@ -49,6 +53,7 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
 
     public async Task Authenticate(CancellationToken stoppingToken)
     {
+        // Build request
         var request = new RestRequest("authenticate", Method.Post).AddJsonBody(new LoginRequest
         {
             Password = _appSettings.AusGeochem.Password,
@@ -60,7 +65,7 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
 
         if (!response.IsSuccessful)
         {
-            Log.Logger.Fatal("Could not successfully authenticate, exiting, {ErrorMessage}", response.ErrorMessage);
+            Log.Logger.Fatal("Could not successfully authenticate, exiting, {ErrorMessage}", response.ErrorMessage ?? response.Content);
             Environment.Exit(Constants.ExitCodeError);
         }
         else if (!string.IsNullOrWhiteSpace(response.Data?.Token))
@@ -72,15 +77,38 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         Log.Logger.Debug("Api authentication successful");
     }
 
-    public async Task<IList<SampleWithLocationDto>> FetchCurrentSamples(int dataPackageId,
+    public async Task<IList<SampleWithLocationDto>> GetSamplesByPackageId(int dataPackageId,
         CancellationToken stoppingToken)
     {
-        // Fetch current MV records in AusGeochem
+        // Build parameters
         var parameters = new ParametersCollection();
-
         parameters.AddParameter(new QueryParameter("dataPackageId.equals", dataPackageId.ToString()));
 
-        return await FetchAll<SampleWithLocationDto>("core/sample-with-locations", stoppingToken, parameters);
+        // GetAll SampleWithLocationDto
+        return await GetAll<SampleWithLocationDto>("core/sample-with-locations", stoppingToken, parameters);
+    }
+    
+    public async Task<SampleWithLocationDto> GetSampleBySourceId(string sourceId, CancellationToken stoppingToken)
+    {
+        // Build request
+        var request = new RestRequest("core/sample-with-locations")
+        {
+            Method = Method.Get
+        };
+        
+        request.AddQueryParameter("sourceId.equals", sourceId);
+        
+        // Get current MV records in AusGeochem
+        var response = await _client.ExecuteAsync<IList<SampleWithLocationDto>>(request, stoppingToken);
+
+        if (!response.IsSuccessful)
+        {
+            Log.Logger.Fatal("Error occured fetching {Name} at endpoint {Resource} via {Method} exiting, {ErrorMessage}",
+                nameof(SampleWithLocationDto), request.Resource, request.Method, response.ErrorMessage ?? response.Content);
+            Environment.Exit(Constants.ExitCodeError);
+        }
+
+        return response.Data?.FirstOrDefault();
     }
 
     public async Task SendSample(SampleWithLocationDto dto, Method method, CancellationToken stoppingToken)
@@ -100,7 +128,7 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         if (!response.IsSuccessful)
         {
             Log.Logger.Fatal("Error occured executing request for resource {Resource} via {Method} exiting, {ErrorMessage}", 
-                request.Resource, request.Method, response.ErrorMessage);
+                request.Resource, request.Method, response.ErrorMessage ?? response.Content);
             Environment.Exit(Constants.ExitCodeError);
         }
         else
@@ -110,6 +138,59 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         }
     }
 
+    public async Task DeleteImage(ImageReadDto dto, CancellationToken stoppingToken)
+    {
+        // Build request
+        var request = new RestRequest($"core/images/{dto.Id}")
+        {
+            Method = Method.Delete
+        };
+
+        // Delete image
+        var response = await _client.ExecuteAsync(request, stoppingToken);
+
+        if (!response.IsSuccessful)
+        {
+            Log.Logger.Fatal("Error occured executing request for resource {Resource} via {Method} exiting, {ErrorMessage}",
+                request.Resource, request.Method, response.ErrorMessage ?? response.Content);
+            Environment.Exit(Constants.ExitCodeError);
+        }
+        else
+        {
+            Log.Logger.Debug("Deleted image {Name}, status {ResponseStatus}",
+                dto.Name, response.ResponseStatus);
+        }
+    }
+
+    public async Task SendImage(Image image, string base64Image, int sampleId, CancellationToken stoppingToken)
+    {
+        // Build request
+        var request = new RestRequest("core/images/add-to-sample", Method.Post).AddJsonBody(new ImageWriteDto
+        {
+            Content = base64Image,
+            Description = image.Description,
+            Name = image.Name,
+        });
+
+        // Add parameters and file
+        request.AddQueryParameter("sampleId", sampleId);
+
+        // Send image
+        var response = await _client.ExecuteAsync(request, stoppingToken);
+
+        if (!response.IsSuccessful)
+        {
+            Log.Logger.Fatal("Error occured sending image {Irn} via {Method} attached to sample {SampleId}, exiting, {ErrorMessage}", 
+                image.Irn, request.Method, sampleId, response.ErrorMessage ?? response.Content);
+            Environment.Exit(Constants.ExitCodeError);
+        }
+        else
+        {
+            Log.Logger.Debug("Sent image {Irn} via {Method} attached to sample {SampleId}, status {ResponseStatus}",
+                image.Irn, request.Method, sampleId, response.ResponseStatus);
+        }
+    }
+    
     public async Task DeleteSample(SampleWithLocationDto dto, CancellationToken stoppingToken)
     {
         // Build request
@@ -118,16 +199,13 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
             Method = Method.Delete
         };
 
-        // Add dto
-        request.AddJsonBody(dto);
-
-        // Send sample
+        // Delete sample
         var response = await _client.ExecuteAsync(request, stoppingToken);
 
         if (!response.IsSuccessful)
         {
             Log.Logger.Fatal("Error occured executing request for resource {Resource} via {Method} exiting, {ErrorMessage}",
-                request.Resource, request.Method, response.ErrorMessage);
+                request.Resource, request.Method, response.ErrorMessage ?? response.Content);
             Environment.Exit(Constants.ExitCodeError);
         }
         else
@@ -137,10 +215,22 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         }
     }
 
-    public async Task<IList<T>> FetchAll<T>(string resource, CancellationToken stoppingToken,
+    public async Task<IList<ImageReadDto>> GetImagesBySampleId(int sampleId, CancellationToken stoppingToken)
+    {
+        // Build parameters
+        var parameters = new ParametersCollection();
+        parameters.AddParameter(new QueryParameter("sampleId", sampleId.ToString()));
+
+        // GetAll ImageReadDtos
+        return await GetAll<ImageReadDto>("core/images/of-sample", stoppingToken, parameters);
+    }
+
+    public async Task<IList<T>> GetAll<T>(string resource, CancellationToken stoppingToken,
         ParametersCollection parameters = null)
     {
         var dtos = new List<T>();
+        
+        // Build request
         var request = new RestRequest(resource);
 
         // Add size parameter for pagination size
@@ -160,7 +250,7 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
             if (!response.IsSuccessful)
             {
                 Log.Logger.Fatal("Error occured fetching {Name} at endpoint {Resource} via {Method} exiting, {ErrorMessage}",
-                    typeof(T).Name, request.Resource, request.Method, response.ErrorMessage);
+                    typeof(T).Name, request.Resource, request.Method, response.ErrorMessage ?? response.Content);
                 Environment.Exit(Constants.ExitCodeError);
             }
 
@@ -168,8 +258,17 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
                 dtos.AddRange(response.Data);
 
             // Parse response link header in order to extract the next page
-            var linkHeaderParameter = response.Headers?.First(x =>
-                string.Equals(x.Name, "link", StringComparison.OrdinalIgnoreCase)).Value?.ToString();
+            var linkHeaderParameter = response.Headers?.FirstOrDefault(x =>
+                string.Equals(x.Name, "link", StringComparison.OrdinalIgnoreCase))
+                ?.Value?.ToString();
+            
+            // Return what we have if no link header parameter
+            if (string.IsNullOrEmpty(linkHeaderParameter))
+            {
+                Log.Logger.Information("Fetch all completed, fetched {Count} {Name}", dtos.Count, typeof(T).Name);
+                return dtos;
+            }
+                
 
             // Create link header
             var linkHeader = LinkHeader.LinksFromHeader(linkHeaderParameter);

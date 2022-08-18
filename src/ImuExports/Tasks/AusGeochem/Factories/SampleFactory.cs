@@ -6,6 +6,14 @@ namespace ImuExports.Tasks.AusGeochem.Factories;
 
 public class SampleFactory : IImuFactory<Sample>
 {
+    private readonly IImuFactory<Image> _imageFactory;
+    
+    public SampleFactory(
+        IImuFactory<Image> imageFactory)
+    {
+        _imageFactory = imageFactory;
+    }
+    
     public Sample Make(Map map, CancellationToken stoppingToken)
     {
         stoppingToken.ThrowIfCancellationRequested();
@@ -199,6 +207,9 @@ public class SampleFactory : IImuFactory<Sample>
         sample.LastKnownLocation = "Museums Victoria";
         
         sample.Deleted = string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "no", StringComparison.OrdinalIgnoreCase);
+        
+        // Images
+        sample.Images = _imageFactory.Make(map.GetMaps("media"), stoppingToken).ToList();
 
         return sample;
     }

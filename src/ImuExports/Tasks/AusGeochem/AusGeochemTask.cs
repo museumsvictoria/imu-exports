@@ -1,6 +1,8 @@
-﻿using IMu;
+﻿using System.Diagnostics;
+using ImageMagick;
+using IMu;
 using ImuExports.Tasks.AusGeochem.Config;
-using ImuExports.Tasks.AusGeochem.Factories;
+using ImuExports.Tasks.AusGeochem.Contracts.Dtos;
 using ImuExports.Tasks.AusGeochem.Mapping;
 using ImuExports.Tasks.AusGeochem.Models;
 using LiteDB;
@@ -40,7 +42,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
 
             // Fetch mineralogy data from EMu
             var mineralogySamples = await FetchSamples("Mineralogy", stoppingToken);
-
+            
             // Fetch petrology data from EMu
             var petrologySamples = await FetchSamples("Petrology", stoppingToken);
             
@@ -103,6 +105,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
         "MinType",
         "MinTypeType",
         "site=SitSiteRef.(EraDepthDeterminationMethod,LocPreciseLocation,EraMvRockUnit_tab,EraEra,EraAge1,EraAge2,EraMvStage,EraDepthFromMt,EraDepthToMt,latlong=[LatLongitudeDecimal_nesttab,LatLatitudeDecimal_nesttab,LatRadiusNumeric_tab,LatRadiusUnit_tab,LatDatum_tab,determinedBy=LatDeterminedByRef_tab.(NamPartyType,NamFullName,NamOrganisation,NamBranch,NamDepartment,NamOrganisation,NamOrganisationOtherNames_tab,NamSource,AddPhysStreet,AddPhysCity,AddPhysState,AddPhysCountry,ColCollaborationName),LatDetDate0,LatPreferred_tab],geo=[LocCountry_tab,LocProvinceStateTerritory_tab,LocDistrictCountyShire_tab,LocTownship_tab,LocNearestNamedPlace_tab,LocPreciseLocation])",
+        "media=MulMultiMediaRef_tab.(irn,MulTitle,MulIdentifier,MulMimeType,MulCreator_tab,MdaDataSets_tab,metadata=[MdaElement_tab,MdaQualifier_tab,MdaFreeText_tab],DetAlternateText,RigCreator_tab,RigSource_tab,RigAcknowledgementCredit,RigCopyrightStatement,RigCopyrightStatus,RigLicence,RigLicenceDetails,ChaRepository_tab,ChaMd5Sum,AdmPublishWebNoPassword,AdmDateModified,AdmTimeModified)",
         "preparations=[StrSpecimenForm_tab]",
         "LocDateCollectedTo",
         "LocDateCollectedFrom",
@@ -196,7 +199,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
         
         // Fetch all current SampleWithLocationDtos
         Log.Logger.Information("Fetching all current SampleWithLocationDtos within AusGeochem for DataPackageId {DataPackageId}", dataPackageId);
-        var currentDtos = await _ausGeochemClient.FetchCurrentSamples(dataPackageId.Value, stoppingToken);
+        var currentSampleDtos = await _ausGeochemClient.GetSamplesByPackageId(dataPackageId.Value, stoppingToken);
 
         // Send/Delete samples
         Log.Logger.Information("Sending samples for DataPackageId {DataPackageId}", dataPackageId);
@@ -205,33 +208,139 @@ public class AusGeochemTask : ImuTaskBase, ITask
         {
             stoppingToken.ThrowIfCancellationRequested();
             
-            var existingDto = currentDtos.SingleOrDefault(x =>
+            var existingSampleDto = currentSampleDtos.SingleOrDefault(x =>
                 string.Equals(x.SampleDto.SourceId, sample.SampleId, StringComparison.OrdinalIgnoreCase));
 
-            if (existingDto != null)
+            if (existingSampleDto != null)
             {
-                var dto = sample.ToSampleWithLocationDto(lookups, existingDto);
+                var updatedSampleDto = sample.ToSampleWithLocationDto(lookups, existingSampleDto);
 
                 if (sample.Deleted)
-                    // Delete
-                    await _ausGeochemClient.DeleteSample(dto, stoppingToken);
+                {
+                    // Delete sample
+                    await _ausGeochemClient.DeleteSample(updatedSampleDto, stoppingToken);
+                    
+                    // Delete images
+                    if (sample.Images.Any())
+                    {
+                        IList<ImageReadDto> imageDtos = new List<ImageReadDto>();
+                        // Fetch all images associated with sample
+                        if (updatedSampleDto.Id != null)
+                            imageDtos = await _ausGeochemClient.GetImagesBySampleId(updatedSampleDto.Id.Value, stoppingToken);
+
+                        // Delete all images
+                        foreach (var imageDto in imageDtos)
+                        {
+                            await _ausGeochemClient.DeleteImage(imageDto, stoppingToken);
+                        }
+                    }
+                }
                 else
-                    // Update
-                    await _ausGeochemClient.SendSample(dto, Method.Put, stoppingToken);
+                {
+                    // Update sample
+                    await _ausGeochemClient.SendSample(updatedSampleDto, Method.Put, stoppingToken);
+
+                    // Update images
+                    if (sample.Images.Any())
+                    {
+                        IList<ImageReadDto> imageDtos = new List<ImageReadDto>();
+                        // Fetch all images associated with sample
+                        if (updatedSampleDto.Id != null)
+                            imageDtos = await _ausGeochemClient.GetImagesBySampleId(updatedSampleDto.Id.Value, stoppingToken);
+
+                        // Delete all images
+                        foreach (var imageDto in imageDtos)
+                        {
+                            await _ausGeochemClient.DeleteImage(imageDto, stoppingToken);
+                        }
+
+                        // Re-Send all images
+                        foreach (var image in sample.Images)
+                        {
+                            // Fetch image as base64 string from EMu
+                            var base64Image = await FetchImageAsBase64(stoppingToken, image);
+
+                            if (updatedSampleDto.Id != null)
+                                await _ausGeochemClient.SendImage(image, base64Image, updatedSampleDto.Id.Value, stoppingToken);
+                        }
+                    }
+                }
             }
             else
             {
-                var dto = sample.ToSampleWithLocationDto(lookups, dataPackageId, _appSettings.AusGeochem.ArchiveId);
+                var createSampleDto = sample.ToSampleWithLocationDto(lookups, dataPackageId, _appSettings.AusGeochem.ArchiveId);
 
                 if (!sample.Deleted)
-                    // Create
-                    await _ausGeochemClient.SendSample(dto, Method.Post, stoppingToken);
+                {
+                    // Create sample
+                    await _ausGeochemClient.SendSample(createSampleDto, Method.Post, stoppingToken);
+
+                    // Send Images
+                    if (sample.Images.Any())
+                    {
+                        // Get created sample so we can link sample to image via id
+                        createSampleDto = await _ausGeochemClient.GetSampleBySourceId(sample.SampleId, stoppingToken);
+
+                        foreach (var image in sample.Images)
+                        {
+                            // Fetch image as base64 string from EMu
+                            var base64Image = await FetchImageAsBase64(stoppingToken, image);
+
+                            if (createSampleDto.Id != null)
+                                await _ausGeochemClient.SendImage(image, base64Image, createSampleDto.Id.Value, stoppingToken);
+                        }
+                    }
+                }
                 else
-                    Log.Logger.Debug("Nothing to do with Sample {ShortName} as it is marked for deletion but doesnt exist in AusGeochem", dto.ShortName);
+                    Log.Logger.Debug("Nothing to do with Sample {ShortName} as it is marked for deletion but doesnt exist in AusGeochem", createSampleDto.ShortName);
             }
 
             offset++;
             Log.Logger.Information("Send samples progress... {Offset}/{TotalResults}", offset, samples.Count);
         }
+    }
+
+    private async Task<string> FetchImageAsBase64(CancellationToken stoppingToken, Image image)
+    {
+        try
+        {
+            stoppingToken.ThrowIfCancellationRequested();
+            
+            var stopwatch = Stopwatch.StartNew();
+            
+            using var imuSession = new ImuSession("emultimedia", _appSettings.Emu.Host, int.Parse(_appSettings.Emu.Port));
+            imuSession.FindKey(image.Irn);
+            var resource = imuSession.Fetch("start", 0, -1, new[] { "resource" }).Rows[0].GetMap("resource");
+
+            if (resource == null)
+                throw new IMuException("MultimediaResourceNotFound");
+
+            await using var sourceFileStream = resource["file"] as FileStream;
+
+            using var imageResource = new MagickImage(sourceFileStream);
+
+            imageResource.Format = MagickFormat.Jpg;
+            imageResource.Quality = 90;
+            imageResource.FilterType = FilterType.Lanczos;
+            imageResource.ColorSpace = ColorSpace.sRGB;
+            imageResource.Resize(new MagickGeometry(3000) { Greater = true });
+            imageResource.UnsharpMask(0.5, 0.5, 0.6, 0.025);
+
+            var base64Image = imageResource.ToBase64();
+
+            stopwatch.Stop();
+            
+            Log.Logger.Debug("Completed fetching image {Irn} in {ElapsedMilliseconds}", image.Irn,
+                stopwatch.ElapsedMilliseconds);
+
+            return base64Image;
+        }
+        catch (Exception ex)
+        {
+            Log.Logger.Error(ex, "Error fetching image {Irn}, exiting", image.Irn);
+            Environment.Exit(Constants.ExitCodeError);
+        }
+        
+        return null;
     }
 }

@@ -23,9 +23,9 @@ public class LookupsFactory : IFactory<Lookups>
         // Lookups fetched from API
         var lookups = new Lookups
         {
-            LocationKindDtos = await _ausGeochemClient.FetchAll<LocationKindDto>("core/l-location-kinds", stoppingToken),
-            MaterialDtos = await _ausGeochemClient.FetchAll<MaterialDto>("core/materials", stoppingToken),
-            SampleKindDtos = await _ausGeochemClient.FetchAll<SampleKindDto>("core/l-sample-kinds", stoppingToken),
+            LocationKindDtos = await _ausGeochemClient.GetAll<LocationKindDto>("core/l-location-kinds", stoppingToken),
+            MaterialDtos = await _ausGeochemClient.GetAll<MaterialDto>("core/materials", stoppingToken),
+            SampleKindDtos = await _ausGeochemClient.GetAll<SampleKindDto>("core/l-sample-kinds", stoppingToken),
         };
 
         // CSV based material name pairs for matching MV material name to AusGeochem material name
