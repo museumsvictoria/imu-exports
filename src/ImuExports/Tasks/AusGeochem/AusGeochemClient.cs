@@ -18,8 +18,6 @@ public interface IAusGeochemClient
 
     Task<IList<SampleWithLocationDto>> GetSamplesByPackageId(int dataPackageId, CancellationToken stoppingToken);
     
-    Task<IList<SampleWithLocationDto>> GetSamplesByArchiveId(int archiveId, CancellationToken stoppingToken);
-    
     Task<SampleWithLocationDto> GetSampleBySourceId(string sourceId, CancellationToken stoppingToken);
 
     Task SendSample(SampleWithLocationDto dto, Method method, CancellationToken stoppingToken);
@@ -33,7 +31,7 @@ public interface IAusGeochemClient
     Task<IList<ImageReadDto>> GetImagesBySampleId(int sampleId, CancellationToken stoppingToken);
 
     Task<IList<T>> GetAll<T>(string resource, CancellationToken stoppingToken,
-        ParametersCollection parameters = null);
+        ParametersCollection parameters = null, int pageSize = Constants.RestClientSmallPageSize);
 }
 
 public class AusGeochemClient : IAusGeochemClient, IDisposable
@@ -63,6 +61,7 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         });
 
         // Request JWT
+        Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
         var response = await _client.ExecuteAsync<LoginResponse>(request, stoppingToken);
 
         if (!response.IsSuccessful)
@@ -89,17 +88,7 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         // GetAll SampleWithLocationDto
         return await GetAll<SampleWithLocationDto>("core/sample-with-locations", stoppingToken, parameters);
     }
-    
-    public async Task<IList<SampleWithLocationDto>> GetSamplesByArchiveId(int archiveId, CancellationToken stoppingToken)
-    {
-        // Build parameters
-        var parameters = new ParametersCollection();
-        parameters.AddParameter(new QueryParameter("archiveId.equals", archiveId.ToString()));
 
-        // GetAll SampleWithLocationDto
-        return await GetAll<SampleWithLocationDto>("core/sample-with-locations", stoppingToken, parameters);
-    }
-    
     public async Task<SampleWithLocationDto> GetSampleBySourceId(string sourceId, CancellationToken stoppingToken)
     {
         // Build request
@@ -110,13 +99,14 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         
         request.AddQueryParameter("sourceId.equals", sourceId);
         
-        // Get current MV records in AusGeochem
+        // Get record based on RegNumber (sourceId) in AusGeochem
+        Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
         var response = await _client.ExecuteAsync<IList<SampleWithLocationDto>>(request, stoppingToken);
 
         if (!response.IsSuccessful)
         {
-            Log.Logger.Fatal("Error occured fetching {Name} at endpoint {Resource} via {Method} exiting, {ErrorMessage}",
-                nameof(SampleWithLocationDto), request.Resource, request.Method, response.ErrorMessage ?? response.Content);
+            Log.Logger.Fatal("Error occured fetching {Name} by SourceId {SourceId} at endpoint {Resource} via {Method} exiting, {ErrorMessage}",
+                nameof(SampleWithLocationDto), sourceId, request.Resource, request.Method, response.ErrorMessage ?? response.Content);
             Environment.Exit(Constants.ExitCodeError);
         }
 
@@ -135,12 +125,13 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         request.AddJsonBody(dto);
 
         // Send sample
+        Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
         var response = await _client.ExecuteAsync(request, stoppingToken);
 
         if (!response.IsSuccessful)
         {
-            Log.Logger.Fatal("Error occured executing request for resource {Resource} via {Method} exiting, {ErrorMessage}", 
-                request.Resource, request.Method, response.ErrorMessage ?? response.Content);
+            Log.Logger.Fatal("Error occured sending sample {ShortName} at resource {Resource} via {Method} exiting, {ErrorMessage}", 
+                dto.ShortName, request.Resource, request.Method, response.ErrorMessage ?? response.Content);
             Environment.Exit(Constants.ExitCodeError);
         }
         else
@@ -159,12 +150,13 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         };
 
         // Delete image
+        Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
         var response = await _client.ExecuteAsync(request, stoppingToken);
 
         if (!response.IsSuccessful)
         {
-            Log.Logger.Fatal("Error occured executing request for resource {Resource} via {Method} exiting, {ErrorMessage}",
-                request.Resource, request.Method, response.ErrorMessage ?? response.Content);
+            Log.Logger.Fatal("Error occured deleting image {Id} at resource {Resource} via {Method} exiting, {ErrorMessage}",
+                dto.Id, request.Resource, request.Method, response.ErrorMessage ?? response.Content);
             Environment.Exit(Constants.ExitCodeError);
         }
         else
@@ -184,10 +176,11 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
             Name = image.Name,
         });
 
-        // Add parameters and file
+        // Add sampleId we want to attach image to
         request.AddQueryParameter("sampleId", sampleId);
 
         // Send image
+        Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
         var response = await _client.ExecuteAsync(request, stoppingToken);
 
         if (!response.IsSuccessful)
@@ -212,12 +205,13 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         };
 
         // Delete sample
+        Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
         var response = await _client.ExecuteAsync(request, stoppingToken);
 
         if (!response.IsSuccessful)
         {
-            Log.Logger.Fatal("Error occured executing request for resource {Resource} via {Method} exiting, {ErrorMessage}",
-                request.Resource, request.Method, response.ErrorMessage ?? response.Content);
+            Log.Logger.Fatal("Error occured deleting sample {ShortName} at resource {Resource} via {Method} exiting, {ErrorMessage}",
+                dto.ShortName, request.Resource, request.Method, response.ErrorMessage ?? response.Content);
             Environment.Exit(Constants.ExitCodeError);
         }
         else
@@ -238,7 +232,7 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
     }
 
     public async Task<IList<T>> GetAll<T>(string resource, CancellationToken stoppingToken,
-        ParametersCollection parameters = null)
+        ParametersCollection parameters = null, int pageSize = Constants.RestClientSmallPageSize)
     {
         var dtos = new List<T>();
         
@@ -246,17 +240,22 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         var request = new RestRequest(resource);
 
         // Add size parameter for pagination size
-        request.AddQueryParameter("size", Constants.RestClientPageSize);
+        request.AddQueryParameter("size", pageSize);
 
         // Add any passed in parameters
         if (parameters != null)
             foreach (var parameter in parameters)
                 request.AddParameter(parameter);
+        
+        // Ensure there is a sort parameter attached otherwise we may get inconsistent results 
+        if(request.Parameters.All(x => x.Name != "sort"))
+            request.AddParameter(new QueryParameter("sort", "id,DESC", false));
 
         while (true)
         {
             stoppingToken.ThrowIfCancellationRequested();
 
+            Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
             var response = await _client.ExecuteAsync<IList<T>>(request, stoppingToken);
 
             if (!response.IsSuccessful)

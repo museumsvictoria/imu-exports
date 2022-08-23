@@ -44,7 +44,8 @@ public static class SampleToDtoMapper
         dto.ShortName = dto.SampleDto.Name = dto.SampleDto.SourceId = sample.SampleId;
 
         // ArchiveNotes => SampleDto.ArchiveNote
-        dto.SampleDto.ArchiveNote = sample.ArchiveNotes;
+        // TODO: Remove once archive notes field length increased.
+        dto.SampleDto.ArchiveNote = sample.ArchiveNotes?.Length > 250 ? sample.ArchiveNotes.Substring(0, 250) : sample.ArchiveNotes;
 
         // Latitude => LocationDto.Lat
         if (double.TryParse(sample.Latitude, out var latitude))

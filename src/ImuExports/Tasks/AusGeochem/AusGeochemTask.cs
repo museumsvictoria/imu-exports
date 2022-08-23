@@ -42,29 +42,30 @@ public class AusGeochemTask : ImuTaskBase, ITask
             
             // Authenticate
             await _ausGeochemClient.Authenticate(stoppingToken);
-
-            // Delete all samples and images in AusGeochem 
+            
             if (_options.DeleteAll)
             {
-                await DeleteAllEntities(stoppingToken);
+                // Delete all samples and images in AusGeochem
+                foreach (var package in _appSettings.AusGeochem.DataPackages)
+                {
+                    await DeleteAllByDataPackageId(package.Id, stoppingToken);
+                }
                 
                 return;
             }
-
-            // Fetch mineralogy data from EMu
-            var mineralogySamples = await FetchSamples("Mineralogy", stoppingToken);
             
-            // Fetch petrology data from EMu
-            var petrologySamples = await FetchSamples("Petrology", stoppingToken);
-
             // Make lookup lists for use in creating Dtos to send
             var lookups = await _lookupsFactory.Make(stoppingToken);
 
-            // Build and then send mineralogy sample Dtos
-            await SendSamples(lookups, mineralogySamples, _appSettings.AusGeochem.MineralogyDataPackageId, stoppingToken);
-            
-            // Build and then send petrology samples Dtos
-            await SendSamples(lookups, petrologySamples, _appSettings.AusGeochem.PetrologyDataPackageId, stoppingToken);
+            // Process all packages in appsettings 
+            foreach (var package in _appSettings.AusGeochem.DataPackages)
+            {
+                // Fetch data from EMu
+                var samples = await FetchSamples(package.Discipline, stoppingToken);
+                
+                // Build and then send sample Dtos
+                await SendSamples(lookups, samples, package.Id, stoppingToken);
+            }
 
             // Update/Insert application
             using var db = new LiteRepository(new ConnectionString()
@@ -346,20 +347,20 @@ public class AusGeochemTask : ImuTaskBase, ITask
         return null;
     }
 
-    private async Task DeleteAllEntities(CancellationToken stoppingToken)
+    private async Task DeleteAllByDataPackageId(int? dataPackageId, CancellationToken stoppingToken)
     {
         // Exit if DataPackageId not known
-        if (_appSettings.AusGeochem.ArchiveId == null)
+        if (dataPackageId == null)
         {
-            Log.Logger.Fatal("ArchiveId is null, cannot continue without one, exiting");
+            Log.Logger.Fatal("DataPackageId is null, cannot continue without one, exiting");
             Environment.Exit(Constants.ExitCodeError);
         }
         
         // Fetch all current SampleWithLocationDtos
-        Log.Logger.Information("Fetching all current SampleWithLocationDtos within AusGeochem for ArchiveId {ArchiveId}", _appSettings.AusGeochem.ArchiveId);
-        var currentSampleDtos = await _ausGeochemClient.GetSamplesByArchiveId(_appSettings.AusGeochem.ArchiveId.Value, stoppingToken);
+        Log.Logger.Information("Fetching all current SampleWithLocationDtos within AusGeochem for DataPackageId {DataPackageId}", dataPackageId);
+        var currentSampleDtos = await _ausGeochemClient.GetSamplesByPackageId(dataPackageId.Value, stoppingToken);
 
-        Log.Logger.Information("Deleting all entities for ArchiveId {ArchiveId}", _appSettings.AusGeochem.ArchiveId);
+        Log.Logger.Information("Deleting all entities for DataPackageId {DataPackageId}", dataPackageId);
         foreach (var sampleDto in currentSampleDtos)
         {
             stoppingToken.ThrowIfCancellationRequested();
