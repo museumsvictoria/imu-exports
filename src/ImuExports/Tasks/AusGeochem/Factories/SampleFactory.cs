@@ -20,7 +20,8 @@ public class SampleFactory : IImuFactory<Sample>
 
         var sample = new Sample();
 
-        sample.SampleId = new[]
+        sample.Irn = map.GetTrimString("irn");
+        sample.Name = new[]
         {
             "NMV",
             string.IsNullOrWhiteSpace(map.GetTrimString("ColRegPart"))
@@ -91,7 +92,7 @@ public class SampleFactory : IImuFactory<Sample>
                 }.Concatenate(", ");
             }
 
-            sample.LocationNotes = new[]
+            sample.LocationDescription = new[]
             {
                 latlongLocationNotes,
                 string.IsNullOrWhiteSpace(georeferenceAssignedNotes)

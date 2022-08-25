@@ -28,7 +28,6 @@ public static class SampleToDtoMapper
             {
                 SampleDto = new SampleDto(),
                 LocationDto = new LocationDto(),
-                ShortName = sample.SampleId
             };
 
         if(sample.LocationKind == "Unknown" && string.IsNullOrWhiteSpace(sample.DepthMax) && string.IsNullOrWhiteSpace(sample.DepthMin))
@@ -40,8 +39,11 @@ public static class SampleToDtoMapper
         if (archiveId != null)
             dto.SampleDto.ArchiveId = archiveId;
 
-        // SampleId => SampleDto.ShortName, SampleDto.Name, SampleDto.SourceId
-        dto.ShortName = dto.SampleDto.Name = dto.SampleDto.SourceId = sample.SampleId;
+        // Name => SampleDto.ShortName, SampleDto.Name
+        dto.ShortName = dto.SampleDto.Name = sample.Name;
+
+        // Irn => SampleDto.SourceId
+        dto.SampleDto.SourceId = sample.Irn;
 
         // ArchiveNotes => SampleDto.ArchiveNote
         // TODO: Remove once archive notes field length increased.
@@ -59,8 +61,8 @@ public static class SampleToDtoMapper
         if (double.TryParse(sample.LatLongPrecision, out var latLongPrecision))
             dto.LocationDto.LatLonPrecision = latLongPrecision;
 
-        // LocationNotes => LocationDto.Description
-        dto.LocationDto.Description = sample.LocationNotes;
+        // LocationDescription => LocationDto.Description
+        dto.LocationDto.Description = sample.LocationDescription;
 
         // UnitName => SampleDto.StratographicUnitName
         dto.SampleDto.StratographicUnitName = sample.UnitName;

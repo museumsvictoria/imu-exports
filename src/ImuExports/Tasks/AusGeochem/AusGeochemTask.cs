@@ -218,7 +218,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
             stoppingToken.ThrowIfCancellationRequested();
             
             var existingSampleDto = currentSampleDtos.SingleOrDefault(x =>
-                string.Equals(x.SampleDto.SourceId, sample.SampleId, StringComparison.OrdinalIgnoreCase));
+                string.Equals(x.SampleDto.SourceId, sample.Irn, StringComparison.OrdinalIgnoreCase));
 
             if (existingSampleDto != null)
             {
@@ -282,7 +282,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
                     if (sample.Images.Any())
                     {
                         // Get created sample so we can link sample to image via id
-                        createSampleDto = await _ausGeochemClient.GetSampleBySourceId(sample.SampleId, stoppingToken);
+                        createSampleDto = await _ausGeochemClient.GetSampleBySourceId(sample.Irn, stoppingToken);
 
                         foreach (var image in sample.Images)
                         {

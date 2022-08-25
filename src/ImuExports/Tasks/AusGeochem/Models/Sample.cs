@@ -9,7 +9,9 @@ public class Sample
     
     public IList<Image> Images { get; set; }
     
-    public string SampleId { get; set; }
+    public string Irn { get; set; }
+    
+    public string Name { get; set; }
     
     public string ArchiveNotes { get; set; }
     
@@ -21,7 +23,7 @@ public class Sample
     
     public string DateGeoreferenced { get; set; }
 
-    public string LocationNotes { get; set; }
+    public string LocationDescription { get; set; }
     
     public string UnitName { get; set; }
 
@@ -32,8 +34,6 @@ public class Sample
     public string DepthMin { get; set; }
 
     public string DepthMax { get; set; }
-    
-    public string PersonRole { get; set; }
     
     public string DateCollectedMin { get; set; }
 
