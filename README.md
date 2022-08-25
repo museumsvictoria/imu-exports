@@ -45,8 +45,8 @@ Specify the type of export run by selecting the specific commands listed below. 
 
 ### Commands
 
-* `ala` - Exports MV collection records for the Atlas of Living Australia (https://www.ala.org.au/). Records are exported from EMu and transformed into a Darwin Core Archive package which is either exported to a specified directory or directly uploaded to an FTP server.  
-* `agn` - Export MV collection records for AusGeochem. (https://ausgeochem.auscope.org.au/).  Utilizes the AusGeochem REST API in order to directly send records. _Note_: an embedded CSV is used to match MV material names with AusGeochem material names.
+* `ala` - Exports MV collection records for the Atlas of Living Australia (<https://www.ala.org.au/>). Records are exported from EMu and transformed into a Darwin Core Archive package which is either exported to a specified directory or directly uploaded to an FTP server.  
+* `agn` - Export MV collection records for AusGeochem. (<https://ausgeochem.auscope.org.au/>).  Utilizes the AusGeochem REST API in order to directly send records. _Note_: an embedded CSV is used to match MV material names with AusGeochem material names.
 
 ### ala specific options (Atlas of Living Australia)
 

@@ -62,9 +62,12 @@ public class AusGeochemTask : ImuTaskBase, ITask
             {
                 // Fetch data from EMu
                 var samples = await FetchSamples(package.Discipline, stoppingToken);
-                
-                // Build and then send sample Dtos
-                await SendSamples(lookups, samples, package.Id, stoppingToken);
+
+                if (samples.Any())
+                {
+                    // Build and then send sample Dtos
+                    await SendSamples(lookups, samples, package.Id, stoppingToken);
+                }
             }
 
             // Update/Insert application
@@ -205,7 +208,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
             Log.Logger.Fatal("DataPackageId is null, cannot continue without one, exiting");
             Environment.Exit(Constants.ExitCodeError);
         }
-        
+
         // Fetch all current SampleWithLocationDtos
         Log.Logger.Information("Fetching all current SampleWithLocationDtos within AusGeochem for DataPackageId {DataPackageId}", dataPackageId);
         var currentSampleDtos = await _ausGeochemClient.GetSamplesByPackageId(dataPackageId.Value, stoppingToken);
