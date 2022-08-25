@@ -1,13 +1,14 @@
-Imu Exports
-=========================== 
+# IMu Exports
+ 
+.Net 6 worker service CLI application which is used to export data from EMu for use in external projects.
 
-.Net 6 worker service application which is used to export data from EMu for use in various projects. Uses the IMu .net API to allow querying and data retrieval.  Solution also contains the older .Net Framework 4.7.2 project which contains exports that are no longer used.
+EMu is a collection management system primarily used in museums, this application utilizes the IMu .Net API to query and retrieve data from the EMu system.
 
-Specific exports are located within the tasks folder and inherit from the ITask interface.
+Specific exports are located within the tasks folder and inherit from the ImuTaskBase, a base class that allows data extraction from EMu in a standardised manner.
 
-### Configuration
+## Configuration
 
-All configuration settings located in the appsettings.json
+All configuration settings are located in the appsettings.json.
 
 ```json
 {
@@ -21,23 +22,50 @@ All configuration settings located in the appsettings.json
       "Host": "host",
       "Username": "username",
       "Password": "password"
+    },
+    "AusGeochem": {
+      "BaseUrl": "baseurl",
+      "Username": "username",
+      "Password": "password",
+      "DataPackages": [
+        {
+          "Id": 0,
+          "Discipline": ""
+        }
+      ],
+      "ArchiveId": 0
     }
   }
 }
 ```
 
-### Usage
+## Usage
 
-Specify the type of export run by changing cli parameters.  If no parameters are specified a list of the available options will be displayed on the CLI.  Futher parameters can also be specified that are specific to the export chosen.
+Specify the type of export run by selecting the specific commands listed below.  If no commands are specified a list of the available options will be displayed.  Further options can also be specified that are specific to the command chosen.
 
-#### Options
+### Commands
 
-* `ala` - Exports records for the Atlas of Living Australia.
-* `agn` - Export records for AusGeochem.
+* `ala` - Exports MV collection records for the Atlas of Living Australia (https://www.ala.org.au/). Records are exported from EMu and transformed into a Darwin Core Archive package which is either exported to a specified directory or directly uploaded to an FTP server.  
+* `agn` - Export MV collection records for AusGeochem. (https://ausgeochem.auscope.org.au/).  Utilizes the AusGeochem REST API in order to directly send records. _Note_: an embedded CSV is used to match MV material names with AusGeochem material names.
 
-### ala specific
-Note: If --dest not set export assumed to be automated, in which case the data will be uploaded to the ftp host specified in the AtlasOfLivingAustralia section within AppSettings.  
+### ala specific options (Atlas of Living Australia)
 
-* `-d, --dest`: Required. Destination directory for csv and images.
-* `-a, --modified-after`: Get all records after modified date >= (yyyy-mm-dd format)
-* `-b, --modified-before`: Get all records before modified date <= (yyyy-mm-dd format)
+* `-d, --dest`
+  
+  Destination directory for csv and images. If not set, export is assumed to be automated, in which case the data will be uploaded to the ftp host specified in the AtlasOfLivingAustralia section within AppSettings.
+
+ 
+* `-a, --modified-after`
+
+  Get all EMu records after modified date >= (yyyy-mm-dd format).
+
+
+* `-b, --modified-before`
+ 
+  Get all EMu records before modified date <= (yyyy-mm-dd format).
+
+### agn specific options (AusGeochem)
+
+* `-d, --delete-all`
+
+  Deletes all samples in AusGeochem specified in the DataPackages section of AppSettings.
