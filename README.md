@@ -15,8 +15,8 @@ All configuration settings are located in the appsettings.json.
   "AppSettings" : {
     "LiteDbFilename": "database.db",
     "Emu": {
-      "Host": "bunjil.mv.vic.gov.au",
-      "Port": "40022"
+      "Host": "host",
+      "Port": 0
     },
     "AtlasOfLivingAustralia": {
       "Host": "host",

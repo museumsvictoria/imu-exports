@@ -105,7 +105,7 @@ public class MultimediaFactory : IImuFactory<Multimedia>
         {
             var stopwatch = Stopwatch.StartNew();
 
-            using var imuSession = new ImuSession("emultimedia", _appSettings.Emu.Host, int.Parse(_appSettings.Emu.Port));
+            using var imuSession = new ImuSession("emultimedia", _appSettings.Imu.Host, _appSettings.Imu.Port);
             imuSession.FindKey(irn);
             var resource = imuSession.Fetch("start", 0, -1, new[] { "resource" }).Rows[0].GetMap("resource");
 

@@ -73,7 +73,7 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
             {
                 stoppingToken.ThrowIfCancellationRequested();
 
-                using (var imuSession = new ImuSession("ecatalogue", _appSettings.Emu.Host, int.Parse(_appSettings.Emu.Port)))
+                using (var imuSession = new ImuSession("ecatalogue", _appSettings.Imu.Host, _appSettings.Imu.Port))
                 {
                     var cachedIrnsBatch = cachedIrns
                         .Skip(offset)

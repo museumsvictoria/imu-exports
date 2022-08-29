@@ -20,7 +20,7 @@ public abstract class ImuTaskBase
             var offset = 0;
             
             // Create session
-            using var imuSession = new ImuSession(moduleName, _appSettings.Emu.Host, int.Parse(_appSettings.Emu.Port));
+            using var imuSession = new ImuSession(moduleName, _appSettings.Imu.Host, _appSettings.Imu.Port);
             Log.Logger.Information("Caching {ModuleName} irns", moduleName);
             
             stoppingToken.ThrowIfCancellationRequested();
@@ -65,7 +65,7 @@ public abstract class ImuTaskBase
             var offset = 0;
 
             // Create session
-            using var imuSession = new ImuSession(moduleName, _appSettings.Emu.Host, int.Parse(_appSettings.Emu.Port));
+            using var imuSession = new ImuSession(moduleName, _appSettings.Imu.Host, _appSettings.Imu.Port);
             Log.Logger.Information("Caching {ModuleSearchName} irns by searching {ModuleName}", moduleSearchName,
                 moduleName);
 

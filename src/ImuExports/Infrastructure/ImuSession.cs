@@ -8,9 +8,16 @@ public class ImuSession : IDisposable
     private Module _module;
     private bool _disposed;
 
-    public ImuSession(string moduleName, string host, int port)
+    public ImuSession(string moduleName, string host, int? port)
     {
-        _session = new Session(host, port);
+        // Exit if host or port not set
+        if (port == null || string.IsNullOrEmpty(host))
+        {
+            Log.Logger.Fatal("IMu host {Host} and port {Port} need to be set, exiting", host, port);
+            Environment.Exit(Constants.ExitCodeError);
+        }
+        
+        _session = new Session(host, port.Value);
         _session.Connect();
 
         _module = new Module(moduleName, _session);

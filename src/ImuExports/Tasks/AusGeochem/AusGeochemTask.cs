@@ -60,7 +60,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
             // Process all packages in appsettings 
             foreach (var package in _appSettings.AusGeochem.DataPackages)
             {
-                // Fetch data from EMu
+                // Fetch samples from IMu
                 var samples = await FetchSamples(package.Discipline, stoppingToken);
 
                 if (samples.Any())
@@ -128,12 +128,13 @@ public class AusGeochemTask : ImuTaskBase, ITask
 
     private async Task<List<Sample>> FetchSamples(string discipline, CancellationToken stoppingToken)
     {
-        // Cache Irns
+        // Cache Irns only
         Log.Logger.Information("Caching {Discipline} catalogue irns", discipline);
         var cachedIrns = new List<long>();
         
         if (_options.Application.PreviousDateRun.HasValue)
         {
+            // If search has run before we need to search multiple EMu modules for any changes
             foreach (var moduleSearchConfig in _moduleSearchConfigs)
             {
                 stoppingToken.ThrowIfCancellationRequested();
@@ -166,7 +167,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
             cachedIrns = (await CacheIrns("ecatalogue", this.BuildTerms(discipline), stoppingToken)).ToList();
         }
 
-        // Fetch sample data from EMu
+        // Fetch actual catalogue data from IMu
         var samples = new List<Sample>();
         var offset = 0;
         Log.Logger.Information("Fetching {Discipline} catalogue data", discipline);
@@ -174,7 +175,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
         {
             stoppingToken.ThrowIfCancellationRequested();
 
-            using var imuSession = new ImuSession("ecatalogue", _appSettings.Emu.Host, int.Parse(_appSettings.Emu.Port));
+            using var imuSession = new ImuSession("ecatalogue", _appSettings.Imu.Host, _appSettings.Imu.Port);
                 
             var cachedIrnsBatch = cachedIrns
                 .Skip(offset)
@@ -184,12 +185,13 @@ public class AusGeochemTask : ImuTaskBase, ITask
             if (cachedIrnsBatch.Count == 0)
                 break;
 
-            imuSession.FindKeys(cachedIrnsBatch);
+            imuSession.FindKeys(cachedIrnsBatch); 
 
             var results = imuSession.Fetch("start", 0, -1, this.ExportColumns);
 
-            Log.Logger.Debug("Fetched {RecordCount} {Discipline} records from EMu", cachedIrnsBatch.Count, discipline);
+            Log.Logger.Debug("Fetched {RecordCount} {Discipline} records from IMu", cachedIrnsBatch.Count, discipline);
 
+            // Build sample from catalogue data and add to samples
             samples.AddRange(results.Rows.Select(map => _sampleFactory.Make(map, stoppingToken)));
 
             offset += results.Count;
@@ -264,7 +266,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
                     // Re-Send all images
                     foreach (var image in sample.Images)
                     {
-                        // Fetch image as base64 string from EMu
+                        // Fetch image as base64 string from IMu
                         var base64Image = await FetchImageAsBase64(stoppingToken, image);
 
                         if (updatedSampleDto.Id != null)
@@ -289,7 +291,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
 
                         foreach (var image in sample.Images)
                         {
-                            // Fetch image as base64 string from EMu
+                            // Fetch image as base64 string from IMu
                             var base64Image = await FetchImageAsBase64(stoppingToken, image);
 
                             if (createSampleDto.Id != null)
@@ -314,7 +316,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
             
             var stopwatch = Stopwatch.StartNew();
             
-            using var imuSession = new ImuSession("emultimedia", _appSettings.Emu.Host, int.Parse(_appSettings.Emu.Port));
+            using var imuSession = new ImuSession("emultimedia", _appSettings.Imu.Host, _appSettings.Imu.Port);
             imuSession.FindKey(image.Irn);
             var resource = imuSession.Fetch("start", 0, -1, new[] { "resource" }).Rows[0].GetMap("resource");
 

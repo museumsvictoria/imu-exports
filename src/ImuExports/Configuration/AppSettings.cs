@@ -6,18 +6,18 @@ public class AppSettings
 
     public string LiteDbFilename { get; set; } = string.Empty;
 
-    public Emu Emu { get; set; }
+    public Imu Imu { get; set; }
 
     public AtlasOfLivingAustralia AtlasOfLivingAustralia { get; set; }
     
     public AusGeochem AusGeochem { get; set; }
 }
 
-public class Emu
+public class Imu
 {
     public string Host { get; set; } = string.Empty;
 
-    public string Port { get; set; } = string.Empty;
+    public int? Port { get; set; }
 }
 
 public class AtlasOfLivingAustralia
