@@ -1,11 +1,15 @@
-﻿using ImuExports.Tasks.AusGeochem;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using ImuExports.Tasks.AusGeochem;
+using RestSharp;
+using RestSharp.Serializers.Json;
 using SimpleInjector;
 
 namespace ImuExports.Configuration;
 
 public static class ContainerConfig
 {
-    public static Container Initialize(this Container container)
+    public static Container Initialize(this Container container, AppSettings appSettings)
     {
         // Register task
         container.Register(typeof(ITask), CommandOptions.TaskOptions.TypeOfTask, Lifestyle.Singleton);
@@ -36,7 +40,18 @@ public static class ContainerConfig
         // AusGeochemTask specific
         if (CommandOptions.TaskOptions.TypeOfTask == typeof(AusGeochemTask))
         {
-            container.Register<IAusGeochemClient, AusGeochemClient>(Lifestyle.Singleton);            
+            container.Register(() =>
+            {
+                var client = new RestClient(appSettings.AusGeochem.BaseUrl);
+                
+                client.UseSystemTextJson(new JsonSerializerOptions(JsonSerializerDefaults.Web)
+                {
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                });
+
+                return client;
+            }, Lifestyle.Singleton);
+            container.Register<IAusGeochemClient, AusGeochemClient>(Lifestyle.Singleton);
         }
         
         return container;

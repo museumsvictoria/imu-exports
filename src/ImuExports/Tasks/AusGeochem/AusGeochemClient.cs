@@ -40,15 +40,11 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
     private readonly RestClient _client;
 
     public AusGeochemClient(
-        IOptions<AppSettings> appSettings)
+        IOptions<AppSettings> appSettings,
+        RestClient client)
     {
         _appSettings = appSettings.Value;
-
-        _client = new RestClient(_appSettings.AusGeochem.BaseUrl);
-        _client.UseSystemTextJson(new JsonSerializerOptions(JsonSerializerDefaults.Web)
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        });
+        _client = client;
     }
 
     public async Task Authenticate(CancellationToken stoppingToken)

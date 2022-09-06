@@ -31,12 +31,17 @@ try
     
     // Create DI container as we need to add it while configuring host
     var container = new Container();
-
+    
+    // Create AppSettings so we can use it in container initialization
+    AppSettings appSettings = null;
+    
     // Configure host
     var host = Host.CreateDefaultBuilder(args)
         .ConfigureServices((context, services) =>
         {
             var configSection = context.Configuration.GetSection(AppSettings.SECTION_NAME);
+
+            appSettings = configSection.Get<AppSettings>();
 
             services
                 .Configure<AppSettings>(configSection)
@@ -51,10 +56,10 @@ try
         .UseSerilog()
         .Build()
         .UseSimpleInjector(container);
-
+    
     // Configure and verify DI container
     container
-        .Initialize()
+        .Initialize(appSettings)
         .Verify();
     
     await host.RunAsync();
