@@ -26,9 +26,9 @@ public interface IAusGeochemClient
 
     Task SendImage(Image image, string base64Image, int sampleId, CancellationToken stoppingToken);
     
-    Task DeleteImage(ImageReadDto dto, CancellationToken stoppingToken);
+    Task DeleteImage(ImageDto dto, CancellationToken stoppingToken);
 
-    Task<IList<ImageReadDto>> GetImagesBySampleId(int sampleId, CancellationToken stoppingToken);
+    Task<IList<ImageDto>> GetImagesBySampleId(int sampleId, CancellationToken stoppingToken);
 
     Task<IList<T>> GetAll<T>(string resource, CancellationToken stoppingToken,
         ParametersCollection parameters = null, int pageSize = Constants.RestClientSmallPageSize);
@@ -50,7 +50,7 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
     public async Task Authenticate(CancellationToken stoppingToken)
     {
         // Build request
-        var request = new RestRequest("authenticate", Method.Post).AddJsonBody(new LoginRequest
+        var request = new RestRequest("authenticate", Method.Post).AddJsonBody(new AuthenticateRequest
         {
             Password = _appSettings.AusGeochem.Password,
             Username = _appSettings.AusGeochem.Username
@@ -58,7 +58,7 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
 
         // Request JWT
         Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
-        var response = await _client.ExecuteAsync<LoginResponse>(request, stoppingToken);
+        var response = await _client.ExecuteAsync<AuthenticateResponse>(request, stoppingToken);
 
         if (!response.IsSuccessful)
         {
@@ -137,7 +137,7 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         }
     }
 
-    public async Task DeleteImage(ImageReadDto dto, CancellationToken stoppingToken)
+    public async Task DeleteImage(ImageDto dto, CancellationToken stoppingToken)
     {
         // Build request
         var request = new RestRequest($"core/images/{dto.Id}")
@@ -165,7 +165,7 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
     public async Task SendImage(Image image, string base64Image, int sampleId, CancellationToken stoppingToken)
     {
         // Build request
-        var request = new RestRequest("core/images/add-to-sample", Method.Post).AddJsonBody(new ImageWriteDto
+        var request = new RestRequest("core/images/add-to-sample", Method.Post).AddJsonBody(new AddImageToSampleRequest
         {
             Content = base64Image,
             Description = image.Description,
@@ -217,14 +217,14 @@ public class AusGeochemClient : IAusGeochemClient, IDisposable
         }
     }
 
-    public async Task<IList<ImageReadDto>> GetImagesBySampleId(int sampleId, CancellationToken stoppingToken)
+    public async Task<IList<ImageDto>> GetImagesBySampleId(int sampleId, CancellationToken stoppingToken)
     {
         // Build parameters
         var parameters = new ParametersCollection();
         parameters.AddParameter(new QueryParameter("sampleId", sampleId.ToString()));
 
         // GetAll ImageReadDtos
-        return await GetAll<ImageReadDto>("core/images/of-sample", stoppingToken, parameters);
+        return await GetAll<ImageDto>("core/images/of-sample", stoppingToken, parameters);
     }
 
     public async Task<IList<T>> GetAll<T>(string resource, CancellationToken stoppingToken,

@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ImuExports.Tasks.AusGeochem.Contracts.Dtos;
+namespace ImuExports.Tasks.AusGeochem.Contracts.Requests;
 
-public class ImageWriteDto
+public class AddImageToSampleRequest
 {
         [JsonPropertyName("content")]
         public string Content { get; set; }

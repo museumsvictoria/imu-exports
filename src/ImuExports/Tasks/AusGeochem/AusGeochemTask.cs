@@ -235,7 +235,8 @@ public class AusGeochemTask : ImuTaskBase, ITask
                     await _ausGeochemClient.DeleteSample(updatedSampleDto, stoppingToken);
                     
                     // Delete images
-                    IList<ImageReadDto> imageDtos = new List<ImageReadDto>();
+                    IList<ImageDto> imageDtos = new List<ImageDto>();
+                    
                     // Fetch all images associated with sample
                     if (updatedSampleDto.Id != null)
                         imageDtos = await _ausGeochemClient.GetImagesBySampleId(updatedSampleDto.Id.Value, stoppingToken);
@@ -252,7 +253,8 @@ public class AusGeochemTask : ImuTaskBase, ITask
                     await _ausGeochemClient.SendSample(updatedSampleDto, Method.Put, stoppingToken);
 
                     // Update images
-                    IList<ImageReadDto> imageDtos = new List<ImageReadDto>();
+                    IList<ImageDto> imageDtos = new List<ImageDto>();
+                    
                     // Fetch all images associated with sample
                     if (updatedSampleDto.Id != null)
                         imageDtos = await _ausGeochemClient.GetImagesBySampleId(updatedSampleDto.Id.Value, stoppingToken);
@@ -283,7 +285,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
                     // Create sample
                     await _ausGeochemClient.SendSample(createSampleDto, Method.Post, stoppingToken);
 
-                    // Send Images
+                    // Create Images
                     if (sample.Images.Any())
                     {
                         // Get created sample so we can link sample to image via id
@@ -370,7 +372,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
         {
             stoppingToken.ThrowIfCancellationRequested();
             
-            IList<ImageReadDto> imageDtos = new List<ImageReadDto>();
+            IList<ImageDto> imageDtos = new List<ImageDto>();
             // Fetch all images associated with sample
             if (sampleDto.Id != null)
                 imageDtos = await _ausGeochemClient.GetImagesBySampleId(sampleDto.Id.Value, stoppingToken);

@@ -2,7 +2,7 @@
 
 namespace ImuExports.Tasks.AusGeochem.Contracts.Requests;
 
-public class LoginRequest
+public class AuthenticateRequest
 {
     [JsonPropertyName("username")]
     public string Username { get; set; }

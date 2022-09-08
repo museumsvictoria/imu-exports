@@ -2,7 +2,7 @@
 
 namespace ImuExports.Tasks.AusGeochem.Contracts.Dtos;
 
-public class ImageReadDto
+public class ImageDto
 {
         [JsonPropertyName("description")]
         public string Description { get; set; }
