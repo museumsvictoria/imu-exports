@@ -135,7 +135,7 @@ public class MultimediaFactory : IImuFactory<Multimedia>
             }
 
             stopwatch.Stop();
-            Log.Logger.Debug("Completed image {irn} creation in {ElapsedMilliseconds}", irn,
+            Log.Logger.Debug("Completed image {irn} creation in {ElapsedMilliseconds}ms", irn,
                 stopwatch.ElapsedMilliseconds);
 
             return true;

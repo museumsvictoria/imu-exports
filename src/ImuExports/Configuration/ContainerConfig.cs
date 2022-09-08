@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using ImuExports.Tasks.AusGeochem;
+using ImuExports.Tasks.AusGeochem.Endpoints;
 using RestSharp;
 using RestSharp.Serializers.Json;
 using SimpleInjector;
@@ -51,7 +52,14 @@ public static class ContainerConfig
 
                 return client;
             }, Lifestyle.Singleton);
+            
             container.Register<IAusGeochemClient, AusGeochemClient>(Lifestyle.Singleton);
+            container.Register<IAuthenticateEndpoint, AuthenticateEndpoint>(Lifestyle.Singleton);
+            container.Register<ISampleEndpoint, SampleEndpoint>(Lifestyle.Singleton);
+            container.Register<IImageEndpoint, ImageEndpoint>(Lifestyle.Singleton);
+            container.Register<ILocationKindEndpoint, LocationKindEndpoint>(Lifestyle.Singleton);
+            container.Register<IMaterialEndpoint, MaterialEndpoint>(Lifestyle.Singleton);
+            container.Register<ISampleKindEndpoint, SampleKindEndpoint>(Lifestyle.Singleton);
         }
         
         return container;

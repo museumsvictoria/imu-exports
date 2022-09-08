@@ -3,17 +3,25 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using ImuExports.Tasks.AusGeochem.ClassMaps;
 using ImuExports.Tasks.AusGeochem.Contracts.Dtos;
+using ImuExports.Tasks.AusGeochem.Endpoints;
 using ImuExports.Tasks.AusGeochem.Models;
 
 namespace ImuExports.Tasks.AusGeochem.Factories;
 
 public class LookupsFactory : IFactory<Lookups>
 {
-    private readonly IAusGeochemClient _ausGeochemClient;
+    private readonly ILocationKindEndpoint _locationKindEndpoint;
+    private readonly IMaterialEndpoint _materialEndpoint;
+    private readonly ISampleKindEndpoint _sampleKindEndpoint;
 
-    public LookupsFactory(IAusGeochemClient ausGeochemClient)
+    public LookupsFactory(
+        ILocationKindEndpoint locationKindEndpoint,
+        IMaterialEndpoint materialEndpoint,
+        ISampleKindEndpoint sampleKindEndpoint)
     {
-        _ausGeochemClient = ausGeochemClient;
+        _locationKindEndpoint = locationKindEndpoint;
+        _materialEndpoint = materialEndpoint;
+        _sampleKindEndpoint = sampleKindEndpoint;
     }
     
     public async Task<Lookups> Make(CancellationToken stoppingToken)
@@ -23,9 +31,9 @@ public class LookupsFactory : IFactory<Lookups>
         // Lookups fetched from API
         var lookups = new Lookups
         {
-            LocationKindDtos = await _ausGeochemClient.GetAll<LocationKindDto>("core/l-location-kinds", stoppingToken, null, Constants.RestClientLargePageSize),
-            MaterialDtos = await _ausGeochemClient.GetAll<MaterialDto>("core/materials", stoppingToken, null, Constants.RestClientLargePageSize),
-            SampleKindDtos = await _ausGeochemClient.GetAll<SampleKindDto>("core/l-sample-kinds", stoppingToken, null, Constants.RestClientLargePageSize),
+            LocationKindDtos = await _locationKindEndpoint.GetAll(stoppingToken),
+            MaterialDtos = await _materialEndpoint.GetAll(stoppingToken),
+            SampleKindDtos = await _sampleKindEndpoint.GetAll(stoppingToken),
         };
 
         // CSV based material name pairs for matching MV material name to AusGeochem material name
