@@ -2,7 +2,6 @@
 using CsvHelper;
 using CsvHelper.Configuration;
 using ImuExports.Tasks.AusGeochem.ClassMaps;
-using ImuExports.Tasks.AusGeochem.Contracts.Dtos;
 using ImuExports.Tasks.AusGeochem.Endpoints;
 using ImuExports.Tasks.AusGeochem.Models;
 

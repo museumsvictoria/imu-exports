@@ -7,7 +7,7 @@ namespace ImuExports.Tasks.AusGeochem.Endpoints;
 
 public interface IImageEndpoint
 {
-    Task SendImage(Image image, string base64Image, int sampleId, CancellationToken stoppingToken);
+    Task CreateImage(Image image, string base64Image, int sampleId, CancellationToken stoppingToken);
     
     Task<IList<ImageDto>> GetImagesBySampleId(int sampleId, CancellationToken stoppingToken);
     
@@ -24,7 +24,7 @@ public class ImageEndpoint : EndpointBase, IImageEndpoint
         _client = client;
     }
     
-    public async Task SendImage(Image image, string base64Image, int sampleId, CancellationToken stoppingToken)
+    public async Task CreateImage(Image image, string base64Image, int sampleId, CancellationToken stoppingToken)
     {
         // Build request
         var request = new RestRequest("core/images/add-to-sample", Method.Post).AddJsonBody(new AddImageToSampleRequest

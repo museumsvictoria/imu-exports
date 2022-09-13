@@ -46,6 +46,7 @@ public class SampleFactory : IImuFactory<Sample>
             var latlong = site.GetMaps("latlong").FirstOrDefault(x => x.GetTrimString("LatPreferred_tab") == "Yes");
             string latlongLocationNotes = null;
             string georeferenceAssignedNotes = null;
+            string determinationMethod = null;
 
             if (latlong != null)
             {
@@ -69,12 +70,11 @@ public class SampleFactory : IImuFactory<Sample>
                     latlong.GetTrimString("LatDetDate0")
                 }.Concatenate(", ");
 
-                latlongLocationNotes = new[]
-                {
-                    string.IsNullOrWhiteSpace(latlong.GetTrimString("LatDatum_tab"))
-                        ? "datum unknown"
-                        : latlong.GetTrimString("LatDatum_tab")
-                }.Concatenate(", ");
+                latlongLocationNotes = string.IsNullOrWhiteSpace(latlong.GetTrimString("LatDatum_tab"))
+                    ? "datum unknown"
+                    : latlong.GetTrimString("LatDatum_tab");
+
+                determinationMethod = latlong.GetTrimString("LatLatLongDetermination_tab");
             }
 
             var geo = site.GetMaps("geo").FirstOrDefault();
@@ -92,6 +92,29 @@ public class SampleFactory : IImuFactory<Sample>
                 }.Concatenate(", ");
             }
 
+            // Properties:DescriptiveLocality
+            if (!string.IsNullOrWhiteSpace(geoLocationNotes))
+                sample.Properties.Add(new SampleProperty
+                {
+                    Property = new KeyValuePair<string, string>("DescriptiveLocality", geoLocationNotes),
+                    Order = 3
+                });
+            
+            // Properties:GeoreferenceDetails
+            var georeferenceDetails = new[]
+            {
+                georeferenceAssignedNotes,
+                determinationMethod,
+                latlongLocationNotes,
+                
+            }.Concatenate(" | ");
+            if (!string.IsNullOrWhiteSpace(georeferenceDetails))
+                sample.Properties.Add(new SampleProperty()
+                {
+                    Property = new KeyValuePair<string, string>("GeoreferenceDetails", georeferenceDetails),
+                    Order = 4
+                });
+
             sample.LocationDescription = new[]
             {
                 latlongLocationNotes,
@@ -102,6 +125,8 @@ public class SampleFactory : IImuFactory<Sample>
             }.Concatenate(" | ");
 
             sample.UnitName = site.GetTrimStrings("EraMvRockUnit_tab").Concatenate(", ");
+            
+            // TODO: Not used
             sample.UnitAge = new[]
             {
                 site.GetTrimString("EraEra"),
@@ -138,15 +163,6 @@ public class SampleFactory : IImuFactory<Sample>
         if (map.GetTrimString("ColDiscipline") == "Petrology")
             sample.SampleKind = "Rock";
 
-        sample.SpecimenState = map.GetMaps("preparations")
-            .Select(x => new[]
-            {
-                x.GetString("StrSpecimenForm_tab")
-            })
-            .SelectMany(x => x)
-            .Distinct()
-            .Concatenate(",");
-        
         // Mineralogy specific
         if (map.GetTrimString("ColDiscipline") == "Mineralogy")
         {
@@ -176,6 +192,14 @@ public class SampleFactory : IImuFactory<Sample>
                     : $"Chemical Analysis: {map.GetTrimString("MinChemicalAnalysis")}",
                 typeSpecimen == null ? null : $"Type specimen: {typeSpecimen}"
             }.Concatenate(" | ");
+            
+            // Properties:MineralVariety
+            if (!string.IsNullOrWhiteSpace(map.GetTrimString("MinVariety")))
+                sample.Properties.Add(new SampleProperty()
+                {
+                    Property = new KeyValuePair<string, string>("MineralVariety", map.GetTrimString("MinVariety")),
+                    Order = 1
+                });
         }
 
         // Petrology specific
@@ -203,6 +227,14 @@ public class SampleFactory : IImuFactory<Sample>
                     ? null
                     : $"Chemical Analysis: {map.GetTrimString("MinChemicalAnalysis")}"
             }.Concatenate(" | ");
+            
+            // Properties:ExtendedRockName
+            if (!string.IsNullOrWhiteSpace(map.GetTrimString("RocRockName")))
+                sample.Properties.Add(new SampleProperty()
+                {
+                    Property = new KeyValuePair<string, string>("ExtendedRockName", map.GetTrimString("RocRockName")),
+                    Order = 1
+                });
         }
 
         sample.LastKnownLocation = "Museums Victoria";
@@ -211,6 +243,39 @@ public class SampleFactory : IImuFactory<Sample>
         
         // Images
         sample.Images = _imageFactory.Make(map.GetMaps("media"), stoppingToken).ToList();
+        
+        // Properties:SpecimenForm
+        var specimenForm = map.GetMaps("preparations")
+            .Select(x => new[]
+            {
+                x.GetString("StrSpecimenForm_tab")
+            })
+            .SelectMany(x => x)
+            .Distinct()
+            .Concatenate(",");
+        if (!string.IsNullOrWhiteSpace(specimenForm))
+            sample.Properties.Add(new SampleProperty()
+            {
+                Property = new KeyValuePair<string, string>("SpecimenForm", specimenForm),
+                Order = 5
+            });
+        
+        // Properties:GeologicalDetails
+        var geologicalDetails = new[]
+        {
+            map.GetTrimString("MinAssociatedMatrix"),
+            map.GetTrimString("RocRockDescription"),
+            map.GetTrimString("RocMainMineralsPresent")
+        }.Concatenate(" | ");
+        if (!string.IsNullOrWhiteSpace(geologicalDetails))
+            sample.Properties.Add(new SampleProperty()
+            {
+                Property = new KeyValuePair<string, string>("GeologicalDetails", geologicalDetails),
+                Order = 5
+            });
+
+        // Sort properties
+        sample.Properties = sample.Properties.OrderBy(x => x.Order).ToList();
 
         return sample;
     }

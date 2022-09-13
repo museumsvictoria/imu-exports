@@ -25,17 +25,20 @@ public class AusGeochemClient : IAusGeochemClient
     private readonly IAuthenticateEndpoint _authenticateEndpoint;
     private readonly IImageEndpoint _imageEndpoint;
     private readonly ISampleEndpoint _sampleEndpoint;
+    private readonly ISamplePropertyEndpoint _samplePropertyEndpoint;
 
     public AusGeochemClient(
         IOptions<AppSettings> appSettings,
         IAuthenticateEndpoint authenticateEndpoint,
         IImageEndpoint imageEndpoint,
-        ISampleEndpoint sampleEndpoint)
+        ISampleEndpoint sampleEndpoint,
+        ISamplePropertyEndpoint samplePropertyEndpoint)
     {
         _appSettings = appSettings.Value;
         _authenticateEndpoint = authenticateEndpoint;
         _imageEndpoint = imageEndpoint;
         _sampleEndpoint = sampleEndpoint;
+        _samplePropertyEndpoint = samplePropertyEndpoint;
     }
 
     public async Task Authenticate(CancellationToken stoppingToken)
@@ -126,6 +129,8 @@ public class AusGeochemClient : IAusGeochemClient
                     {
                         await _imageEndpoint.DeleteImage(imageDto, stoppingToken);
                     }
+                    
+                    // TODO: Delete all sample properties
                 }
                 else
                 {
@@ -152,8 +157,10 @@ public class AusGeochemClient : IAusGeochemClient
                         var base64Image = await FetchImageAsBase64(stoppingToken, image);
 
                         if (updatedSampleDto.Id != null)
-                            await _imageEndpoint.SendImage(image, base64Image, updatedSampleDto.Id.Value, stoppingToken);
+                            await _imageEndpoint.CreateImage(image, base64Image, updatedSampleDto.Id.Value, stoppingToken);
                     }
+                    
+                    // TODO: Update all sample properties
                 }
             }
             else
@@ -165,21 +172,30 @@ public class AusGeochemClient : IAusGeochemClient
                     // Create sample
                     await _sampleEndpoint.SendSample(createSampleDto, Method.Post, stoppingToken);
 
-                    // Create Images
-                    if (sample.Images.Any())
+                    if (sample.Images.Any() || sample.Properties.Any())
                     {
-                        // Get created sample so we can link sample to image via id
+                        // Get created sample so we can link sample to images and sample properties
                         createSampleDto = await _sampleEndpoint.GetSampleBySourceId(sample.Irn, stoppingToken);
-
-                        foreach (var image in sample.Images)
-                        {
-                            // Fetch image as base64 string from IMu
-                            var base64Image = await FetchImageAsBase64(stoppingToken, image);
-
-                            if (createSampleDto.Id != null)
-                                await _imageEndpoint.SendImage(image, base64Image, createSampleDto.Id.Value, stoppingToken);
-                        }
                     }
+                    
+                    // Create Images
+                    foreach (var image in sample.Images)
+                    {
+                        // Fetch image as base64 string from IMu
+                        var base64Image = await FetchImageAsBase64(stoppingToken, image);
+
+                        if (createSampleDto.Id != null)
+                            await _imageEndpoint.CreateImage(image, base64Image, createSampleDto.Id.Value, stoppingToken);
+                    }
+
+                    // Create all sample properties
+                    foreach (var sampleProperty in sample.Properties)
+                        if (createSampleDto.Id != null)
+                        {
+                            var createSamplePropertyDto = sampleProperty.ToSamplePropertyDto(createSampleDto.Id.Value);
+                            await _samplePropertyEndpoint.SendSampleProperty(createSamplePropertyDto, Method.Post,
+                                stoppingToken);
+                        }
                 }
                 else
                     Log.Logger.Debug("Nothing to do with Sample {ShortName} as it is marked for deletion but doesnt exist in AusGeochem", createSampleDto.ShortName);

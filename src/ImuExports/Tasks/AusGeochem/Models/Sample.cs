@@ -5,9 +5,12 @@ public class Sample
     public Sample()
     {
         Images = new List<Image>();
+        Properties = new List<SampleProperty>();
     }
     
     public IList<Image> Images { get; set; }
+    
+    public IList<SampleProperty> Properties { get; set; }
     
     public string Irn { get; set; }
     
@@ -40,8 +43,6 @@ public class Sample
     public string DateCollectedMax { get; set; }
     
     public string SampleKind { get; set; }
-    
-    public string SpecimenState { get; set; }
     
     public string MineralId { get; set; }
     

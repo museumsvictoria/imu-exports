@@ -53,6 +53,7 @@ public static class ContainerConfig
                 return client;
             }, Lifestyle.Singleton);
             
+            // TODO: register endpoints in a more automatic way
             container.Register<IAusGeochemClient, AusGeochemClient>(Lifestyle.Singleton);
             container.Register<IAuthenticateEndpoint, AuthenticateEndpoint>(Lifestyle.Singleton);
             container.Register<ISampleEndpoint, SampleEndpoint>(Lifestyle.Singleton);
@@ -60,6 +61,7 @@ public static class ContainerConfig
             container.Register<ILocationKindEndpoint, LocationKindEndpoint>(Lifestyle.Singleton);
             container.Register<IMaterialEndpoint, MaterialEndpoint>(Lifestyle.Singleton);
             container.Register<ISampleKindEndpoint, SampleKindEndpoint>(Lifestyle.Singleton);
+            container.Register<ISamplePropertyEndpoint, SamplePropertyEndpoint>(Lifestyle.Singleton);
         }
         
         return container;
