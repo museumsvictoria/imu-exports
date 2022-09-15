@@ -271,7 +271,7 @@ public class SampleFactory : IImuFactory<Sample>
             sample.Properties.Add(new SampleProperty()
             {
                 Property = new KeyValuePair<string, string>("GeologicalDetails", geologicalDetails),
-                Order = 5
+                Order = 2
             });
 
         // Sort properties

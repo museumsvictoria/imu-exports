@@ -64,7 +64,9 @@ public class AusGeochemClient : IAusGeochemClient
         {
             stoppingToken.ThrowIfCancellationRequested();
             
+            // Delete images
             IList<ImageDto> imageDtos = new List<ImageDto>();
+            
             // Fetch all images associated with sample
             if (sampleDto.Id != null)
                 imageDtos = await _imageEndpoint.GetImagesBySampleId(sampleDto.Id.Value, stoppingToken);
@@ -77,6 +79,20 @@ public class AusGeochemClient : IAusGeochemClient
                 await _imageEndpoint.DeleteImage(imageDto, stoppingToken);
             }
             
+            // Delete sample properties
+            IList<SamplePropertyDto> currentSamplePropertiesDtos = new List<SamplePropertyDto>();
+                    
+            // Fetch all sample properties associated with sample
+            if (sampleDto.Id != null)
+                currentSamplePropertiesDtos = await _samplePropertyEndpoint.GetSamplePropertiesBySampleId(sampleDto.Id.Value,
+                    stoppingToken);
+
+            // Delete all sample properties
+            foreach (var samplePropertyDto in currentSamplePropertiesDtos)
+            {
+                await _samplePropertyEndpoint.DeleteSampleProperty(samplePropertyDto, stoppingToken);
+            }
+
             // Delete sample
             await _sampleEndpoint.DeleteSample(sampleDto, stoppingToken);
         }
@@ -130,7 +146,19 @@ public class AusGeochemClient : IAusGeochemClient
                         await _imageEndpoint.DeleteImage(imageDto, stoppingToken);
                     }
                     
-                    // TODO: Delete all sample properties
+                    // Delete sample properties
+                    IList<SamplePropertyDto> currentSamplePropertiesDtos = new List<SamplePropertyDto>();
+                    
+                    // Fetch all sample properties associated with sample
+                    if (updatedSampleDto.Id != null)
+                        currentSamplePropertiesDtos = await _samplePropertyEndpoint.GetSamplePropertiesBySampleId(updatedSampleDto.Id.Value,
+                            stoppingToken);
+
+                    // Delete all sample properties
+                    foreach (var samplePropertyDto in currentSamplePropertiesDtos)
+                    {
+                        await _samplePropertyEndpoint.DeleteSampleProperty(samplePropertyDto, stoppingToken);
+                    }
                 }
                 else
                 {
@@ -160,7 +188,38 @@ public class AusGeochemClient : IAusGeochemClient
                             await _imageEndpoint.CreateImage(image, base64Image, updatedSampleDto.Id.Value, stoppingToken);
                     }
                     
-                    // TODO: Update all sample properties
+                    // Fetch all current SamplePropertyDtos
+                    IList<SamplePropertyDto> currentSamplePropertiesDtos = new List<SamplePropertyDto>();
+                    if (updatedSampleDto.Id != null)
+                        currentSamplePropertiesDtos = await _samplePropertyEndpoint.GetSamplePropertiesBySampleId(updatedSampleDto.Id.Value,
+                            stoppingToken);
+                    
+                    // Update all sample properties
+                    foreach (var sampleProperty in sample.Properties)
+                    {
+                        var existingSamplePropertyDto = currentSamplePropertiesDtos.SingleOrDefault(x =>
+                            string.Equals(x.PropName, sampleProperty.Property.Key, StringComparison.OrdinalIgnoreCase));
+
+                        if (existingSamplePropertyDto != null)
+                        {
+                            // Update sample property
+                            var updatedSamplePropertyDto = sampleProperty.ToSamplePropertyDto(existingSamplePropertyDto);
+
+                            await _samplePropertyEndpoint.SendSampleProperty(updatedSamplePropertyDto, Method.Put,
+                                stoppingToken);
+                        }
+                        else
+                        {
+                            // Create sample property
+                            var createSamplePropertyDto = sampleProperty.ToSamplePropertyDto(updatedSampleDto.Id.Value);
+                            await _samplePropertyEndpoint.SendSampleProperty(createSamplePropertyDto, Method.Post, stoppingToken);
+                        }
+                    }
+
+                    // Delete sample properties that dont exist in properties but do in AusGeochem
+                    foreach (var samplePropertyDto in currentSamplePropertiesDtos.Where(x =>
+                                 sample.Properties.All(y => y.Property.Key != x.PropName)))
+                        await _samplePropertyEndpoint.DeleteSampleProperty(samplePropertyDto, stoppingToken);
                 }
             }
             else

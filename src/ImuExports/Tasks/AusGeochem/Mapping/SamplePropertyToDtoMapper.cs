@@ -5,12 +5,17 @@ namespace ImuExports.Tasks.AusGeochem.Mapping;
 
 public static class SamplePropertyToDtoMapper
 {
-    public static SamplePropertyDto ToSamplePropertyDto(this SampleProperty sampleProperty, int sampleId, SamplePropertyDto dto = null)
+    public static SamplePropertyDto ToSamplePropertyDto(this SampleProperty sampleProperty, SamplePropertyDto dto)
     {
-        dto ??= new SamplePropertyDto()
-        {
-            SampleId = sampleId
-        };
+        return ToSamplePropertyDto(sampleProperty, null, dto);
+    }
+    
+    public static SamplePropertyDto ToSamplePropertyDto(this SampleProperty sampleProperty, int? sampleId = null, SamplePropertyDto dto = null)
+    {
+        dto ??= new SamplePropertyDto();
+
+        if (sampleId != null)
+            dto.SampleId = sampleId;
 
         dto.PropName = sampleProperty.Property.Key;
         dto.PropValue = sampleProperty.Property.Value;
