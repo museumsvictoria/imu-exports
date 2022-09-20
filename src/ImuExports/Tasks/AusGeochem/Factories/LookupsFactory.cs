@@ -7,7 +7,12 @@ using ImuExports.Tasks.AusGeochem.Models;
 
 namespace ImuExports.Tasks.AusGeochem.Factories;
 
-public class LookupsFactory : IFactory<Lookups>
+public interface ILookupsFactory
+{
+    Task<Lookups> Make(CancellationToken stoppingToken);
+}
+
+public class LookupsFactory : ILookupsFactory
 {
     private readonly ILocationKindEndpoint _locationKindEndpoint;
     private readonly IMaterialEndpoint _materialEndpoint;

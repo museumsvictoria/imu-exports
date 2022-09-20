@@ -1,12 +1,10 @@
-﻿using ImageMagick;
-using IMu;
-using ImuExports.Tasks.AusGeochem.Contracts.Dtos;
+﻿using ImuExports.Tasks.AusGeochem.Contracts.Dtos;
 using ImuExports.Tasks.AusGeochem.Endpoints;
+using ImuExports.Tasks.AusGeochem.Factories;
 using ImuExports.Tasks.AusGeochem.Mapping;
 using ImuExports.Tasks.AusGeochem.Models;
 using Microsoft.Extensions.Options;
 using RestSharp;
-using Stopwatch = System.Diagnostics.Stopwatch;
 
 namespace ImuExports.Tasks.AusGeochem;
 
@@ -26,19 +24,22 @@ public class AusGeochemClient : IAusGeochemClient
     private readonly IImageEndpoint _imageEndpoint;
     private readonly ISampleEndpoint _sampleEndpoint;
     private readonly ISamplePropertyEndpoint _samplePropertyEndpoint;
+    private readonly IBase64ImageFactory _base64ImageFactory;
 
     public AusGeochemClient(
         IOptions<AppSettings> appSettings,
         IAuthenticateEndpoint authenticateEndpoint,
         IImageEndpoint imageEndpoint,
         ISampleEndpoint sampleEndpoint,
-        ISamplePropertyEndpoint samplePropertyEndpoint)
+        ISamplePropertyEndpoint samplePropertyEndpoint,
+        IBase64ImageFactory base64ImageFactory)
     {
         _appSettings = appSettings.Value;
         _authenticateEndpoint = authenticateEndpoint;
         _imageEndpoint = imageEndpoint;
         _sampleEndpoint = sampleEndpoint;
         _samplePropertyEndpoint = samplePropertyEndpoint;
+        _base64ImageFactory = base64ImageFactory;
     }
 
     public async Task Authenticate(CancellationToken stoppingToken)
@@ -182,9 +183,9 @@ public class AusGeochemClient : IAusGeochemClient
                     foreach (var image in sample.Images)
                     {
                         // Fetch image as base64 string from IMu
-                        var base64Image = await FetchImageAsBase64(stoppingToken, image);
+                        var base64Image = await _base64ImageFactory.Make(image.Irn, stoppingToken);
 
-                        if (updatedSampleDto.Id != null)
+                        if (!string.IsNullOrEmpty(base64Image) && updatedSampleDto.Id != null)
                             await _imageEndpoint.CreateImage(image, base64Image, updatedSampleDto.Id.Value, stoppingToken);
                     }
                     
@@ -241,9 +242,9 @@ public class AusGeochemClient : IAusGeochemClient
                     foreach (var image in sample.Images)
                     {
                         // Fetch image as base64 string from IMu
-                        var base64Image = await FetchImageAsBase64(stoppingToken, image);
+                        var base64Image = await _base64ImageFactory.Make(image.Irn, stoppingToken);
 
-                        if (createSampleDto.Id != null)
+                        if (!string.IsNullOrEmpty(base64Image) && createSampleDto.Id != null)
                             await _imageEndpoint.CreateImage(image, base64Image, createSampleDto.Id.Value, stoppingToken);
                     }
 
@@ -265,48 +266,48 @@ public class AusGeochemClient : IAusGeochemClient
         }
     }
     
-    //TODO: move this somewhere sensible
-    private async Task<string> FetchImageAsBase64(CancellationToken stoppingToken, Image image)
-    {
-        try
-        {
-            stoppingToken.ThrowIfCancellationRequested();
-            
-            var stopwatch = Stopwatch.StartNew();
-            
-            using var imuSession = new ImuSession("emultimedia", _appSettings.Imu.Host, _appSettings.Imu.Port);
-            imuSession.FindKey(image.Irn);
-            var resource = imuSession.Fetch("start", 0, -1, new[] { "resource" }).Rows[0].GetMap("resource");
-
-            if (resource == null)
-                throw new IMuException("MultimediaResourceNotFound");
-
-            await using var sourceFileStream = resource["file"] as FileStream;
-
-            using var imageResource = new MagickImage(sourceFileStream);
-
-            imageResource.Format = MagickFormat.Jpg;
-            imageResource.Quality = 90;
-            imageResource.FilterType = FilterType.Lanczos;
-            imageResource.ColorSpace = ColorSpace.sRGB;
-            imageResource.Resize(new MagickGeometry(3000) { Greater = true });
-            imageResource.UnsharpMask(0.5, 0.5, 0.6, 0.025);
-
-            var base64Image = imageResource.ToBase64();
-
-            stopwatch.Stop();
-            
-            Log.Logger.Debug("Completed fetching image {Irn} in {ElapsedMilliseconds}ms", image.Irn,
-                stopwatch.ElapsedMilliseconds);
-
-            return base64Image;
-        }
-        catch (Exception ex)
-        {
-            Log.Logger.Error(ex, "Error fetching image {Irn}, exiting", image.Irn);
-            Environment.Exit(Constants.ExitCodeError);
-        }
-        
-        return null;
-    }
+    // //TODO: move this somewhere sensible
+    // private async Task<string> FetchImageAsBase64(CancellationToken stoppingToken, Image image)
+    // {
+    //     try
+    //     {
+    //         stoppingToken.ThrowIfCancellationRequested();
+    //         
+    //         var stopwatch = Stopwatch.StartNew();
+    //         
+    //         using var imuSession = new ImuSession("emultimedia", _appSettings.Imu.Host, _appSettings.Imu.Port);
+    //         imuSession.FindKey(image.Irn);
+    //         var resource = imuSession.Fetch("start", 0, -1, new[] { "resource" }).Rows[0].GetMap("resource");
+    //
+    //         if (resource == null)
+    //             throw new IMuException("MultimediaResourceNotFound");
+    //
+    //         await using var sourceFileStream = resource["file"] as FileStream;
+    //
+    //         using var imageResource = new MagickImage(sourceFileStream);
+    //
+    //         imageResource.Format = MagickFormat.Jpg;
+    //         imageResource.Quality = 90;
+    //         imageResource.FilterType = FilterType.Lanczos;
+    //         imageResource.ColorSpace = ColorSpace.sRGB;
+    //         imageResource.Resize(new MagickGeometry(3000) { Greater = true });
+    //         imageResource.UnsharpMask(0.5, 0.5, 0.6, 0.025);
+    //
+    //         var base64Image = imageResource.ToBase64();
+    //
+    //         stopwatch.Stop();
+    //         
+    //         Log.Logger.Debug("Completed fetching image {Irn} in {ElapsedMilliseconds}ms", image.Irn,
+    //             stopwatch.ElapsedMilliseconds);
+    //
+    //         return base64Image;
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Log.Logger.Error(ex, "Error fetching image {Irn}, exiting", image.Irn);
+    //         Environment.Exit(Constants.ExitCodeError);
+    //     }
+    //     
+    //     return null;
+    // }
 }

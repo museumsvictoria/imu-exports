@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 using ImuExports.Tasks.AusGeochem;
 using ImuExports.Tasks.AusGeochem.Endpoints;
+using ImuExports.Tasks.AusGeochem.Factories;
 using RestSharp;
 using RestSharp.Serializers.Json;
 using SimpleInjector;
@@ -25,11 +26,11 @@ public static class ContainerConfig
         if(moduleSearchTypes.Any())
             container.Collection.Register<IModuleSearchConfig>(moduleSearchTypes);
 
-        // Register factories
-        var factoryRegistrations = typeof(IFactory<>).Assembly.GetExportedTypes()
+        // Register IMu factories
+        var factoryRegistrations = typeof(IImuFactory<>).Assembly.GetExportedTypes()
             .Where(type => type.Namespace != null &&
                            type.Namespace.StartsWith(CommandOptions.TaskOptions.GetType().Namespace ?? string.Empty))
-            .Where(type => type.GetInterfaces().Any(i => i.IsGenericType && (i.GetGenericTypeDefinition() == typeof(IImuFactory<>) || i.GetGenericTypeDefinition() == typeof(IFactory<>))))
+            .Where(type => type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IImuFactory<>)))
             .Select(type => new { Service = type.GetInterfaces().Single(), Implementation = type })
             .ToList();
         
@@ -53,7 +54,7 @@ public static class ContainerConfig
                 return client;
             }, Lifestyle.Singleton);
             
-            // TODO: register endpoints in a more automatic way
+            // TODO: register automatically
             container.Register<IAusGeochemClient, AusGeochemClient>(Lifestyle.Singleton);
             container.Register<IAuthenticateEndpoint, AuthenticateEndpoint>(Lifestyle.Singleton);
             container.Register<ISampleEndpoint, SampleEndpoint>(Lifestyle.Singleton);
@@ -62,6 +63,8 @@ public static class ContainerConfig
             container.Register<IMaterialEndpoint, MaterialEndpoint>(Lifestyle.Singleton);
             container.Register<ISampleKindEndpoint, SampleKindEndpoint>(Lifestyle.Singleton);
             container.Register<ISamplePropertyEndpoint, SamplePropertyEndpoint>(Lifestyle.Singleton);
+            container.Register<ILookupsFactory, LookupsFactory>(Lifestyle.Singleton);
+            container.Register<IBase64ImageFactory, Base64ImageFactory>(Lifestyle.Singleton);
         }
         
         return container;

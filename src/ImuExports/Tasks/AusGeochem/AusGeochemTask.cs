@@ -1,5 +1,6 @@
 ﻿using IMu;
 using ImuExports.Tasks.AusGeochem.Config;
+using ImuExports.Tasks.AusGeochem.Factories;
 using ImuExports.Tasks.AusGeochem.Models;
 using LiteDB;
 using Microsoft.Extensions.Options;
@@ -11,14 +12,14 @@ public class AusGeochemTask : ImuTaskBase, ITask
     private readonly AusGeochemOptions _options = (AusGeochemOptions)CommandOptions.TaskOptions;
     private readonly AppSettings _appSettings;
     private readonly IImuFactory<Sample> _sampleFactory;
-    private readonly IFactory<Lookups> _lookupsFactory;
+    private readonly ILookupsFactory _lookupsFactory;
     private readonly IAusGeochemClient _ausGeochemClient;
     private readonly IEnumerable<IModuleSearchConfig> _moduleSearchConfigs;
     
     public AusGeochemTask(
         IOptions<AppSettings> appSettings,
         IImuFactory<Sample> sampleFactory,
-        IFactory<Lookups> lookupsFactory,
+        ILookupsFactory lookupsFactory,
         IAusGeochemClient ausGeochemClient,
         IEnumerable<IModuleSearchConfig> moduleSearchConfigs) : base(appSettings)
     {
