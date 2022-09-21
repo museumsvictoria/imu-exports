@@ -265,49 +265,4 @@ public class AusGeochemClient : IAusGeochemClient
             Log.Logger.Information("Send samples progress... {Offset}/{TotalResults}", offset, samples.Count);
         }
     }
-    
-    // //TODO: move this somewhere sensible
-    // private async Task<string> FetchImageAsBase64(CancellationToken stoppingToken, Image image)
-    // {
-    //     try
-    //     {
-    //         stoppingToken.ThrowIfCancellationRequested();
-    //         
-    //         var stopwatch = Stopwatch.StartNew();
-    //         
-    //         using var imuSession = new ImuSession("emultimedia", _appSettings.Imu.Host, _appSettings.Imu.Port);
-    //         imuSession.FindKey(image.Irn);
-    //         var resource = imuSession.Fetch("start", 0, -1, new[] { "resource" }).Rows[0].GetMap("resource");
-    //
-    //         if (resource == null)
-    //             throw new IMuException("MultimediaResourceNotFound");
-    //
-    //         await using var sourceFileStream = resource["file"] as FileStream;
-    //
-    //         using var imageResource = new MagickImage(sourceFileStream);
-    //
-    //         imageResource.Format = MagickFormat.Jpg;
-    //         imageResource.Quality = 90;
-    //         imageResource.FilterType = FilterType.Lanczos;
-    //         imageResource.ColorSpace = ColorSpace.sRGB;
-    //         imageResource.Resize(new MagickGeometry(3000) { Greater = true });
-    //         imageResource.UnsharpMask(0.5, 0.5, 0.6, 0.025);
-    //
-    //         var base64Image = imageResource.ToBase64();
-    //
-    //         stopwatch.Stop();
-    //         
-    //         Log.Logger.Debug("Completed fetching image {Irn} in {ElapsedMilliseconds}ms", image.Irn,
-    //             stopwatch.ElapsedMilliseconds);
-    //
-    //         return base64Image;
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Log.Logger.Error(ex, "Error fetching image {Irn}, exiting", image.Irn);
-    //         Environment.Exit(Constants.ExitCodeError);
-    //     }
-    //     
-    //     return null;
-    // }
 }
