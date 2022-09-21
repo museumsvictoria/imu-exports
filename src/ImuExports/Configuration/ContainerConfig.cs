@@ -1,8 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using ImuExports.Tasks.AusGeochem;
-using ImuExports.Tasks.AusGeochem.Endpoints;
-using ImuExports.Tasks.AusGeochem.Factories;
 using RestSharp;
 using RestSharp.Serializers.Json;
 using SimpleInjector;
@@ -16,36 +14,25 @@ public static class ContainerConfig
         // Register task
         container.Register(typeof(ITask), CommandOptions.TaskOptions.TypeOfTask, Lifestyle.Singleton);
 
-        // Register module search configs
-        var moduleSearchTypes = typeof(IModuleSearchConfig).Assembly.GetExportedTypes()
-            .Where(type => type.Namespace != null &&
-                           type.Namespace.StartsWith(CommandOptions.TaskOptions.GetType().Namespace ?? string.Empty))
-            .Where(type => type.GetInterfaces().Contains(typeof(IModuleSearchConfig)))
-            .ToList();
-        
-        if(moduleSearchTypes.Any())
-            container.Collection.Register<IModuleSearchConfig>(moduleSearchTypes);
+        // Register all search configs
+        container.RegisterAllByInterface(typeof(IModuleSearchConfig), Lifestyle.Singleton);
+
+        // Register Endpoints
+        container.RegisterAll(type => type.Name.Contains("Endpoint"), Lifestyle.Singleton);
+
+        // Register Factories
+        container.RegisterAll(type => type.Name.Contains("Factory") && !type.Name.Contains("ImuFactory"), Lifestyle.Singleton);
 
         // Register IMu factories
-        var factoryRegistrations = typeof(IImuFactory<>).Assembly.GetExportedTypes()
-            .Where(type => type.Namespace != null &&
-                           type.Namespace.StartsWith(CommandOptions.TaskOptions.GetType().Namespace ?? string.Empty))
-            .Where(type => type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IImuFactory<>)))
-            .Select(type => new { Service = type.GetInterfaces().Single(), Implementation = type })
-            .ToList();
-        
-        foreach (var registration in factoryRegistrations)
-        {
-            container.Register(registration.Service, registration.Implementation, Lifestyle.Singleton);
-        }
-        
+        container.RegisterAll(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IImuFactory<>), Lifestyle.Singleton);
+
         // AusGeochemTask specific
         if (CommandOptions.TaskOptions.TypeOfTask == typeof(AusGeochemTask))
         {
             container.Register(() =>
             {
                 var client = new RestClient(appSettings.AusGeochem.BaseUrl);
-                
+
                 client.UseSystemTextJson(new JsonSerializerOptions(JsonSerializerDefaults.Web)
                 {
                     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
@@ -53,20 +40,39 @@ public static class ContainerConfig
 
                 return client;
             }, Lifestyle.Singleton);
-            
-            // TODO: register automatically
+
             container.Register<IAusGeochemClient, AusGeochemClient>(Lifestyle.Singleton);
-            container.Register<IAuthenticateEndpoint, AuthenticateEndpoint>(Lifestyle.Singleton);
-            container.Register<ISampleEndpoint, SampleEndpoint>(Lifestyle.Singleton);
-            container.Register<IImageEndpoint, ImageEndpoint>(Lifestyle.Singleton);
-            container.Register<ILocationKindEndpoint, LocationKindEndpoint>(Lifestyle.Singleton);
-            container.Register<IMaterialEndpoint, MaterialEndpoint>(Lifestyle.Singleton);
-            container.Register<ISampleKindEndpoint, SampleKindEndpoint>(Lifestyle.Singleton);
-            container.Register<ISamplePropertyEndpoint, SamplePropertyEndpoint>(Lifestyle.Singleton);
-            container.Register<ILookupsFactory, LookupsFactory>(Lifestyle.Singleton);
-            container.Register<IBase64ImageFactory, Base64ImageFactory>(Lifestyle.Singleton);
         }
-        
+
         return container;
+    }
+
+    private static void RegisterAllByInterface(this Container container, Type type, Lifestyle lifestyle = null)
+    {
+        var types = typeof(ContainerConfig).Assembly.GetExportedTypes()
+            .Where(t => t.Namespace != null &&
+                        t.Namespace.StartsWith(CommandOptions.TaskOptions.GetType().Namespace ?? string.Empty))
+            .Where(t => t.GetInterfaces().Contains(type))
+            .ToList();
+
+        if (types.Any())
+            container.Collection.Register(type, types, lifestyle ?? Lifestyle.Transient);
+    }
+
+    private static void RegisterAll(this Container container, Func<Type, bool> interfaceFilter = null,
+        Lifestyle lifestyle = null)
+    {
+        var registrations = typeof(ContainerConfig).Assembly.GetExportedTypes()
+            .Where(t => t.Namespace != null && t.Namespace.StartsWith(CommandOptions.TaskOptions.GetType().Namespace ?? string.Empty));
+
+        if (interfaceFilter != null)
+        {
+            registrations = registrations.Where(t => t.GetInterfaces().Any(interfaceFilter));
+        }
+
+        foreach (var registration in registrations.Select(t => new { Service = t.GetInterfaces().Single(), Implementation = t }))
+        {
+            container.Register(registration.Service, registration.Implementation, lifestyle ?? Lifestyle.Transient);
+        }
     }
 }
