@@ -13,20 +13,20 @@ public class AusGeochemTask : ImuTaskBase, ITask
     private readonly AppSettings _appSettings;
     private readonly IImuFactory<Sample> _sampleFactory;
     private readonly ILookupsFactory _lookupsFactory;
-    private readonly IAusGeochemClient _ausGeochemClient;
+    private readonly IAusGeochemApiClient _ausGeochemApiClient;
     private readonly IEnumerable<IModuleSearchConfig> _moduleSearchConfigs;
     
     public AusGeochemTask(
         IOptions<AppSettings> appSettings,
         IImuFactory<Sample> sampleFactory,
         ILookupsFactory lookupsFactory,
-        IAusGeochemClient ausGeochemClient,
+        IAusGeochemApiClient ausGeochemApiClient,
         IEnumerable<IModuleSearchConfig> moduleSearchConfigs) : base(appSettings)
     {
         _appSettings = appSettings.Value;
         _sampleFactory = sampleFactory;
         _lookupsFactory = lookupsFactory;
-        _ausGeochemClient = ausGeochemClient;
+        _ausGeochemApiClient = ausGeochemApiClient;
         _moduleSearchConfigs = moduleSearchConfigs;
     }
 
@@ -37,14 +37,14 @@ public class AusGeochemTask : ImuTaskBase, ITask
             stoppingToken.ThrowIfCancellationRequested();
             
             // Authenticate
-            await _ausGeochemClient.Authenticate(stoppingToken);
+            await _ausGeochemApiClient.Authenticate(stoppingToken);
             
             if (_options.DeleteAll)
             {
                 // Delete all samples and images in AusGeochem
                 foreach (var package in _appSettings.AusGeochem.DataPackages)
                 {
-                    await _ausGeochemClient.DeleteAllByDataPackageId(package.Id, stoppingToken);
+                    await _ausGeochemApiClient.DeleteAllByDataPackageId(package.Id, stoppingToken);
                 }
                 
                 return;
@@ -60,7 +60,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
                 var samples = await FetchSamples(package.Discipline, stoppingToken);
 
                 // Build and then send sample Dtos
-                await _ausGeochemClient.SendSamples(lookups, samples, package.Id, stoppingToken);
+                await _ausGeochemApiClient.SendSamples(lookups, samples, package.Id, stoppingToken);
             }
 
             // Update/Insert application

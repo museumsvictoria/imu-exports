@@ -17,9 +17,6 @@ public static class ContainerConfig
         // Register all search configs
         container.RegisterAllByInterface(typeof(IModuleSearchConfig), Lifestyle.Singleton);
 
-        // Register Endpoints
-        container.RegisterAll(type => type.Name.Contains("Endpoint"), Lifestyle.Singleton);
-
         // Register Factories
         container.RegisterAll(type => type.Name.Contains("Factory") && !type.Name.Contains("ImuFactory"), Lifestyle.Singleton);
 
@@ -41,7 +38,13 @@ public static class ContainerConfig
                 return client;
             }, Lifestyle.Singleton);
 
-            container.Register<IAusGeochemClient, AusGeochemClient>(Lifestyle.Singleton);
+            container.Register<IAusGeochemApiClient, AusGeochemApiApiClient>(Lifestyle.Singleton);
+            
+            // Register Endpoints
+            container.RegisterAll(type => type.Name.Contains("Endpoint"), Lifestyle.Singleton);
+            
+            // Register API Handlers
+            container.RegisterAll(type => type.Name.Contains("ApiHandler"), Lifestyle.Singleton);
         }
 
         return container;

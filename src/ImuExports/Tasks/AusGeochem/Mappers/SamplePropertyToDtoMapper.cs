@@ -1,7 +1,7 @@
 ﻿using ImuExports.Tasks.AusGeochem.Contracts.Dtos;
 using ImuExports.Tasks.AusGeochem.Models;
 
-namespace ImuExports.Tasks.AusGeochem.Mapping;
+namespace ImuExports.Tasks.AusGeochem.Mappers;
 
 public static class SamplePropertyToDtoMapper
 {
