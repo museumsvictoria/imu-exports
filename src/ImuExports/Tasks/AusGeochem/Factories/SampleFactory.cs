@@ -96,7 +96,7 @@ public class SampleFactory : IImuFactory<Sample>
             if (!string.IsNullOrWhiteSpace(geoLocationNotes))
                 sample.Properties.Add(new SampleProperty
                 {
-                    Property = new KeyValuePair<string, string>("DescriptiveLocality", geoLocationNotes),
+                    Property = new KeyValuePair<string, string>("Descriptive Locality", geoLocationNotes),
                     Order = 3
                 });
             
@@ -111,7 +111,7 @@ public class SampleFactory : IImuFactory<Sample>
             if (!string.IsNullOrWhiteSpace(georeferenceDetails))
                 sample.Properties.Add(new SampleProperty()
                 {
-                    Property = new KeyValuePair<string, string>("GeoreferenceDetails", georeferenceDetails),
+                    Property = new KeyValuePair<string, string>("Georeference Details", georeferenceDetails),
                     Order = 4
                 });
 
@@ -197,7 +197,7 @@ public class SampleFactory : IImuFactory<Sample>
             if (!string.IsNullOrWhiteSpace(map.GetTrimString("MinVariety")))
                 sample.Properties.Add(new SampleProperty()
                 {
-                    Property = new KeyValuePair<string, string>("MineralVariety", map.GetTrimString("MinVariety")),
+                    Property = new KeyValuePair<string, string>("Mineral Variety", map.GetTrimString("MinVariety")),
                     Order = 1
                 });
         }
@@ -232,7 +232,7 @@ public class SampleFactory : IImuFactory<Sample>
             if (!string.IsNullOrWhiteSpace(map.GetTrimString("RocRockName")))
                 sample.Properties.Add(new SampleProperty()
                 {
-                    Property = new KeyValuePair<string, string>("ExtendedRockName", map.GetTrimString("RocRockName")),
+                    Property = new KeyValuePair<string, string>("Extended Rock Name", map.GetTrimString("RocRockName")),
                     Order = 1
                 });
         }
@@ -256,7 +256,7 @@ public class SampleFactory : IImuFactory<Sample>
         if (!string.IsNullOrWhiteSpace(specimenForm))
             sample.Properties.Add(new SampleProperty()
             {
-                Property = new KeyValuePair<string, string>("SpecimenForm", specimenForm),
+                Property = new KeyValuePair<string, string>("Specimen Form", specimenForm),
                 Order = 5
             });
         
@@ -270,7 +270,7 @@ public class SampleFactory : IImuFactory<Sample>
         if (!string.IsNullOrWhiteSpace(geologicalDetails))
             sample.Properties.Add(new SampleProperty()
             {
-                Property = new KeyValuePair<string, string>("GeologicalDetails", geologicalDetails),
+                Property = new KeyValuePair<string, string>("Geological Details", geologicalDetails),
                 Order = 2
             });
 
