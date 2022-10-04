@@ -108,6 +108,7 @@ public class SampleFactory : IImuFactory<Sample>
                 latlongLocationNotes,
                 
             }.Concatenate(" | ");
+            
             if (!string.IsNullOrWhiteSpace(georeferenceDetails))
                 sample.Properties.Add(new SampleProperty()
                 {
@@ -253,6 +254,7 @@ public class SampleFactory : IImuFactory<Sample>
             .SelectMany(x => x)
             .Distinct()
             .Concatenate(",");
+        
         if (!string.IsNullOrWhiteSpace(specimenForm))
             sample.Properties.Add(new SampleProperty()
             {
@@ -267,6 +269,7 @@ public class SampleFactory : IImuFactory<Sample>
             map.GetTrimString("RocRockDescription"),
             map.GetTrimString("RocMainMineralsPresent")
         }.Concatenate(" | ");
+        
         if (!string.IsNullOrWhiteSpace(geologicalDetails))
             sample.Properties.Add(new SampleProperty()
             {

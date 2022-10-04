@@ -31,15 +31,8 @@ public class TaskRunner : BackgroundService
             // Cleanup task
             await CommandOptions.TaskOptions.CleanUp(_appSettings);
         }
-        catch (Exception ex)
+        catch
         {
-            if (ex is OperationCanceledException)
-            {
-                Log.Logger.Information("TaskRunner has been cancelled prematurely");
-            }
-            else
-                Log.Logger.Error(ex, "Exception occured running task");
-            
             // Attempt to cleanup
             await CommandOptions.TaskOptions.CleanUp(_appSettings);
 

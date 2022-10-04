@@ -11,9 +11,9 @@ public interface IAusGeochemApiClient
 {
     Task Authenticate(CancellationToken stoppingToken);
 
-    Task DeleteAllByDataPackageId(int? dataPackageId, CancellationToken stoppingToken);
+    Task DeleteAllByDataPackageId(DataPackage package, CancellationToken stoppingToken);
 
-    Task SendSamples(Lookups lookups, IList<Sample> samples, int? dataPackageId, CancellationToken stoppingToken);
+    Task SendSamples(Lookups lookups, IList<Sample> samples, DataPackage package, CancellationToken stoppingToken);
 }
 
 public class AusGeochemApiApiClient : IAusGeochemApiClient
@@ -43,20 +43,20 @@ public class AusGeochemApiApiClient : IAusGeochemApiClient
         await _authenticateEndpoint.Authenticate(stoppingToken);
     }
 
-    public async Task DeleteAllByDataPackageId(int? dataPackageId, CancellationToken stoppingToken)
+    public async Task DeleteAllByDataPackageId(DataPackage package, CancellationToken stoppingToken)
     {
         // Exit if DataPackageId not known
-        if (dataPackageId == null)
+        if (package.Id == null)
         {
-            Log.Logger.Fatal("DataPackageId is null, cannot continue without one, exiting");
+            Log.Logger.Fatal("DataPackage Id is null, cannot continue without one, exiting");
             Environment.Exit(Constants.ExitCodeError);
         }
         
         // Fetch all current SampleWithLocationDtos
-        Log.Logger.Information("Fetching all current SampleWithLocationDtos within AusGeochem for DataPackageId {DataPackageId}", dataPackageId);
-        var currentSampleDtos = await _sampleEndpoint.GetSamplesByPackageId(dataPackageId.Value, stoppingToken);
+        Log.Logger.Information("Fetching all current SampleWithLocationDtos within AusGeochem for Data Package {Discipline} ({DataPackageId})", package.Discipline, package.Id);
+        var currentSampleDtos = await _sampleEndpoint.GetSamplesByPackageId(package.Id.Value, stoppingToken);
 
-        Log.Logger.Information("Deleting all entities for DataPackageId {DataPackageId}", dataPackageId);
+        Log.Logger.Information("Deleting all entities for Data Package {Discipline} ({DataPackageId})", package.Discipline, package.Id);
         foreach (var sampleDto in currentSampleDtos)
         {
             stoppingToken.ThrowIfCancellationRequested();
@@ -74,24 +74,24 @@ public class AusGeochemApiApiClient : IAusGeochemApiClient
         }
     }
 
-    public async Task SendSamples(Lookups lookups, IList<Sample> samples, int? dataPackageId, CancellationToken stoppingToken)
+    public async Task SendSamples(Lookups lookups, IList<Sample> samples, DataPackage package, CancellationToken stoppingToken)
     {
         if(!samples.Any())
             return;
         
         // Exit if DataPackageId not known
-        if (dataPackageId == null)
+        if (package.Id == null)
         {
             Log.Logger.Fatal("DataPackageId is null, cannot continue without one, exiting");
             Environment.Exit(Constants.ExitCodeError);
         }
 
         // Fetch all current SampleWithLocationDtos
-        Log.Logger.Information("Fetching all current SampleWithLocationDtos within AusGeochem for DataPackageId {DataPackageId}", dataPackageId);
-        var currentSampleDtos = await _sampleEndpoint.GetSamplesByPackageId(dataPackageId.Value, stoppingToken);
+        Log.Logger.Information("Fetching all current SampleWithLocationDtos within AusGeochem for Data Package {Discipline} ({DataPackageId})", package.Discipline, package.Id);
+        var currentSampleDtos = await _sampleEndpoint.GetSamplesByPackageId(package.Id.Value, stoppingToken);
 
         // Send/Delete samples
-        Log.Logger.Information("Sending samples for DataPackageId {DataPackageId}", dataPackageId);
+        Log.Logger.Information("Sending samples for Data Package {Discipline} ({DataPackageId})", package.Discipline, package.Id);
         var offset = 0;
         foreach (var sample in samples)
         {
@@ -130,7 +130,7 @@ public class AusGeochemApiApiClient : IAusGeochemApiClient
             }
             else
             {
-                var createSampleDto = sample.ToSampleWithLocationDto(lookups, dataPackageId, _appSettings.AusGeochem.ArchiveId);
+                var createSampleDto = sample.ToSampleWithLocationDto(lookups, package.Id, _appSettings.AusGeochem.ArchiveId);
 
                 if (!sample.Deleted)
                 {
@@ -156,7 +156,7 @@ public class AusGeochemApiApiClient : IAusGeochemApiClient
             }
 
             offset++;
-            Log.Logger.Information("Send samples progress... {Offset}/{TotalResults}", offset, samples.Count);
+            Log.Logger.Information("Send samples progress for Data Package {Discipline} ({DataPackageId})... {Offset}/{TotalResults}", package.Discipline, package.Id, offset, samples.Count);
         }
     }
 }

@@ -44,12 +44,12 @@ public class AusGeochemTask : ImuTaskBase, ITask
                 // Delete all samples and images in AusGeochem
                 foreach (var package in _appSettings.AusGeochem.DataPackages)
                 {
-                    await _ausGeochemApiClient.DeleteAllByDataPackageId(package.Id, stoppingToken);
+                    await _ausGeochemApiClient.DeleteAllByDataPackageId(package, stoppingToken);
                 }
                 
                 return;
             }
-            
+
             // Make lookup lists for use in creating Dtos to send
             var lookups = await _lookupsFactory.Make(stoppingToken);
 
@@ -57,10 +57,10 @@ public class AusGeochemTask : ImuTaskBase, ITask
             foreach (var package in _appSettings.AusGeochem.DataPackages)
             {
                 // Fetch samples from IMu
-                var samples = await FetchSamples(package.Discipline, stoppingToken);
+                var samples = await FetchSamples(package, stoppingToken);
 
                 // Build and then send sample Dtos
-                await _ausGeochemApiClient.SendSamples(lookups, samples, package.Id, stoppingToken);
+                await _ausGeochemApiClient.SendSamples(lookups, samples, package, stoppingToken);
             }
 
             // Update/Insert application
@@ -119,10 +119,10 @@ public class AusGeochemTask : ImuTaskBase, ITask
         "AdmPublishWebNoPassword"
     };
 
-    private async Task<List<Sample>> FetchSamples(string discipline, CancellationToken stoppingToken)
+    private async Task<List<Sample>> FetchSamples(DataPackage package, CancellationToken stoppingToken)
     {
         // Cache Irns only
-        Log.Logger.Information("Caching {Discipline} catalogue irns", discipline);
+        Log.Logger.Information("Caching {Discipline} catalogue irns", package.Discipline);
         var cachedIrns = new List<long>();
         
         if (_options.Application.PreviousDateRun.HasValue)
@@ -136,7 +136,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
                 {
                     filter.TermFilters = new List<KeyValuePair<string, string>>()
                     {
-                        new("ColDiscipline", discipline)
+                        new("ColDiscipline", package.Discipline)
                     };
                 }
 
@@ -157,13 +157,13 @@ public class AusGeochemTask : ImuTaskBase, ITask
         {
             stoppingToken.ThrowIfCancellationRequested();
 
-            cachedIrns = (await CacheIrns("ecatalogue", this.BuildTerms(discipline), stoppingToken)).ToList();
+            cachedIrns = (await CacheIrns("ecatalogue", this.BuildTerms(package.Discipline), stoppingToken)).ToList();
         }
 
         // Fetch actual catalogue data from IMu
         var samples = new List<Sample>();
         var offset = 0;
-        Log.Logger.Information("Fetching {Discipline} catalogue data", discipline);
+        Log.Logger.Information("Fetching {Discipline} catalogue data", package.Discipline);
         while (true)
         {
             stoppingToken.ThrowIfCancellationRequested();
@@ -182,7 +182,7 @@ public class AusGeochemTask : ImuTaskBase, ITask
 
             var results = imuSession.Fetch("start", 0, -1, this.ExportColumns);
 
-            Log.Logger.Debug("Fetched {RecordCount} {Discipline} records from IMu", cachedIrnsBatch.Count, discipline);
+            Log.Logger.Debug("Fetched {RecordCount} {Discipline} records from IMu", cachedIrnsBatch.Count, package.Discipline);
 
             // Build sample from catalogue data and add to samples
             samples.AddRange(results.Rows.Select(map => _sampleFactory.Make(map, stoppingToken)));
