@@ -39,10 +39,8 @@ public class SamplePropertyEndpoint : EndpointBase, ISamplePropertyEndpoint
 
         if (!response.IsSuccessful)
         {
-            Log.Logger.Fatal(
-                "Error occured sending sample property {PropName} at resource {Resource} via {Method} exiting, {ErrorMessage}",
-                dto.PropName, request.Resource, request.Method, response.ErrorMessage ?? response.Content);
-            Environment.Exit(Constants.ExitCodeError);
+            Log.Logger.Fatal("Error occured sending sample property {PropName}", dto.PropName);
+            throw RestException.CreateException(response);
         }
         else
         {
@@ -65,10 +63,8 @@ public class SamplePropertyEndpoint : EndpointBase, ISamplePropertyEndpoint
 
         if (!response.IsSuccessful)
         {
-            Log.Logger.Fatal(
-                "Error occured deleting sample property {PropName} at resource {Resource} via {Method} exiting, {ErrorMessage}",
-                dto.PropName, request.Resource, request.Method, response.ErrorMessage ?? response.Content);
-            Environment.Exit(Constants.ExitCodeError);
+            Log.Logger.Fatal("Error occured deleting sample property {PropName}", dto.PropName);
+            throw RestException.CreateException(response);
         }
         else
         {

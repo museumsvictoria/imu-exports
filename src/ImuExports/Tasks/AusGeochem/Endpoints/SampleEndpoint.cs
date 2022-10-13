@@ -52,10 +52,8 @@ public class SampleEndpoint : EndpointBase, ISampleEndpoint
         if (!response.IsSuccessful)
         {
             Log.Logger.Fatal(
-                "Error occured fetching {Name} by SourceId {SourceId} at endpoint {Resource} via {Method} exiting, {ErrorMessage}",
-                nameof(SampleWithLocationDto), sourceId, request.Resource, request.Method,
-                response.ErrorMessage ?? response.Content);
-            Environment.Exit(Constants.ExitCodeError);
+                "Error occured fetching {Name} by SourceId {SourceId}", nameof(SampleWithLocationDto), sourceId);
+            throw RestException.CreateException(response);
         }
 
         return response.Data?.FirstOrDefault();
@@ -78,10 +76,8 @@ public class SampleEndpoint : EndpointBase, ISampleEndpoint
 
         if (!response.IsSuccessful)
         {
-            Log.Logger.Fatal(
-                "Error occured sending sample {ShortName} at resource {Resource} via {Method} exiting, {ErrorMessage}",
-                dto.ShortName, request.Resource, request.Method, response.ErrorMessage ?? response.Content);
-            Environment.Exit(Constants.ExitCodeError);
+            Log.Logger.Fatal("Error occured sending sample {ShortName}", dto.ShortName);
+            throw RestException.CreateException(response);
         }
         else
         {
@@ -105,9 +101,8 @@ public class SampleEndpoint : EndpointBase, ISampleEndpoint
         if (!response.IsSuccessful)
         {
             Log.Logger.Fatal(
-                "Error occured deleting sample {ShortName} at resource {Resource} via {Method} exiting, {ErrorMessage}",
-                dto.ShortName, request.Resource, request.Method, response.ErrorMessage ?? response.Content);
-            Environment.Exit(Constants.ExitCodeError);
+                "Error occured deleting sample {ShortName}", dto.ShortName);
+            throw RestException.CreateException(response);
         }
         else
         {

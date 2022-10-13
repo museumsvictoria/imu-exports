@@ -10,13 +10,14 @@ public class ImuSession : IDisposable
 
     public ImuSession(string moduleName, string host, int? port)
     {
-        // Exit if host or port not set
-        if (port == null || string.IsNullOrEmpty(host))
-        {
-            Log.Logger.Fatal("IMu host {Host} and port {Port} need to be set, exiting", host, port);
-            Environment.Exit(Constants.ExitCodeError);
-        }
+        // Check port
+        ArgumentNullException.ThrowIfNull(port);
         
+        // Check host
+        ArgumentNullException.ThrowIfNull(host);
+        if (host.Trim() == string.Empty)
+            throw new ArgumentException("Host cannot be empty", nameof(host));
+
         _session = new Session(host, port.Value);
         _session.Connect();
 

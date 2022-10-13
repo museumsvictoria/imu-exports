@@ -45,11 +45,11 @@ public class AusGeochemApiApiClient : IAusGeochemApiClient
 
     public async Task DeleteAllByDataPackageId(DataPackage package, CancellationToken stoppingToken)
     {
-        // Exit if DataPackageId not known
+        // Throw if DataPackageId not known
         if (package.Id == null)
         {
             Log.Logger.Fatal("DataPackage Id is null, cannot continue without one, exiting");
-            Environment.Exit(Constants.ExitCodeError);
+            ArgumentNullException.ThrowIfNull(package.Id);
         }
         
         // Fetch all current SampleWithLocationDtos
@@ -79,11 +79,11 @@ public class AusGeochemApiApiClient : IAusGeochemApiClient
         if(!samples.Any())
             return;
         
-        // Exit if DataPackageId not known
+        // Throw if DataPackageId not known
         if (package.Id == null)
         {
-            Log.Logger.Fatal("DataPackageId is null, cannot continue without one, exiting");
-            Environment.Exit(Constants.ExitCodeError);
+            Log.Logger.Fatal("DataPackage Id is null, cannot continue without one, exiting");
+            ArgumentNullException.ThrowIfNull(package.Id);
         }
 
         // Fetch all current SampleWithLocationDtos

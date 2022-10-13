@@ -42,9 +42,8 @@ public abstract class EndpointBase
 
             if (!response.IsSuccessful)
             {
-                Log.Logger.Fatal("Error occured fetching {Name} at endpoint {Resource} via {Method} exiting, {ErrorMessage}",
-                    typeof(T).Name, request.Resource, request.Method, response.ErrorMessage ?? response.Content);
-                Environment.Exit(Constants.ExitCodeError);
+                Log.Logger.Fatal("Error occured fetching {Name}", typeof(T).Name);
+                throw RestException.CreateException(response);
             }
 
             if (response.Data != null)

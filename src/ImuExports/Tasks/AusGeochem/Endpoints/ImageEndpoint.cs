@@ -43,9 +43,8 @@ public class ImageEndpoint : EndpointBase, IImageEndpoint
 
         if (!response.IsSuccessful)
         {
-            Log.Logger.Fatal("Error occured sending image {Irn} via {Method} attached to sample {SampleId}, exiting, {ErrorMessage}", 
-                image.Irn, request.Method, sampleId, response.ErrorMessage ?? response.Content);
-            Environment.Exit(Constants.ExitCodeError);
+            Log.Logger.Fatal("Error occured sending image {Irn} attached to sample {SampleId}", image.Irn, sampleId);
+            throw RestException.CreateException(response);
         }
         else
         {
@@ -78,9 +77,8 @@ public class ImageEndpoint : EndpointBase, IImageEndpoint
 
         if (!response.IsSuccessful)
         {
-            Log.Logger.Fatal("Error occured deleting image {Id} at resource {Resource} via {Method} exiting, {ErrorMessage}",
-                dto.Id, request.Resource, request.Method, response.ErrorMessage ?? response.Content);
-            Environment.Exit(Constants.ExitCodeError);
+            Log.Logger.Fatal("Error occured deleting image {Id}", dto.Id);
+            throw RestException.CreateException(response);
         }
         else
         {

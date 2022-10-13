@@ -36,16 +36,21 @@ public class AuthenticateEndpoint : EndpointBase, IAuthenticateEndpoint
         // Request JWT
         Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
         var response = await _client.ExecuteAsync<AuthenticateResponse>(request, stoppingToken);
-
+        
         if (!response.IsSuccessful)
         {
-            Log.Logger.Fatal("Could not successfully authenticate, exiting, {ErrorMessage}", response.ErrorMessage ?? response.Content);
-            Environment.Exit(Constants.ExitCodeError);
+            Log.Logger.Fatal("Could not successfully authenticate");
+            throw RestException.CreateException(response);
         }
-        else if (!string.IsNullOrWhiteSpace(response.Data?.Token))
+        
+        if (!string.IsNullOrWhiteSpace(response.Data?.Token))
         {
             // Set authenticator if successful
             _client.Authenticator = new JwtAuthenticator(response.Data.Token);
+        }
+        else
+        {
+            throw new InvalidOperationException("JWT Token cannot be null or empty");
         }
 
         Log.Logger.Debug("Api authentication successful");

@@ -58,9 +58,7 @@ public class Base64ImageFactory : IBase64ImageFactory
         catch (Exception ex)
         {
             Log.Logger.Error(ex, "Error fetching image {Irn}, exiting", irn);
-            Environment.Exit(Constants.ExitCodeError);
+            throw;
         }
-
-        return null;
     }
 }
