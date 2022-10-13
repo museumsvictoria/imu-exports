@@ -71,7 +71,7 @@ public class SampleFactory : IImuFactory<Sample>
                 }.Concatenate(", ");
 
                 latlongLocationNotes = string.IsNullOrWhiteSpace(latlong.GetTrimString("LatDatum_tab"))
-                    ? "datum unknown"
+                    ? "Assumed WGS84"
                     : latlong.GetTrimString("LatDatum_tab");
 
                 determinationMethod = latlong.GetTrimString("LatLatLongDetermination_tab");
@@ -127,21 +127,12 @@ public class SampleFactory : IImuFactory<Sample>
 
             sample.UnitName = site.GetTrimStrings("EraMvRockUnit_tab").Concatenate(", ");
             
-            // TODO: Not used
-            sample.UnitAge = new[]
-            {
-                site.GetTrimString("EraEra"),
-                site.GetTrimString("EraAge1"),
-                site.GetTrimString("EraAge2"),
-                site.GetTrimString("EraMvStage")
-            }.Concatenate(", ");
-
             if (site.GetTrimString("EraDepthDeterminationMethod") == "Subsurface - mine/quarry, unknown depth" ||
                 site.GetTrimString("EraDepthDeterminationMethod") ==
                 "Subsurface - mine/quarry, depth from locality data")
                 sample.LocationKind = "Mine";
             else if (site.GetTrimString("EraDepthDeterminationMethod") ==
-                     "Subsurface - borehole/well, depth unknown" || site.GetTrimString("EraDepthDeterminationMethod") ==
+                     "Subsurface - borehole/well, unknown depth" || site.GetTrimString("EraDepthDeterminationMethod") ==
                      "Subsurface - borehole/well, depth from locality data")
                 sample.LocationKind = "Borehole/well";
             else if (string.IsNullOrWhiteSpace(site.GetTrimString("EraDepthDeterminationMethod")))
@@ -238,12 +229,11 @@ public class SampleFactory : IImuFactory<Sample>
                 });
         }
 
-        sample.LastKnownLocation = "Museums Victoria";
-        
         sample.Deleted = string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "no", StringComparison.OrdinalIgnoreCase);
         
         // Images
-        sample.Images = _imageFactory.Make(map.GetMaps("media"), stoppingToken).ToList();
+        // TODO - Add this back in once images are ok to send
+        // sample.Images = _imageFactory.Make(map.GetMaps("media"), stoppingToken).ToList();
         
         // Properties:SpecimenForm
         var specimenForm = map.GetMaps("preparations")
@@ -265,9 +255,15 @@ public class SampleFactory : IImuFactory<Sample>
         // Properties:GeologicalDetails
         var geologicalDetails = new[]
         {
-            map.GetTrimString("MinAssociatedMatrix"),
-            map.GetTrimString("RocRockDescription"),
-            map.GetTrimString("RocMainMineralsPresent")
+            string.IsNullOrWhiteSpace(map.GetTrimString("MinAssociatedMatrix"))
+                ? null
+                : $"Associated Matrix: {map.GetTrimString("MinAssociatedMatrix")}",
+            string.IsNullOrWhiteSpace(map.GetTrimString("RocRockDescription"))
+                ? null
+                : $"Rock Description: {map.GetTrimString("RocRockDescription")}",
+            string.IsNullOrWhiteSpace(map.GetTrimString("RocMainMineralsPresent"))
+                ? null
+                : $"Main Minerals Present: {map.GetTrimString("RocMainMineralsPresent")}"
         }.Concatenate(" | ");
         
         if (!string.IsNullOrWhiteSpace(geologicalDetails))

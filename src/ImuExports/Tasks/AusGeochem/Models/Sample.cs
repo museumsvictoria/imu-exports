@@ -30,8 +30,6 @@ public class Sample
     
     public string UnitName { get; set; }
 
-    public string UnitAge { get; set; }
-    
     public string LocationKind { get; set; }
     
     public string DepthMin { get; set; }
@@ -47,8 +45,6 @@ public class Sample
     public string MineralId { get; set; }
     
     public string Comment { get; set; }
-    
-    public string LastKnownLocation { get; set; }
     
     public bool Deleted { get; set; }
 }
