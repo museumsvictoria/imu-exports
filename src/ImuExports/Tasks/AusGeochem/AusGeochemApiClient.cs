@@ -158,5 +158,16 @@ public class AusGeochemApiApiClient : IAusGeochemApiClient
             offset++;
             Log.Logger.Information("Send samples progress for Data Package {Discipline} ({DataPackageId})... {Offset}/{TotalResults}", package.Discipline, package.Id, offset, samples.Count);
         }
+
+        var samplesByIrn = samples.Select(x => new { x.Irn, x.Deleted }).ToList();
+        var currentSamplesByIrn = currentSampleDtos.Select(x => x.SampleDto.SourceId).ToList();
+
+        Log.Logger.Information(
+            "Created {CountCreated}, Updated {CountUpdated}, Deleted {CountDeleted}, Did nothing with {CountNothingToDo} out of a total of {TotalSamples} Samples", 
+            samplesByIrn.ExceptBy(currentSamplesByIrn, x => x.Irn).Count(),
+            samplesByIrn.IntersectBy(currentSamplesByIrn, x => x.Irn).Count(),
+            samplesByIrn.IntersectBy(currentSamplesByIrn, x => x.Irn).Count(x => x.Deleted),
+            samplesByIrn.ExceptBy(currentSamplesByIrn, x => x.Irn).Count(x => x.Deleted),
+            samples.Count);
     }
 }

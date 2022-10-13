@@ -85,19 +85,34 @@ public static class SampleToDtoMapper
             // Found match within material name pairs
             material = lookups.MaterialDtos.FirstOrDefault(x =>
                 string.Equals(x.Name, materialsLookupMatch.AusGeochemName, StringComparison.OrdinalIgnoreCase));
+
+            if (material != null)
+                Log.Logger.Debug(
+                    "Material name {MineralId} found via CSV match - MvName: {MvName}, AusGeochemName: {AusGeochemName}, Sample name: {SampleName}",
+                    sample.MineralId, materialsLookupMatch.MvName, materialsLookupMatch.AusGeochemName, sample.Name);
         }
         else
         {
             // Look for match within materialDtos directly
             material = lookups.MaterialDtos.FirstOrDefault(x =>
                 string.Equals(x.Name, sample.MineralId, StringComparison.OrdinalIgnoreCase));
+
+            if (material != null)
+                Log.Logger.Debug(
+                    "Material name {MineralId} found via exact match in material list - Material name: {MaterialName}, Sample name: {SampleName}",
+                    sample.MineralId, material.Name, sample.Name);
         }
-        
+
         // Assign material if match found
         if (material != null)
         {
             dto.SampleDto.MaterialId = material.Id;
             dto.SampleDto.MaterialName = material.Name;
+        }
+        else
+        {
+            Log.Logger.Debug("Material name {MineralId} not matched - Sample name: {SampleName}", sample.MineralId,
+                sample.Name);
         }
 
         // DepthMin => RelativeElevationMax
