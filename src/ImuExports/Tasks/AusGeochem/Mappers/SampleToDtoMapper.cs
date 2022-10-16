@@ -60,6 +60,9 @@ public static class SampleToDtoMapper
         if (double.TryParse(sample.LatLongPrecision, out var latLongPrecision))
             dto.LocationDto.LatLonPrecision = latLongPrecision;
 
+        // LocationName => LocationDto.Name
+        dto.LocationDto.Name = sample.LocationName;
+
         // LocationDescription => LocationDto.Description
         dto.LocationDto.Description = sample.LocationDescription;
 

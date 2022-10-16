@@ -26,6 +26,8 @@ public class Sample
     
     public string DateGeoreferenced { get; set; }
 
+    public string LocationName { get; set; }
+
     public string LocationDescription { get; set; }
     
     public string UnitName { get; set; }

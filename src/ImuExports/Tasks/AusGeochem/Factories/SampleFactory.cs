@@ -115,6 +115,8 @@ public class SampleFactory : IImuFactory<Sample>
                     Property = new KeyValuePair<string, string>("Georeference Details", georeferenceDetails),
                     Order = 4
                 });
+            
+            sample.LocationName = site.GetTrimString("LocPreciseLocation");
 
             sample.LocationDescription = new[]
             {
