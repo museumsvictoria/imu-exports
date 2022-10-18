@@ -35,11 +35,11 @@ public class AuthenticateEndpoint : EndpointBase, IAuthenticateEndpoint
 
         // Request JWT
         Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
-        var response = await _client.ExecuteAsync<AuthenticateResponse>(request, stoppingToken);
-        
+        var response = await ExecuteWithPolicyAsync<AuthenticateResponse>(request, stoppingToken);
+
         if (!response.IsSuccessful)
         {
-            Log.Logger.Fatal("Could not successfully authenticate");
+            Log.Logger.Fatal("Could not authenticate successfully");
             throw RestException.CreateException(response);
         }
         

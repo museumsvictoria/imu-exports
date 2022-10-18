@@ -47,8 +47,8 @@ public class SampleEndpoint : EndpointBase, ISampleEndpoint
 
         // Get record based on RegNumber (sourceId) in AusGeochem
         Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
-        var response = await _client.ExecuteAsync<IList<SampleWithLocationDto>>(request, stoppingToken);
-
+        var response = await ExecuteWithPolicyAsync<IList<SampleWithLocationDto>>(request, stoppingToken);
+        
         if (!response.IsSuccessful)
         {
             Log.Logger.Fatal(
@@ -72,7 +72,7 @@ public class SampleEndpoint : EndpointBase, ISampleEndpoint
 
         // Send sample
         Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
-        var response = await _client.ExecuteAsync(request, stoppingToken);
+        var response = await ExecuteWithPolicyAsync(request, stoppingToken);
 
         if (!response.IsSuccessful)
         {
@@ -96,7 +96,7 @@ public class SampleEndpoint : EndpointBase, ISampleEndpoint
 
         // Delete sample
         Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
-        var response = await _client.ExecuteAsync(request, stoppingToken);
+        var response = await ExecuteWithPolicyAsync(request, stoppingToken);
 
         if (!response.IsSuccessful)
         {

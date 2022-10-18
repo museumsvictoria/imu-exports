@@ -35,7 +35,7 @@ public class SamplePropertyEndpoint : EndpointBase, ISamplePropertyEndpoint
 
         // Send sample
         Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
-        var response = await _client.ExecuteAsync(request, stoppingToken);
+        var response = await ExecuteWithPolicyAsync(request, stoppingToken);
 
         if (!response.IsSuccessful)
         {
@@ -59,7 +59,7 @@ public class SamplePropertyEndpoint : EndpointBase, ISamplePropertyEndpoint
 
         // Delete sample
         Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
-        var response = await _client.ExecuteAsync(request, stoppingToken);
+        var response = await ExecuteWithPolicyAsync(request, stoppingToken);
 
         if (!response.IsSuccessful)
         {

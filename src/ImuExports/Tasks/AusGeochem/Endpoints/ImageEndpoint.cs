@@ -39,7 +39,7 @@ public class ImageEndpoint : EndpointBase, IImageEndpoint
 
         // Send image
         Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
-        var response = await _client.ExecuteAsync(request, stoppingToken);
+        var response = await ExecuteWithPolicyAsync(request, stoppingToken);
 
         if (!response.IsSuccessful)
         {
@@ -73,7 +73,7 @@ public class ImageEndpoint : EndpointBase, IImageEndpoint
 
         // Delete image
         Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
-        var response = await _client.ExecuteAsync(request, stoppingToken);
+        var response = await ExecuteWithPolicyAsync(request, stoppingToken);
 
         if (!response.IsSuccessful)
         {

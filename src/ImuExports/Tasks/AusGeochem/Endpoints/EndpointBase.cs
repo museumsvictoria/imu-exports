@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
+using Polly;
 using RestSharp;
 
 namespace ImuExports.Tasks.AusGeochem.Endpoints;
@@ -38,7 +39,7 @@ public abstract class EndpointBase
             stoppingToken.ThrowIfCancellationRequested();
 
             Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
-            var response = await _client.ExecuteAsync<IList<T>>(request, stoppingToken);
+            var response = await ExecuteWithPolicyAsync<IList<T>>(request, stoppingToken);
 
             if (!response.IsSuccessful)
             {
@@ -93,5 +94,41 @@ public abstract class EndpointBase
         }
 
         return dtos;
+    }
+
+    protected async Task<RestResponse<T>> ExecuteWithPolicyAsync<T>(RestRequest request, CancellationToken stoppingToken)
+    {
+        var response = await Policy
+            .HandleResult<RestResponse<T>>(r => !r.IsSuccessful)
+            .WaitAndRetryAsync(4, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
+                (result, duration, _, _) =>
+                {
+                    Log.Logger.Debug("Request was not successful ({StatusCodeAsInt}:{StatusCode}) waiting {Duration} seconds, then retrying", (int)result.Result.StatusCode, result.Result.StatusCode, duration.Seconds);
+                })
+            .ExecuteAsync((t) =>
+            {
+                t.ThrowIfCancellationRequested();
+                return _client.ExecuteAsync<T>(request, stoppingToken);
+            }, stoppingToken);
+
+        return response;
+    }
+    
+    protected async Task<RestResponse> ExecuteWithPolicyAsync(RestRequest request, CancellationToken stoppingToken)
+    {
+        var response = await Policy
+            .HandleResult<RestResponse>(r => !r.IsSuccessful)
+            .WaitAndRetryAsync(4, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
+                (result, duration, _, _) =>
+                {
+                    Log.Logger.Debug("Request was not successful ({StatusCodeAsInt}:{StatusCode}), waiting {Duration} seconds, then retrying", (int)result.Result.StatusCode, result.Result.StatusCode, duration.Seconds);
+                })
+            .ExecuteAsync((t) =>
+            {
+                t.ThrowIfCancellationRequested();
+                return _client.ExecuteAsync(request, stoppingToken);
+            }, stoppingToken);
+
+        return response;
     }
 }
