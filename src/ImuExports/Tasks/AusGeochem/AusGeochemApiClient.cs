@@ -56,21 +56,19 @@ public class AusGeochemApiApiClient : IAusGeochemApiClient
         Log.Logger.Information("Fetching all current SampleWithLocationDtos within AusGeochem for Data Package {Discipline} ({DataPackageId})", package.Discipline, package.Id);
         var currentSampleDtos = await _sampleEndpoint.GetSamplesByPackageId(package.Id.Value, stoppingToken);
 
-        Log.Logger.Information("Deleting all entities for Data Package {Discipline} ({DataPackageId})", package.Discipline, package.Id);
+        Log.Logger.Information("Deleting all samples for Data Package {Discipline} ({DataPackageId})", package.Discipline, package.Id);
+        var offset = 0;
         foreach (var sampleDto in currentSampleDtos)
         {
             stoppingToken.ThrowIfCancellationRequested();
             
             ArgumentNullException.ThrowIfNull(sampleDto.Id);
             
-            // Delete images
-            await _imageApiHandler.Delete(sampleDto.Id.Value, stoppingToken);
-            
-            // Delete sample properties
-            await _samplePropertyApiHandler.Delete(sampleDto.Id.Value, stoppingToken);
-
             // Delete sample
             await _sampleEndpoint.DeleteSample(sampleDto, stoppingToken);
+            
+            offset++;
+            Log.Logger.Information("Delete all samples progress for Data Package {Discipline} ({DataPackageId})... {Offset}/{TotalResults}", package.Discipline, package.Id, offset, currentSampleDtos.Count);
         }
     }
 
@@ -107,12 +105,6 @@ public class AusGeochemApiApiClient : IAusGeochemApiClient
 
                 if (sample.Deleted)
                 {
-                    // Delete images
-                    await _imageApiHandler.Delete(updatedSampleDto.Id.Value, stoppingToken);
-                    
-                    // Delete sample properties
-                    await _samplePropertyApiHandler.Delete(updatedSampleDto.Id.Value, stoppingToken);
-
                     // Delete sample
                     await _sampleEndpoint.DeleteSample(updatedSampleDto, stoppingToken);
                 }
