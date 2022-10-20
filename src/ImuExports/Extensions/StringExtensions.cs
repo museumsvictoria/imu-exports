@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ImuExports.Extensions;
@@ -38,5 +39,22 @@ public static class StringExtensions
             return input;
 
         return Regex.Replace(input, @"[^\w\s]", string.Empty);
+    }
+    
+    public static string RemoveDiacritics(this string input) 
+    {
+        var normalizedString = input.Normalize(NormalizationForm.FormD);
+        var sb = new StringBuilder();
+
+        foreach (var c in normalizedString.EnumerateRunes())
+        {
+            var unicodeCategory = Rune.GetUnicodeCategory(c);
+            if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+            {
+                sb.Append(c);
+            }
+        }
+
+        return sb.ToString().Normalize(NormalizationForm.FormC);
     }
 }
