@@ -6,7 +6,7 @@ namespace ImuExports.Tests.Extensions;
 public class StringExtensionsTests
 {
     [Fact]
-    public void RemoveDiacritics_RemovesDiacritics()
+    public void RemoveDiacritics_WithDiacritic_ReplacesDiacritic()
     {
         // Given
         var input = "Sérandite";

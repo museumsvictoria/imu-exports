@@ -23,4 +23,10 @@
       <ProjectReference Include="..\ImuExports\ImuExports.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="imu-1.0.03">
+        <HintPath>..\..\dep\IMu\imu-1.0.03.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

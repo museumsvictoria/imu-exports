@@ -104,6 +104,17 @@ public static class SampleToDtoMapper
                 Log.Logger.Debug(
                     "Material name {MineralId} found via exact match in material list - Material name: {MaterialName}, Sample name: {SampleName}",
                     sample.MineralId, material.Name, sample.Name);
+
+            
+            // Remove diacritics then look for match within materialDtos directly
+            var mineralIdNoDiacritics = sample.MineralId.RemoveDiacritics();
+            material = lookups.MaterialDtos.FirstOrDefault(x =>
+                string.Equals(x.Name, mineralIdNoDiacritics, StringComparison.OrdinalIgnoreCase));
+            
+            if (material != null)
+                Log.Logger.Debug(
+                    "Material name {MineralIdNoDiacritics} found via removing diacritics then exact match in material list - Material name: {MaterialName}, Sample name: {SampleName}",
+                    mineralIdNoDiacritics, material.Name, sample.Name);
         }
 
         // Assign material if match found
