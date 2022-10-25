@@ -29,9 +29,14 @@ public class ImageEndpoint : EndpointBase, IImageEndpoint
         // Build request
         var request = new RestRequest("core/images/add-to-sample", Method.Post).AddJsonBody(new AddImageToSampleRequest
         {
+            AltText = image.AltText,
             Content = base64Image,
+            ContentType = "image/jpeg",
+            Creator = image.Creator,
             Description = image.Description,
+            License = image.License,
             Name = image.Name,
+            RightsHolder = image.RightsHolder
         });
 
         // Add sampleId we want to attach image to

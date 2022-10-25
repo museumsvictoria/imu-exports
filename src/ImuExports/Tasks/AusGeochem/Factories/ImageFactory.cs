@@ -1,4 +1,5 @@
 ﻿using IMu;
+using ImuExports.Tasks.AusGeochem.Config;
 using ImuExports.Tasks.AusGeochem.Models;
 
 namespace ImuExports.Tasks.AusGeochem.Factories;
@@ -10,12 +11,18 @@ public class ImageFactory : IImuFactory<Image>
         stoppingToken.ThrowIfCancellationRequested();
         
         if (map != null &&
+            string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "yes", StringComparison.OrdinalIgnoreCase) &&
+            map.GetTrimStrings("MdaDataSets_tab").Any(x =>
+                x.Contains(AusGeochemConstants.ImuDataSetsQueryString)) &&
             string.Equals(map.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
         {
             var image = new Image()
             {
                 Irn = map.GetLong("irn"),
-                Name = map.GetTrimString("MulTitle"),
+                Creator = map.GetTrimStrings("RigCreator_tab").Concatenate(", "),
+                RightsHolder = "Museums Victoria",
+                License = "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+                AltText = map.GetTrimString("DetAlternateText")
             };
 
             var captionMap = map

@@ -234,8 +234,13 @@ public class SampleFactory : IImuFactory<Sample>
         sample.Deleted = string.Equals(map.GetTrimString("AdmPublishWebNoPassword"), "no", StringComparison.OrdinalIgnoreCase);
         
         // Images
-        // TODO - Add this back in once images are ok to send
-        // sample.Images = _imageFactory.Make(map.GetMaps("media"), stoppingToken).ToList();
+        sample.Images = _imageFactory.Make(map.GetMaps("media"), stoppingToken).ToList();
+
+        // Create name for each image
+        foreach (var image in sample.Images)
+        {
+            image.Name = $"{sample.Name} - {image.Irn}";
+        }
         
         // Properties:SpecimenForm
         var specimenForm = map.GetMaps("preparations")
