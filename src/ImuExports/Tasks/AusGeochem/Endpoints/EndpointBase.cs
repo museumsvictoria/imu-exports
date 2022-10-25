@@ -18,7 +18,7 @@ public abstract class EndpointBase
         ParametersCollection parameters = null, int pageSize = Constants.RestClientSmallPageSize)
     {
         var dtos = new List<T>();
-        
+
         // Build request
         var request = new RestRequest(resource);
 
@@ -29,9 +29,9 @@ public abstract class EndpointBase
         if (parameters != null)
             foreach (var parameter in parameters)
                 request.AddParameter(parameter);
-        
+
         // Ensure there is a sort parameter attached otherwise we may get inconsistent results 
-        if(request.Parameters.All(x => x.Name != "sort"))
+        if (request.Parameters.All(x => x.Name != "sort"))
             request.AddParameter(new QueryParameter("sort", "id,DESC", false));
 
         while (true)
@@ -52,9 +52,9 @@ public abstract class EndpointBase
 
             // Parse response link header in order to extract the next page
             var linkHeaderParameter = response.Headers?.FirstOrDefault(x =>
-                string.Equals(x.Name, "link", StringComparison.OrdinalIgnoreCase))
+                    string.Equals(x.Name, "link", StringComparison.OrdinalIgnoreCase))
                 ?.Value?.ToString();
-            
+
             // Return what we have if no link header parameter
             if (string.IsNullOrEmpty(linkHeaderParameter))
             {
@@ -96,16 +96,19 @@ public abstract class EndpointBase
         return dtos;
     }
 
-    protected async Task<RestResponse<T>> ExecuteWithPolicyAsync<T>(RestRequest request, CancellationToken stoppingToken)
+    protected async Task<RestResponse<T>> ExecuteWithPolicyAsync<T>(RestRequest request,
+        CancellationToken stoppingToken)
     {
         var response = await Policy
             .HandleResult<RestResponse<T>>(r => !r.IsSuccessful)
             .WaitAndRetryAsync(4, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
                 (result, duration, _, _) =>
                 {
-                    Log.Logger.Debug("Request was not successful ({StatusCodeAsInt}:{StatusCode}) waiting {Duration} seconds, then retrying", (int)result.Result.StatusCode, result.Result.StatusCode, duration.Seconds);
+                    Log.Logger.Debug(
+                        "Request was not successful ({StatusCodeAsInt}:{StatusCode}) waiting {Duration} seconds, then retrying",
+                        (int)result.Result.StatusCode, result.Result.StatusCode, duration.Seconds);
                 })
-            .ExecuteAsync((t) =>
+            .ExecuteAsync(t =>
             {
                 t.ThrowIfCancellationRequested();
                 return _client.ExecuteAsync<T>(request, stoppingToken);
@@ -113,7 +116,7 @@ public abstract class EndpointBase
 
         return response;
     }
-    
+
     protected async Task<RestResponse> ExecuteWithPolicyAsync(RestRequest request, CancellationToken stoppingToken)
     {
         var response = await Policy
@@ -121,9 +124,11 @@ public abstract class EndpointBase
             .WaitAndRetryAsync(4, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
                 (result, duration, _, _) =>
                 {
-                    Log.Logger.Debug("Request was not successful ({StatusCodeAsInt}:{StatusCode}), waiting {Duration} seconds, then retrying", (int)result.Result.StatusCode, result.Result.StatusCode, duration.Seconds);
+                    Log.Logger.Debug(
+                        "Request was not successful ({StatusCodeAsInt}:{StatusCode}), waiting {Duration} seconds, then retrying",
+                        (int)result.Result.StatusCode, result.Result.StatusCode, duration.Seconds);
                 })
-            .ExecuteAsync((t) =>
+            .ExecuteAsync(t =>
             {
                 t.ThrowIfCancellationRequested();
                 return _client.ExecuteAsync(request, stoppingToken);

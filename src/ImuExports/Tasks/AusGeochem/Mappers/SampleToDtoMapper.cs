@@ -27,10 +27,11 @@ public static class SampleToDtoMapper
             dto = new SampleWithLocationDto
             {
                 SampleDto = new SampleDto(),
-                LocationDto = new LocationDto(),
+                LocationDto = new LocationDto()
             };
 
-        if(sample.LocationKind == "Unknown" && string.IsNullOrWhiteSpace(sample.DepthMax) && string.IsNullOrWhiteSpace(sample.DepthMin))
+        if (sample.LocationKind == "Unknown" && string.IsNullOrWhiteSpace(sample.DepthMax) &&
+            string.IsNullOrWhiteSpace(sample.DepthMin))
             dto.AutoSetElevationWriteConfig = true;
 
         if (dataPackageId != null)
@@ -78,44 +79,8 @@ public static class SampleToDtoMapper
             dto.SampleDto.LocationKindName = locationKind.Name;
         }
 
-        // Find Material name based on external CSV
-        MaterialDto material;
-        var materialsLookupMatch = lookups.MaterialNamePairs.FirstOrDefault(x =>
-            string.Equals(x.MvName, sample.MineralId, StringComparison.OrdinalIgnoreCase));
-
-        if (materialsLookupMatch != null)
-        {
-            // Found match within material name pairs
-            material = lookups.MaterialDtos.FirstOrDefault(x =>
-                string.Equals(x.Name, materialsLookupMatch.AusGeochemName, StringComparison.OrdinalIgnoreCase));
-
-            if (material != null)
-                Log.Logger.Debug(
-                    "Material name {MineralId} found via CSV match - MvName: {MvName}, AusGeochemName: {AusGeochemName}, Sample name: {SampleName}",
-                    sample.MineralId, materialsLookupMatch.MvName, materialsLookupMatch.AusGeochemName, sample.Name);
-        }
-        else
-        {
-            // Look for match within materialDtos directly
-            material = lookups.MaterialDtos.FirstOrDefault(x =>
-                string.Equals(x.Name, sample.MineralId, StringComparison.OrdinalIgnoreCase));
-
-            if (material != null)
-                Log.Logger.Debug(
-                    "Material name {MineralId} found via exact match in material list - Material name: {MaterialName}, Sample name: {SampleName}",
-                    sample.MineralId, material.Name, sample.Name);
-
-            
-            // Remove diacritics then look for match within materialDtos directly
-            var mineralIdNoDiacritics = sample.MineralId.RemoveDiacritics();
-            material = lookups.MaterialDtos.FirstOrDefault(x =>
-                string.Equals(x.Name, mineralIdNoDiacritics, StringComparison.OrdinalIgnoreCase));
-            
-            if (material != null)
-                Log.Logger.Debug(
-                    "Material name {MineralIdNoDiacritics} found via removing diacritics then exact match in material list - Material name: {MaterialName}, Sample name: {SampleName}",
-                    mineralIdNoDiacritics, material.Name, sample.Name);
-        }
+        // Find Material
+        var material = FindMaterial(lookups.MaterialDtos, lookups.MaterialNamePairs, sample);
 
         // Assign material if match found
         if (material != null)
@@ -156,5 +121,60 @@ public static class SampleToDtoMapper
         dto.SampleDto.Description = sample.Comment;
 
         return dto;
+    }
+
+    private static MaterialDto FindMaterial(IList<MaterialDto> materialDtos, IList<MaterialNamePair> materialNamePairs,
+        Sample sample)
+    {
+        MaterialDto material;
+
+        // Find Material name based on external CSV
+        var materialsLookupMatch = materialNamePairs.FirstOrDefault(x =>
+            string.Equals(x.MvName, sample.MineralId, StringComparison.OrdinalIgnoreCase));
+
+        if (materialsLookupMatch != null)
+        {
+            // Find match within materials list
+            material = materialDtos.FirstOrDefault(x =>
+                string.Equals(x.Name, materialsLookupMatch.AusGeochemName, StringComparison.OrdinalIgnoreCase));
+
+            if (material != null)
+            {
+                Log.Logger.Debug(
+                    "Material name {MineralId} found via CSV match - MvName: {MvName}, AusGeochemName: {AusGeochemName}, Sample name: {SampleName}",
+                    sample.MineralId, materialsLookupMatch.MvName, materialsLookupMatch.AusGeochemName, sample.Name);
+
+                return material;
+            }
+        }
+
+        // Look for exact match within materials list directly
+        material = materialDtos.FirstOrDefault(x =>
+            string.Equals(x.Name, sample.MineralId, StringComparison.OrdinalIgnoreCase));
+
+        if (material != null)
+        {
+            Log.Logger.Debug(
+                "Material name {MineralId} found via exact match in material list - Material name: {MaterialName}, Sample name: {SampleName}",
+                sample.MineralId, material.Name, sample.Name);
+
+            return material;
+        }
+
+        // Remove diacritics then look for match within material list directly
+        var mineralIdNoDiacritics = sample.MineralId.RemoveDiacritics();
+        material = materialDtos.FirstOrDefault(x =>
+            string.Equals(x.Name, mineralIdNoDiacritics, StringComparison.OrdinalIgnoreCase));
+
+        if (material != null)
+        {
+            Log.Logger.Debug(
+                "Material name {MineralIdNoDiacritics} found via removing diacritics then exact match in material list - Material name: {MaterialName}, Sample name: {SampleName}",
+                mineralIdNoDiacritics, material.Name, sample.Name);
+
+            return material;
+        }
+
+        return null;
     }
 }

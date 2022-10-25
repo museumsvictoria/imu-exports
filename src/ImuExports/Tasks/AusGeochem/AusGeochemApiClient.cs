@@ -111,7 +111,7 @@ public class AusGeochemApiApiClient : IAusGeochemApiClient
                 else
                 {
                     // Update sample
-                    await _sampleEndpoint.SendSample(updatedSampleDto, Method.Put, stoppingToken);
+                    _ = await _sampleEndpoint.SendSample(updatedSampleDto, Method.Put, stoppingToken);
                     
                     // Update images
                     await _imageApiHandler.Update(updatedSampleDto.Id.Value, sample.Images, stoppingToken);
@@ -127,13 +127,7 @@ public class AusGeochemApiApiClient : IAusGeochemApiClient
                 if (!sample.Deleted)
                 {
                     // Create sample
-                    await _sampleEndpoint.SendSample(createSampleDto, Method.Post, stoppingToken);
-
-                    if (sample.Images.Any() || sample.Properties.Any())
-                    {
-                        // Get created sample so we can link sample to images and sample properties
-                        createSampleDto = await _sampleEndpoint.GetSampleBySourceId(sample.Irn, stoppingToken);
-                    }
+                    createSampleDto = await _sampleEndpoint.SendSample(createSampleDto, Method.Post, stoppingToken);
                     
                     ArgumentNullException.ThrowIfNull(createSampleDto.Id);
                 

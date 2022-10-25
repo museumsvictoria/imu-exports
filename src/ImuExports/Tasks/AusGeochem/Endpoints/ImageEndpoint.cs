@@ -8,9 +8,9 @@ namespace ImuExports.Tasks.AusGeochem.Endpoints;
 public interface IImageEndpoint
 {
     Task CreateImage(Image image, string base64Image, int sampleId, CancellationToken stoppingToken);
-    
+
     Task<IList<ImageDto>> GetImagesBySampleId(int sampleId, CancellationToken stoppingToken);
-    
+
     Task DeleteImage(ImageDto dto, CancellationToken stoppingToken);
 }
 
@@ -23,7 +23,7 @@ public class ImageEndpoint : EndpointBase, IImageEndpoint
     {
         _client = client;
     }
-    
+
     public async Task CreateImage(Image image, string base64Image, int sampleId, CancellationToken stoppingToken)
     {
         // Build request
@@ -51,13 +51,11 @@ public class ImageEndpoint : EndpointBase, IImageEndpoint
             Log.Logger.Fatal("Error occured sending image {Irn} attached to sample {SampleId}", image.Irn, sampleId);
             throw RestException.CreateException(response);
         }
-        else
-        {
-            Log.Logger.Debug("Sent image {Irn} via {Method} attached to sample {SampleId}, status {ResponseStatus}",
-                image.Irn, request.Method, sampleId, response.ResponseStatus);
-        }
+
+        Log.Logger.Debug("Sent image {Irn} via {Method} attached to sample {SampleId}, status {ResponseStatus}",
+            image.Irn, request.Method, sampleId, response.ResponseStatus);
     }
-    
+
     public async Task<IList<ImageDto>> GetImagesBySampleId(int sampleId, CancellationToken stoppingToken)
     {
         // Build parameters
@@ -67,7 +65,7 @@ public class ImageEndpoint : EndpointBase, IImageEndpoint
         // GetAll ImageReadDtos
         return await GetAll<ImageDto>("core/images/of-sample", stoppingToken, parameters);
     }
-    
+
     public async Task DeleteImage(ImageDto dto, CancellationToken stoppingToken)
     {
         // Build request
@@ -85,10 +83,8 @@ public class ImageEndpoint : EndpointBase, IImageEndpoint
             Log.Logger.Fatal("Error occured deleting image {Id}", dto.Id);
             throw RestException.CreateException(response);
         }
-        else
-        {
-            Log.Logger.Debug("Deleted image {Name}, status {ResponseStatus}",
-                dto.Name, response.ResponseStatus);
-        }
+
+        Log.Logger.Debug("Deleted image {Name}, status {ResponseStatus}",
+            dto.Name, response.ResponseStatus);
     }
 }

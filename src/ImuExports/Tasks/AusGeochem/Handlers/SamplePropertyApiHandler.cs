@@ -7,8 +7,6 @@ namespace ImuExports.Tasks.AusGeochem.Handlers;
 
 public interface ISamplePropertyApiHandler
 {
-    Task Delete(int sampleId, CancellationToken stoppingToken);
-    
     Task Update(int sampleId, IList<SampleProperty> sampleProperties, CancellationToken stoppingToken);
     
     Task Create(int sampleId, IList<SampleProperty> sampleProperties, CancellationToken stoppingToken);
@@ -24,20 +22,6 @@ public class SamplePropertyApiHandler : ISamplePropertyApiHandler
         _samplePropertyEndpoint = samplePropertyEndpoint;
     }
     
-    public async Task Delete(int sampleId, CancellationToken stoppingToken)
-    {
-        // Fetch all sample properties associated with sample
-        var dtos = await _samplePropertyEndpoint.GetSamplePropertiesBySampleId(sampleId, stoppingToken);
-
-        // Delete all sample properties
-        foreach (var dto in dtos)
-        {
-            stoppingToken.ThrowIfCancellationRequested();
-            
-            await _samplePropertyEndpoint.DeleteSampleProperty(dto, stoppingToken);
-        }
-    }
-
     public async Task Update(int sampleId, IList<SampleProperty> sampleProperties,  CancellationToken stoppingToken)
     {
         // Fetch all sample properties associated with sample

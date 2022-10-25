@@ -6,8 +6,6 @@ namespace ImuExports.Tasks.AusGeochem.Handlers;
 
 public interface IImageApiHandler
 {
-    Task Delete(int sampleId, CancellationToken stoppingToken);
-    
     Task Update(int sampleId, IList<Image> images, CancellationToken stoppingToken);
 
     Task Create(int sampleId, IList<Image> images, CancellationToken stoppingToken);
@@ -24,20 +22,6 @@ public class ImageApiHandler : IImageApiHandler
     {
         _imageEndpoint = imageEndpoint;
         _base64ImageFactory = base64ImageFactory;
-    }
-    
-    public async Task Delete(int sampleId, CancellationToken stoppingToken)
-    {
-        // Fetch all images associated with sample
-        var dtos = await _imageEndpoint.GetImagesBySampleId(sampleId, stoppingToken);
-
-        // Delete all images
-        foreach (var dto in dtos)
-        {
-            stoppingToken.ThrowIfCancellationRequested();
-                
-            await _imageEndpoint.DeleteImage(dto, stoppingToken);
-        }
     }
 
     public async Task Update(int sampleId, IList<Image> images, CancellationToken stoppingToken)

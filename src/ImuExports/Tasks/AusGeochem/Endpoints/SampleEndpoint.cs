@@ -7,9 +7,7 @@ public interface ISampleEndpoint
 {
     Task<IList<SampleWithLocationDto>> GetSamplesByPackageId(int dataPackageId, CancellationToken stoppingToken);
 
-    Task<SampleWithLocationDto> GetSampleBySourceId(string sourceId, CancellationToken stoppingToken);
-
-    Task SendSample(SampleWithLocationDto dto, Method method, CancellationToken stoppingToken);
+    Task<SampleWithLocationDto> SendSample(SampleWithLocationDto dto, Method method, CancellationToken stoppingToken);
 
     Task DeleteSample(SampleWithLocationDto dto, CancellationToken stoppingToken);
 }
@@ -34,32 +32,9 @@ public class SampleEndpoint : EndpointBase, ISampleEndpoint
         // GetAll SampleWithLocationDto
         return await GetAll<SampleWithLocationDto>("core/sample-with-locations", stoppingToken, parameters);
     }
-
-    public async Task<SampleWithLocationDto> GetSampleBySourceId(string sourceId, CancellationToken stoppingToken)
-    {
-        // Build request
-        var request = new RestRequest("core/sample-with-locations")
-        {
-            Method = Method.Get
-        };
-
-        request.AddQueryParameter("sourceId.equals", sourceId);
-
-        // Get record based on RegNumber (sourceId) in AusGeochem
-        Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
-        var response = await ExecuteWithPolicyAsync<IList<SampleWithLocationDto>>(request, stoppingToken);
-        
-        if (!response.IsSuccessful)
-        {
-            Log.Logger.Fatal(
-                "Error occured fetching {Name} by SourceId {SourceId}", nameof(SampleWithLocationDto), sourceId);
-            throw RestException.CreateException(response);
-        }
-
-        return response.Data?.FirstOrDefault();
-    }
-
-    public async Task SendSample(SampleWithLocationDto dto, Method method, CancellationToken stoppingToken)
+    
+    public async Task<SampleWithLocationDto> SendSample(SampleWithLocationDto dto, Method method,
+        CancellationToken stoppingToken)
     {
         // Build request
         var request = new RestRequest("core/sample-with-locations")
@@ -72,7 +47,7 @@ public class SampleEndpoint : EndpointBase, ISampleEndpoint
 
         // Send sample
         Log.Logger.Debug("Sending Request for {Url} via {Method}", _client.BuildUri(request), request.Method);
-        var response = await ExecuteWithPolicyAsync(request, stoppingToken);
+        var response = await ExecuteWithPolicyAsync<SampleWithLocationDto>(request, stoppingToken);
 
         if (!response.IsSuccessful)
         {
@@ -84,6 +59,8 @@ public class SampleEndpoint : EndpointBase, ISampleEndpoint
             Log.Logger.Debug("Sent sample {ShortName} via {Method}, status {ResponseStatus}",
                 dto.ShortName, request.Method, response.ResponseStatus);
         }
+
+        return response.Data;
     }
 
     public async Task DeleteSample(SampleWithLocationDto dto, CancellationToken stoppingToken)
