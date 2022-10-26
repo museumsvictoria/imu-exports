@@ -43,7 +43,7 @@ public class ImageApiHandler : IImageApiHandler
             stoppingToken.ThrowIfCancellationRequested();
             
             // Fetch image as base64 string from IMu
-            var base64Image = await _base64ImageFactory.Make(image.Irn, stoppingToken);
+            var base64Image = await _base64ImageFactory.Make(image, stoppingToken);
 
             if (!string.IsNullOrEmpty(base64Image))
                 await _imageEndpoint.CreateImage(image, base64Image, sampleId, stoppingToken);
@@ -57,7 +57,7 @@ public class ImageApiHandler : IImageApiHandler
             stoppingToken.ThrowIfCancellationRequested();
             
             // Fetch image as base64 string from IMu
-            var base64Image = await _base64ImageFactory.Make(image.Irn, stoppingToken);
+            var base64Image = await _base64ImageFactory.Make(image, stoppingToken);
 
             if (!string.IsNullOrEmpty(base64Image))
                 await _imageEndpoint.CreateImage(image, base64Image, sampleId, stoppingToken);
