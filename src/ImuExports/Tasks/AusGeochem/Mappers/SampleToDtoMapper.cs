@@ -5,19 +5,21 @@ namespace ImuExports.Tasks.AusGeochem.Mappers;
 
 public static class SampleToDtoMapper
 {
-    public static SampleWithLocationDto ToSampleWithLocationDto(this Sample sample, Lookups lookups,
+    public static SampleWithLocationDto ToSampleWithLocationDto(this Sample sample, Lookups lookups, bool isProduction,
         SampleWithLocationDto dto)
     {
-        return SampleToDto(sample, lookups, null, null, dto);
+        return SampleToDto(sample, lookups, isProduction, null, null, dto);
     }
 
-    public static SampleWithLocationDto ToSampleWithLocationDto(this Sample sample, Lookups lookups, int? dataPackageId,
+    public static SampleWithLocationDto ToSampleWithLocationDto(this Sample sample, Lookups lookups, bool isProduction,
+        int? dataPackageId,
         int? archiveId = null)
     {
-        return SampleToDto(sample, lookups, dataPackageId, archiveId);
+        return SampleToDto(sample, lookups, isProduction, dataPackageId, archiveId);
     }
 
-    private static SampleWithLocationDto SampleToDto(Sample sample, Lookups lookups, int? dataPackageId = null,
+    private static SampleWithLocationDto SampleToDto(Sample sample, Lookups lookups, bool isProduction,
+        int? dataPackageId = null,
         int? archiveId = null, SampleWithLocationDto dto = null)
     {
         // If there is a current DTO we are Updating otherwise we are Creating
@@ -30,8 +32,10 @@ public static class SampleToDtoMapper
                 LocationDto = new LocationDto()
             };
 
-        if (sample.LocationKind == "Unknown" && string.IsNullOrWhiteSpace(sample.DepthMax) &&
-            string.IsNullOrWhiteSpace(sample.DepthMin))
+        if (sample.LocationKind == "Unknown" && 
+            string.IsNullOrWhiteSpace(sample.DepthMax) &&
+            string.IsNullOrWhiteSpace(sample.DepthMin) &&
+            isProduction)
             dto.AutoSetElevationWriteConfig = true;
 
         if (dataPackageId != null)

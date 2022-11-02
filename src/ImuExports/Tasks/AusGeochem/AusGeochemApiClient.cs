@@ -23,19 +23,22 @@ public class AusGeochemApiApiClient : IAusGeochemApiClient
     private readonly ISampleEndpoint _sampleEndpoint;
     private readonly IImageApiHandler _imageApiHandler;
     private readonly ISamplePropertyApiHandler _samplePropertyApiHandler;
+    private readonly IHostEnvironment _hostEnvironment;
 
     public AusGeochemApiApiClient(
         IOptions<AppSettings> appSettings,
         IAuthenticateEndpoint authenticateEndpoint,
         ISampleEndpoint sampleEndpoint,
         IImageApiHandler imageApiHandler,
-        ISamplePropertyApiHandler samplePropertyApiHandler)
+        ISamplePropertyApiHandler samplePropertyApiHandler,
+        IHostEnvironment hostEnvironment)
     {
         _appSettings = appSettings.Value;
         _authenticateEndpoint = authenticateEndpoint;
         _sampleEndpoint = sampleEndpoint;
         _imageApiHandler = imageApiHandler;
         _samplePropertyApiHandler = samplePropertyApiHandler;
+        _hostEnvironment = hostEnvironment;
     }
 
     public async Task Authenticate(CancellationToken stoppingToken)
@@ -100,7 +103,7 @@ public class AusGeochemApiApiClient : IAusGeochemApiClient
 
             if (existingSampleDto != null)
             {
-                var updatedSampleDto = sample.ToSampleWithLocationDto(lookups, existingSampleDto);
+                var updatedSampleDto = sample.ToSampleWithLocationDto(lookups, _hostEnvironment.IsProduction(), existingSampleDto);
                 ArgumentNullException.ThrowIfNull(updatedSampleDto.Id);
 
                 if (sample.Deleted)
@@ -122,7 +125,7 @@ public class AusGeochemApiApiClient : IAusGeochemApiClient
             }
             else
             {
-                var createSampleDto = sample.ToSampleWithLocationDto(lookups, package.Id, _appSettings.AusGeochem.ArchiveId);
+                var createSampleDto = sample.ToSampleWithLocationDto(lookups, _hostEnvironment.IsProduction(), package.Id, _appSettings.AusGeochem.ArchiveId);
 
                 if (!sample.Deleted)
                 {
