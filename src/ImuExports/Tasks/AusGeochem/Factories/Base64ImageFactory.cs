@@ -40,7 +40,7 @@ public class Base64ImageFactory : IBase64ImageFactory
 
             using var imageResource = new MagickImage(sourceFileStream);
 
-            imageResource.Format = MagickFormat.Jpg;
+            imageResource.Format = MagickFormat.Jpeg;
             imageResource.Quality = 90;
             imageResource.FilterType = FilterType.Lanczos;
             imageResource.ColorSpace = ColorSpace.sRGB;
@@ -64,7 +64,7 @@ public class Base64ImageFactory : IBase64ImageFactory
 
             imageResource.SetProfile(iptcProfile);
 
-            var base64Image = imageResource.ToBase64();
+            var base64Image = imageResource.ToBase64(MagickFormat.Jpeg);
 
             stopwatch.Stop();
             

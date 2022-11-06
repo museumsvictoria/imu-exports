@@ -35,7 +35,7 @@ public class ImageEndpoint : EndpointBase, IImageEndpoint
             Creator = image.Creator,
             Description = image.Description,
             License = image.License,
-            Name = image.Name,
+            Name = $"{image.Name}.jpg",
             RightsHolder = image.RightsHolder
         });
 
