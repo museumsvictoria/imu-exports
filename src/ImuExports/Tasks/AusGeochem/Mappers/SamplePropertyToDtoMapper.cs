@@ -17,8 +17,8 @@ public static class SamplePropertyToDtoMapper
         if (sampleId != null)
             dto.SampleId = sampleId;
 
-        dto.PropName = sampleProperty.Property.Key;
-        dto.PropValue = sampleProperty.Property.Value;
+        dto.PropName = sampleProperty.Name;
+        dto.PropValue = sampleProperty.Value;
 
         return dto;
     }

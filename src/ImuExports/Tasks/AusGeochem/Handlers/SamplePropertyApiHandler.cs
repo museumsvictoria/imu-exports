@@ -31,7 +31,7 @@ public class SamplePropertyApiHandler : ISamplePropertyApiHandler
         foreach (var sampleProperty in sampleProperties)
         {
             var existingDto = dtos.SingleOrDefault(x =>
-                string.Equals(x.PropName, sampleProperty.Property.Key, StringComparison.OrdinalIgnoreCase));
+                string.Equals(x.PropName, sampleProperty.Name, StringComparison.OrdinalIgnoreCase));
 
             if (existingDto != null)
             {
@@ -49,7 +49,7 @@ public class SamplePropertyApiHandler : ISamplePropertyApiHandler
         }
 
         // Delete sample properties that dont exist in properties but do in AusGeochem
-        foreach (var samplePropertyDto in dtos.Where(x => sampleProperties.All(y => y.Property.Key != x.PropName)))
+        foreach (var samplePropertyDto in dtos.Where(x => sampleProperties.All(y => y.Name != x.PropName)))
             await _samplePropertyEndpoint.DeleteSampleProperty(samplePropertyDto, stoppingToken);
     }
 

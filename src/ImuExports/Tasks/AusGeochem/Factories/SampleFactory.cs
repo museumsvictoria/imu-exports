@@ -96,8 +96,8 @@ public class SampleFactory : IImuFactory<Sample>
             if (!string.IsNullOrWhiteSpace(geoLocationNotes))
                 sample.Properties.Add(new SampleProperty
                 {
-                    Property = new KeyValuePair<string, string>("Descriptive Locality", geoLocationNotes),
-                    Order = 3
+                    Name = "Descriptive Locality",
+                    Value = geoLocationNotes
                 });
             
             // Properties:GeoreferenceDetails
@@ -112,8 +112,8 @@ public class SampleFactory : IImuFactory<Sample>
             if (!string.IsNullOrWhiteSpace(georeferenceDetails))
                 sample.Properties.Add(new SampleProperty()
                 {
-                    Property = new KeyValuePair<string, string>("Georeference Details", georeferenceDetails),
-                    Order = 4
+                    Name = "Georeference Details",
+                    Value = georeferenceDetails
                 });
             
             sample.LocationName = site.GetTrimString("LocPreciseLocation");
@@ -191,8 +191,8 @@ public class SampleFactory : IImuFactory<Sample>
             if (!string.IsNullOrWhiteSpace(map.GetTrimString("MinVariety")))
                 sample.Properties.Add(new SampleProperty()
                 {
-                    Property = new KeyValuePair<string, string>("Mineral Variety", map.GetTrimString("MinVariety")),
-                    Order = 1
+                    Name = "Mineral Variety",
+                    Value = map.GetTrimString("MinVariety")
                 });
         }
 
@@ -226,8 +226,8 @@ public class SampleFactory : IImuFactory<Sample>
             if (!string.IsNullOrWhiteSpace(map.GetTrimString("RocRockName")))
                 sample.Properties.Add(new SampleProperty()
                 {
-                    Property = new KeyValuePair<string, string>("Extended Rock Name", map.GetTrimString("RocRockName")),
-                    Order = 1
+                    Name = "Extended Rock Name",
+                    Value = map.GetTrimString("RocRockName")
                 });
         }
 
@@ -255,8 +255,8 @@ public class SampleFactory : IImuFactory<Sample>
         if (!string.IsNullOrWhiteSpace(specimenForm))
             sample.Properties.Add(new SampleProperty()
             {
-                Property = new KeyValuePair<string, string>("Specimen Form", specimenForm),
-                Order = 5
+                Name = "Specimen Form",
+                Value = specimenForm
             });
         
         // Properties:GeologicalDetails
@@ -276,12 +276,9 @@ public class SampleFactory : IImuFactory<Sample>
         if (!string.IsNullOrWhiteSpace(geologicalDetails))
             sample.Properties.Add(new SampleProperty()
             {
-                Property = new KeyValuePair<string, string>("Geological Details", geologicalDetails),
-                Order = 2
+                Name = "Geological Details",
+                Value = geologicalDetails
             });
-
-        // Sort properties
-        sample.Properties = sample.Properties.OrderBy(x => x.Order).ToList();
 
         return sample;
     }
