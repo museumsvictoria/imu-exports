@@ -6,5 +6,5 @@ public static class AtlasOfLivingAustraliaConstants
 
     public static string ImuSpecimenQueryString = "Collections Online: Natural Sciences";
 
-    public static string ImuMultimediaQueryString = "Collections Online: MMR";
+    public static string ImuCollectionsOnlineMultimediaQueryString = "Collections Online: MMR";
 }

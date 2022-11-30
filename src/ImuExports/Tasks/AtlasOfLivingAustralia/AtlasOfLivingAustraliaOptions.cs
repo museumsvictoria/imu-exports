@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.ComponentModel;
+using System.Globalization;
 using CommandLine;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 using LiteDB;
@@ -107,6 +108,21 @@ public class AtlasOfLivingAustraliaOptions : ITaskOptions
                         ModifiedBeforeDate);
                     Environment.Exit(Constants.ExitCodeError);
                 }
+            
+            // Attempt to access network
+            try
+            {
+                NetworkShareAccesser.Access(appSettings.AtlasOfLivingAustralia.WebSiteComputer,
+                    appSettings.AtlasOfLivingAustralia.WebSiteDomain,
+                    appSettings.AtlasOfLivingAustralia.WebSiteUser,
+                    appSettings.AtlasOfLivingAustralia.WebSitePassword);
+            }
+            catch (Win32Exception exception)
+            {
+                // Continue if exception is "Multiple connections to a server or shared resource by the same user..."
+                if(exception.NativeErrorCode != 1219)
+                    throw;
+            }
         });
     }
 

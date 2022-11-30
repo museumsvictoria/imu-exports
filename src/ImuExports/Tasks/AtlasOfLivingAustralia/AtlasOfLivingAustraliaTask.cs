@@ -202,11 +202,11 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
                 try
                 {
                     // Upload files
-                    using var client = new SftpClient(_appSettings.AtlasOfLivingAustralia.Host,
-                        22, _appSettings.AtlasOfLivingAustralia.Username,
-                        _appSettings.AtlasOfLivingAustralia.Password);
+                    using var client = new SftpClient(_appSettings.AtlasOfLivingAustralia.FtpHost,
+                        22, _appSettings.AtlasOfLivingAustralia.FtpUsername,
+                        _appSettings.AtlasOfLivingAustralia.FtpPassword);
                     
-                    Log.Logger.Information("Connecting to sftp server {Host}", _appSettings.AtlasOfLivingAustralia.Host);
+                    Log.Logger.Information("Connecting to sftp server {Host}", _appSettings.AtlasOfLivingAustralia.FtpHost);
                     client.Connect();
                         
                     stopwatch.Restart();
