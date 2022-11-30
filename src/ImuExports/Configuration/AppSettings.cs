@@ -22,11 +22,21 @@ public class Imu
 
 public class AtlasOfLivingAustralia
 {
-    public string Host { get; set; } = string.Empty;
+    public string FtpHost { get; set; } = string.Empty;
 
-    public string Username { get; set; } = string.Empty;
+    public string FtpUsername { get; set; } = string.Empty;
 
-    public string Password { get; set; } = string.Empty;
+    public string FtpPassword { get; set; } = string.Empty;
+    
+    public string WebSitePath { get; set; } = string.Empty;
+        
+    public string WebSiteUser { get; set; } = string.Empty;
+        
+    public string WebSitePassword { get; set; } = string.Empty;
+        
+    public string WebSiteComputer { get; set; } = string.Empty;
+
+    public string WebSiteDomain { get; set; } = string.Empty;
 }
 
 public class AusGeochem

@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.ComponentModel;
+using System.Globalization;
 using CommandLine;
 using ImuExports.Tasks.AtlasOfLivingAustralia.Models;
 using LiteDB;
@@ -8,7 +9,7 @@ namespace ImuExports.Tasks.AtlasOfLivingAustralia;
 [Verb("ala", HelpText = "Export records for the Atlas of Living Australia.")]
 public class AtlasOfLivingAustraliaOptions : ITaskOptions
 {
-    [Option('d', "dest", HelpText = "Destination directory for csv and images.")]
+    [Option('d', "dest", HelpText = "Destination directory for Darwin Core Archive")]
     public string Destination { get; set; }
 
     [Option('a', "modified-after", HelpText = "Get all records after modified date >=")]
@@ -46,30 +47,6 @@ public class AtlasOfLivingAustraliaOptions : ITaskOptions
                 IsAutomated = true;
                 Destination = $"{AppContext.BaseDirectory}{Utils.RandomString(8)}";
                 Log.Logger.Debug("No destination specified... assuming task is automated");
-
-                // Check for last import date
-                using var db = new LiteRepository(new ConnectionString()
-                {
-                    Filename = $"{AppContext.BaseDirectory}{appSettings.LiteDbFilename}",
-                    Upgrade = true
-                });
-
-                Application = db.Query<AtlasOfLivingAustraliaApplication>().FirstOrDefault();
-
-                if (Application == null)
-                {
-                    Application = new AtlasOfLivingAustraliaApplication();
-                    Log.Logger.Debug("No AtlasOfLivingAustralia Application found... creating new application");
-                }
-                else
-                {
-                    ParsedModifiedAfterDate = Application.PreviousDateRun;
-                    Log.Logger.Debug("AtlasOfLivingAustralia Application found");
-
-                    Log.Logger.Debug(
-                        "Setting ParsedModifiedAfterDate to application.PreviousDateRun {ParsedModifiedAfterDate}",
-                        ParsedModifiedAfterDate?.ToString("yyyy-MM-dd"));
-                }
             }
             else
             {
@@ -131,6 +108,21 @@ public class AtlasOfLivingAustraliaOptions : ITaskOptions
                         ModifiedBeforeDate);
                     Environment.Exit(Constants.ExitCodeError);
                 }
+            
+            // Attempt to access network
+            try
+            {
+                NetworkShareAccesser.Access(appSettings.AtlasOfLivingAustralia.WebSiteComputer,
+                    appSettings.AtlasOfLivingAustralia.WebSiteDomain,
+                    appSettings.AtlasOfLivingAustralia.WebSiteUser,
+                    appSettings.AtlasOfLivingAustralia.WebSitePassword);
+            }
+            catch (Win32Exception exception)
+            {
+                // Continue if exception is "Multiple connections to a server or shared resource by the same user..."
+                if(exception.NativeErrorCode != 1219)
+                    throw;
+            }
         });
     }
 

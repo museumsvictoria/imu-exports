@@ -388,7 +388,7 @@ public class OccurrenceFactory : IImuFactory<Occurrence>
                     $"https://collections.museumsvictoria.com.au/specimens/{map.GetLong("irn")}";
         }
 
-        occurrence.AssociatedMedia = MakeAssociatedMedia(map);
+        occurrence.AssociatedMedia = occurrence.Multimedia.Select(x => x.Identifier).Concatenate(" | ");
 
         return occurrence;
     }
@@ -511,27 +511,6 @@ public class OccurrenceFactory : IImuFactory<Occurrence>
             : $"{map.GetTrimString("ColRegPrefix")}{map.GetTrimString("ColRegNumber")}-{map.GetTrimString("ColRegPart")}";
     }
 
-    private string MakeAssociatedMedia(Map map)
-    {
-        return map.GetMaps("media").Select(mediaMap =>
-        {
-            // Add associated media only if mmr exists in collections online
-            if (mediaMap != null &&
-                string.Equals(mediaMap.GetTrimString("AdmPublishWebNoPassword"), "yes",
-                    StringComparison.OrdinalIgnoreCase) &&
-                mediaMap.GetTrimStrings("MdaDataSets_tab")
-                    .Contains(AtlasOfLivingAustraliaConstants.ImuMultimediaQueryString) &&
-                string.Equals(mediaMap.GetTrimString("MulMimeType"), "image", StringComparison.OrdinalIgnoreCase))
-            {
-                var irn = mediaMap.GetLong("irn");
-
-                return $"https://collections.museumvictoria.com.au/content/media/{irn % 50}/{irn}-large.jpg";
-            }
-
-            return null;
-        }).Concatenate(" | ");
-    }
-
     private string MakeDctermsModified(Map map)
     {
         var datesModified = new List<DateTime>();
@@ -575,7 +554,7 @@ public class OccurrenceFactory : IImuFactory<Occurrence>
         var medias = map.GetMaps("media");
 
         foreach (var media in medias)
-            if (Assertions.IsMultimedia(media) &&
+            if (Assertions.IsAtlasOfLivingAustraliaImage(media) &&
                 DateTime.TryParseExact(
                     $"{media.GetTrimString("AdmDateModified")} {media.GetTrimString("AdmTimeModified")}",
                     "dd/MM/yyyy HH:mm",

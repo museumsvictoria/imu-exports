@@ -73,28 +73,27 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
             {
                 stoppingToken.ThrowIfCancellationRequested();
 
-                using (var imuSession = new ImuSession("ecatalogue", _appSettings.Imu.Host, _appSettings.Imu.Port))
-                {
-                    var cachedIrnsBatch = cachedIrns
-                        .Skip(offset)
-                        .Take(Constants.DataBatchSize)
-                        .ToList();
+                using var imuSession = new ImuSession("ecatalogue", _appSettings.Imu.Host, _appSettings.Imu.Port);
+                
+                var cachedIrnsBatch = cachedIrns
+                    .Skip(offset)
+                    .Take(Constants.DataBatchSize)
+                    .ToList();
 
-                    if (cachedIrnsBatch.Count == 0)
-                        break;
+                if (cachedIrnsBatch.Count == 0)
+                    break;
 
-                    imuSession.FindKeys(cachedIrnsBatch);
+                imuSession.FindKeys(cachedIrnsBatch);
 
-                    var results = imuSession.Fetch("start", 0, -1, ExportColumns);
+                var results = imuSession.Fetch("start", 0, -1, ExportColumns);
 
-                    Log.Logger.Debug("Fetched {RecordCount} records from Imu", cachedIrnsBatch.Count);
+                Log.Logger.Debug("Fetched {RecordCount} records from IMu", cachedIrnsBatch.Count);
                     
-                    occurrences.AddRange(results.Rows.Select(map => _occurrenceFactory.Make(map, stoppingToken)));
+                occurrences.AddRange(results.Rows.Select(map => _occurrenceFactory.Make(map, stoppingToken)));
 
-                    offset += results.Count;
+                offset += results.Count;
 
-                    Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset, cachedIrns.Count);
-                }
+                Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset, cachedIrns.Count);
             }
 
             // Save data
@@ -132,7 +131,7 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
             {
                 // Determine filename
                 string startDate = null; 
-                string endDate;
+                string endDate = null;
 
                 if (_options.ParsedModifiedAfterDate.HasValue)
                 {
@@ -145,13 +144,25 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
                             ? _options.ParsedModifiedBeforeDate?.ToString("yyyy-MM-dd")
                             : _options.DateStarted.ToString("yyyy-MM-dd");
                 }
+
+                string zipFilename;
+                if (startDate != null && endDate != null)
+                {
+                    zipFilename = $"mv-dwca-{startDate}-to-{endDate}.zip";
+                }
+                else if (startDate != null)
+                {
+                    zipFilename = $"mv-dwca-after-{startDate}.zip";
+                }
+                else if (endDate != null)
+                {
+                    zipFilename = $"mv-dwca-before-{endDate}.zip";
+                }
                 else
                 {
-                    endDate = _options.DateStarted.ToString("yyyy-MM-dd");
-                }
+                    zipFilename = $"mv-dwca.zip";
+                }  
                 
-                var zipFilename = startDate != null ? $"mv-dwca-{startDate}-to-{endDate}.zip" : $"mv-dwca-{endDate}.zip";
-                        
                 var tempFilepath = $"{Path.GetTempPath()}{Utils.RandomString(8)}.tmp";
                 var stopwatch = Stopwatch.StartNew();
                 
@@ -191,11 +202,11 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
                 try
                 {
                     // Upload files
-                    using var client = new SftpClient(_appSettings.AtlasOfLivingAustralia.Host,
-                        22, _appSettings.AtlasOfLivingAustralia.Username,
-                        _appSettings.AtlasOfLivingAustralia.Password);
+                    using var client = new SftpClient(_appSettings.AtlasOfLivingAustralia.FtpHost,
+                        22, _appSettings.AtlasOfLivingAustralia.FtpUsername,
+                        _appSettings.AtlasOfLivingAustralia.FtpPassword);
                     
-                    Log.Logger.Information("Connecting to sftp server {Host}", _appSettings.AtlasOfLivingAustralia.Host);
+                    Log.Logger.Information("Connecting to sftp server {Host}", _appSettings.AtlasOfLivingAustralia.FtpHost);
                     client.Connect();
                         
                     stopwatch.Restart();

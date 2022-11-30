@@ -12,17 +12,20 @@ public class MultimediaFactory : IImuFactory<Multimedia>
 {
     private readonly AppSettings _appSettings;
     private readonly AtlasOfLivingAustraliaOptions _options = (AtlasOfLivingAustraliaOptions)CommandOptions.TaskOptions;
+    private readonly IPathFactory _pathFactory;
     
-    public MultimediaFactory(IOptions<AppSettings> appSettings)
+    public MultimediaFactory(IOptions<AppSettings> appSettings,
+        IPathFactory pathFactory)
     {
         _appSettings = appSettings.Value;
+        _pathFactory = pathFactory;
     }
 
     public Multimedia Make(Map map, CancellationToken stoppingToken)
     {
         stoppingToken.ThrowIfCancellationRequested();
         
-        if (Assertions.IsMultimedia(map))
+        if (Assertions.IsAtlasOfLivingAustraliaImage(map))
         {
             var irn = map.GetLong("irn");
 
@@ -30,7 +33,6 @@ public class MultimediaFactory : IImuFactory<Multimedia>
             {
                 Type = "StillImage",
                 Format = "image/jpeg",
-                Identifier = $"{irn}.jpg",
                 Title = map.GetTrimString("MulTitle"),
                 Creator = map.GetTrimStrings("MulCreator_tab").Concatenate(" | "),
                 Publisher = "Museums Victoria",
@@ -67,8 +69,16 @@ public class MultimediaFactory : IImuFactory<Multimedia>
                     multimedia.RightsHolder = rightsHolderRegex.Groups["rightsholder"].Value;
             }
 
-            if (TrySaveMultimedia(irn))
+            var (isSuccess, identifier) = MakeIdentifier(map);
+
+            if (isSuccess)
+            {
+                multimedia.Identifier = identifier;
+                
                 return multimedia;
+            }
+            
+            Log.Logger.Warning("Could not construct identifier, omitting image from occurence record (MMR Irn: {Irn})", irn);
         }
 
         return null;
@@ -99,52 +109,68 @@ public class MultimediaFactory : IImuFactory<Multimedia>
         return multimedias;
     }
 
-    private bool TrySaveMultimedia(long irn)
+    private (bool, string) MakeIdentifier(Map map)
     {
-        try
+        var irn = map.GetLong("irn");
+        var destinationPath = _pathFactory.MakeImageDestinationPath(irn);
+        
+        // First check to see if image is collections online image
+        if (Assertions.IsCollectionsOnlineImage(map))
         {
-            var stopwatch = Stopwatch.StartNew();
-
-            using var imuSession = new ImuSession("emultimedia", _appSettings.Imu.Host, _appSettings.Imu.Port);
-            imuSession.FindKey(irn);
-            var resource = imuSession.Fetch("start", 0, -1, new[] { "resource" }).Rows[0].GetMap("resource");
-
-            if (resource == null)
-                throw new IMuException("MultimediaResourceNotFound");
-
-            var mimeFormat = resource["mimeFormat"] as string;
-
-            using var fileStream = resource["file"] as FileStream;
-            using var file = File.Open($"{_options.Destination}{irn}.jpg", FileMode.Create,
-                FileAccess.Write);
-            if (mimeFormat != null && mimeFormat.ToLower() == "jpeg")
-                fileStream.CopyTo(file);
+            // Check that file exists on collections online website path
+            if (File.Exists(destinationPath))
+            {
+                return (true, _pathFactory.MakeImageUriPath(irn));
+            }
             else
             {
-                using var image = new MagickImage(fileStream);
-                image.Format = MagickFormat.Jpg;
+                Log.Logger.Warning("Could not find occurence record image file on Collections Online website path {DestinationPath} (MMR Irn: {Irn})", destinationPath, irn);
+            }
+        }
 
+        // If not create large derivative and save it to collections online
+        if (File.Exists(destinationPath))
+        {
+            // File exists already so return uri path
+            return (true, _pathFactory.MakeImageUriPath(irn));
+        }
+        else
+        {
+            // Save image to collections online
+            try
+            {
+                var stopwatch = Stopwatch.StartNew();
+            
+                using var imuSession = new ImuSession("emultimedia", _appSettings.Imu.Host, _appSettings.Imu.Port);
+                imuSession.FindKey(irn);
+                var resource = imuSession.Fetch("start", 0, -1, new[] { "resource" }).Rows[0].GetMap("resource");
+            
+                if (resource == null)
+                    throw new IMuException("MultimediaResourceNotFound");
+
+                using var fileStream = resource["file"] as FileStream;
+                using var image = new MagickImage(fileStream);
+                
                 image.Format = MagickFormat.Jpg;
-                image.Quality = 90;
+                image.Quality = 86;
                 image.FilterType = FilterType.Lanczos;
                 image.ColorSpace = ColorSpace.sRGB;
                 image.Resize(new MagickGeometry(3000) { Greater = true });
                 image.UnsharpMask(0.5, 0.5, 0.6, 0.025);
+                image.Write(destinationPath!);
 
-                image.Write(file);
+                stopwatch.Stop();
+                Log.Logger.Debug("Completed image {Irn} creation in {ElapsedMilliseconds}ms", irn,
+                    stopwatch.ElapsedMilliseconds);
+            
+                return (true, _pathFactory.MakeImageUriPath(irn));
             }
-
-            stopwatch.Stop();
-            Log.Logger.Debug("Completed image {irn} creation in {ElapsedMilliseconds}ms", irn,
-                stopwatch.ElapsedMilliseconds);
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            Log.Logger.Error(ex, "Error saving multimedia {irn}", irn);
+            catch (Exception ex)
+            {
+                Log.Logger.Warning(ex, "Error saving image {Irn}", irn);
+            }
         }
 
-        return false;
+        return (false, null);
     }
 }
