@@ -101,7 +101,7 @@ public abstract class EndpointBase
     {
         var response = await Policy
             .HandleResult<RestResponse<T>>(r => !r.IsSuccessful)
-            .WaitAndRetryAsync(4, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
+            .WaitAndRetryAsync(4, attempt => TimeSpan.FromSeconds(attempt * 16),
                 (result, duration, _, _) =>
                 {
                     Log.Logger.Debug(
