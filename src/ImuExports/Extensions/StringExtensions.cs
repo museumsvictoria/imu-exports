@@ -43,6 +43,9 @@ public static class StringExtensions
     
     public static string RemoveDiacritics(this string input) 
     {
+        if (input is null)
+            return null;
+        
         var normalizedString = input.Normalize(NormalizationForm.FormD);
         var sb = new StringBuilder();
 

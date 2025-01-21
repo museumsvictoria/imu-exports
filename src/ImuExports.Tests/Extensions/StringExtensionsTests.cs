@@ -17,4 +17,17 @@ public class StringExtensionsTests
         // Then
         result.ShouldBe("Serandite");
     }
+    
+    [Fact]
+    public void RemoveDiacritics_WithNull_ReturnsNull()
+    {
+        // Given
+        string input = null!;
+
+        // When
+        var result = input.RemoveDiacritics();
+        
+        // Then
+        result.ShouldBe(null);
+    }
 }
