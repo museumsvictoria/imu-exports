@@ -2,12 +2,12 @@
   <configuration default="false" name="Deploy ImuExports to Production" type="BatchConfigurationType" factoryName="Batch">
     <module name="rider.module" />
     <option name="INTERPRETER_OPTIONS" value="" />
-    <option name="WORKING_DIRECTORY" value="./env/production/ImuExports/" />
+    <option name="WORKING_DIRECTORY" value="./env/prod" />
     <option name="PARENT_ENVS" value="true" />
-    <option name="SCRIPT_NAME" value="./env/production/ImuExports/deploy-production.bat" />
+    <option name="SCRIPT_NAME" value="./env/prod/deploy-production.bat" />
     <option name="PARAMETERS" value="" />
     <method v="2">
-      <option name="Build" default="false" projectName="ImuExports" projectPath="file://$PROJECT_DIR$/src/ImuExports/ImuExports.csproj" />
+      <option name="Build" default="false" projectName="ImuExports" projectPath="$PROJECT_DIR$/src/ImuExports/ImuExports.csproj" />
     </method>
   </configuration>
 </component>
