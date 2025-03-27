@@ -28,12 +28,7 @@ public class AtlasOfLivingAustraliaOptions : ITaskOptions
 
     public AtlasOfLivingAustraliaApplication Application { get; set; }
 
-    public DateTime DateStarted { get; }
-
-    public AtlasOfLivingAustraliaOptions()
-    {
-        DateStarted = DateTime.Now;
-    }
+    public DateTime DateStarted { get; } = DateTime.Now;
 
     public async Task Initialize(AppSettings appSettings)
     {
@@ -63,6 +58,7 @@ public class AtlasOfLivingAustraliaOptions : ITaskOptions
             
             // Make sure destination directory exists
             if (!Directory.Exists(Destination))
+            {
                 try
                 {
                     Directory.CreateDirectory(Destination);
@@ -72,11 +68,13 @@ public class AtlasOfLivingAustraliaOptions : ITaskOptions
                     Log.Logger.Fatal(ex, "Error creating {Destination} directory", Destination);
                     Environment.Exit(Constants.ExitCodeError);
                 }
+            }
             
             Log.Logger.Information("Exporting to directory {Destination}", Destination);
 
             // Parse ModifiedAfterDate
             if (!string.IsNullOrWhiteSpace(ModifiedAfterDate))
+            {
                 try
                 {
                     ParsedModifiedAfterDate = DateTime.ParseExact(ModifiedAfterDate, "yyyy-MM-dd",
@@ -91,9 +89,11 @@ public class AtlasOfLivingAustraliaOptions : ITaskOptions
                         ModifiedAfterDate);
                     Environment.Exit(Constants.ExitCodeError);
                 }
+            }
 
             // Parse ModifiedBeforeDate
             if (!string.IsNullOrWhiteSpace(ModifiedBeforeDate))
+            {
                 try
                 {
                     ParsedModifiedBeforeDate = DateTime.ParseExact(ModifiedBeforeDate, "yyyy-MM-dd",
@@ -104,24 +104,11 @@ public class AtlasOfLivingAustraliaOptions : ITaskOptions
                 }
                 catch (Exception ex)
                 {
-                    Log.Logger.Fatal(ex, "Error parsing ModifiedBeforeDate {ModifiedBeforeDate}, ensure string is in the format yyyy-MM-dd",
+                    Log.Logger.Fatal(ex,
+                        "Error parsing ModifiedBeforeDate {ModifiedBeforeDate}, ensure string is in the format yyyy-MM-dd",
                         ModifiedBeforeDate);
                     Environment.Exit(Constants.ExitCodeError);
                 }
-            
-            // Attempt to access network
-            try
-            {
-                NetworkShareAccesser.Access(appSettings.AtlasOfLivingAustralia.WebSiteComputer,
-                    appSettings.AtlasOfLivingAustralia.WebSiteDomain,
-                    appSettings.AtlasOfLivingAustralia.WebSiteUser,
-                    appSettings.AtlasOfLivingAustralia.WebSitePassword);
-            }
-            catch (Win32Exception exception)
-            {
-                // Continue if exception is "Multiple connections to a server or shared resource by the same user..."
-                if(exception.NativeErrorCode != 1219)
-                    throw;
             }
         });
     }

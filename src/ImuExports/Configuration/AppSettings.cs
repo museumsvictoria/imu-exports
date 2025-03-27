@@ -34,8 +34,6 @@ public class AtlasOfLivingAustralia
         
     public string WebSitePassword { get; set; } = string.Empty;
         
-    public string WebSiteComputer { get; set; } = string.Empty;
-
     public string WebSiteDomain { get; set; } = string.Empty;
 }
 

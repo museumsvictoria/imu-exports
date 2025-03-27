@@ -20,7 +20,7 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
     private readonly AppSettings _appSettings;
     private readonly IImuFactory<Occurrence> _occurrenceFactory;
     private readonly IEnumerable<IModuleSearchConfig> _moduleSearchConfigs;
-    
+
     public AtlasOfLivingAustraliaTask(
         IOptions<AppSettings> appSettings,
         IImuFactory<Occurrence> occurrenceFactory,
@@ -34,6 +34,10 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
     public async Task Run(CancellationToken stoppingToken)
     {
         using (Log.Logger.BeginTimedOperation($"{GetType().Name} starting", $"{GetType().Name}.Run"))
+        using (ConnectToSharedFolder.Access(_appSettings.AtlasOfLivingAustralia.WebSitePath,
+                   _appSettings.AtlasOfLivingAustralia.WebSiteDomain,
+                   _appSettings.AtlasOfLivingAustralia.WebSiteUser,
+                   _appSettings.AtlasOfLivingAustralia.WebSitePassword))
         {
             // Cache Irns
             var cachedIrns = new List<long>();
@@ -72,7 +76,7 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
             while (true)
             {
                 stoppingToken.ThrowIfCancellationRequested();
-
+                
                 using var imuSession = new ImuSession("ecatalogue", _appSettings.Imu.Host, _appSettings.Imu.Port);
                 
                 var cachedIrnsBatch = cachedIrns
@@ -88,7 +92,7 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
                 var results = imuSession.Fetch("start", 0, -1, ExportColumns);
 
                 Log.Logger.Debug("Fetched {RecordCount} records from IMu", cachedIrnsBatch.Count);
-                    
+
                 occurrences.AddRange(results.Rows.Select(map => _occurrenceFactory.Make(map, stoppingToken)));
 
                 offset += results.Count;
@@ -121,28 +125,28 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
                 csv.Context.RegisterClassMap<MultimediaClassMap>();
                 await csv.WriteRecordsAsync(multimedia, stoppingToken);
             }
-            
+
             // Copy meta.xml
             Log.Logger.Information("Copying meta.xml");
             File.Copy(@$"{AppContext.BaseDirectory}meta.xml", _options.Destination + @"meta.xml", true);
-            
+
             // Compress/Upload files to ALA if automated export
             if (_options.IsAutomated)
             {
                 // Determine filename
-                string startDate = null; 
+                string startDate = null;
                 string endDate = null;
 
                 if (_options.ParsedModifiedAfterDate.HasValue)
                 {
                     startDate = _options.ParsedModifiedAfterDate?.ToString("yyyy-MM-dd");
                 }
-                
+
                 if (_options.ParsedModifiedBeforeDate.HasValue)
                 {
                     endDate = _options.ParsedModifiedBeforeDate <= _options.DateStarted
-                            ? _options.ParsedModifiedBeforeDate?.ToString("yyyy-MM-dd")
-                            : _options.DateStarted.ToString("yyyy-MM-dd");
+                        ? _options.ParsedModifiedBeforeDate?.ToString("yyyy-MM-dd")
+                        : _options.DateStarted.ToString("yyyy-MM-dd");
                 }
 
                 string zipFilename;
@@ -161,11 +165,11 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
                 else
                 {
                     zipFilename = $"mv-dwca.zip";
-                }  
-                
+                }
+
                 var tempFilepath = $"{Path.GetTempPath()}{Utils.RandomString(8)}.tmp";
                 var stopwatch = Stopwatch.StartNew();
-                
+
                 try
                 {
                     // Zip Directory
@@ -205,19 +209,20 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
                     using var client = new SftpClient(_appSettings.AtlasOfLivingAustralia.FtpHost,
                         22, _appSettings.AtlasOfLivingAustralia.FtpUsername,
                         _appSettings.AtlasOfLivingAustralia.FtpPassword);
-                    
                     Log.Logger.Information("Connecting to sftp server {Host}", _appSettings.AtlasOfLivingAustralia.FtpHost);
+                    
                     client.Connect();
-                        
+
                     stopwatch.Restart();
                     await using (var fileStream = new FileStream($"{_options.Destination}{zipFilename}", FileMode.Open))
                     {
                         Log.Logger.Information(
-                            "Uploading zip {ZipFilename} ({Length})", zipFilename, Utils.BytesToString(fileStream.Length));
+                            "Uploading zip {ZipFilename} ({Length})", zipFilename,
+                            Utils.BytesToString(fileStream.Length));
                         client.BufferSize = 4 * 1024; // bypass Payload error large files
                         client.UploadFile(fileStream, zipFilename);
                     }
-                        
+
                     stopwatch.Stop();
                     Log.Logger.Information(
                         "Uploaded {ZipFilename} in {Elapsed} ({ElapsedMilliseconds} ms)",
@@ -227,22 +232,24 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
                 {
                     // Log and cleanup before exit
                     Log.Logger.Fatal(ex, "Error uploading zip archive");
-                    
+
                     throw;
                 }
 
                 // Update/Insert application
-                using var db = new LiteRepository(new ConnectionString()
+                using var db = new LiteRepository(new ConnectionString
                 {
                     Filename = $"{AppContext.BaseDirectory}{_appSettings.LiteDbFilename}",
                     Upgrade = true
                 });
                 
                 var application = _options.Application;
-        
+
                 if (application != null)
                 {
-                    Log.Logger.Information("Updating ALA Application PreviousDateRun {PreviousDateRun} to {DateStarted}", application.PreviousDateRun, _options.DateStarted);
+                    Log.Logger.Information(
+                        "Updating ALA Application PreviousDateRun {PreviousDateRun} to {DateStarted}",
+                        application.PreviousDateRun, _options.DateStarted);
                     application.PreviousDateRun = _options.DateStarted;
                     db.Upsert(application);
                 }
@@ -266,7 +273,7 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
         return searchTerms;
     }
 
-    private string[] ExportColumns => new[]
+    private static string[] ExportColumns => new[]
     {
         "irn",
         "ColRegPrefix",
