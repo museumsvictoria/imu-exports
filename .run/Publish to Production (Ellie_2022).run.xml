@@ -1,0 +1,8 @@
+﻿<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Publish to Production (Ellie_2022)" type="DotNetFolderPublish" factoryName="Publish to folder">
+    <riderPublish configuration="Release" platform="Any CPU" produce_single_file="true" runtime="win-x64" target_folder="//ellie_2022/imu-exports" target_framework="net6.0" uuid_high="7487415727040381397" uuid_low="-9050612545824804179" />
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Deploy appsettings to Production" run_configuration_type="BatchConfigurationType" />
+    </method>
+  </configuration>
+</component>
