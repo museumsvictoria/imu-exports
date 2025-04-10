@@ -34,10 +34,6 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
     public async Task Run(CancellationToken stoppingToken)
     {
         using (Log.Logger.BeginTimedOperation($"{GetType().Name} starting", $"{GetType().Name}.Run"))
-        using (ConnectToSharedFolder.Access(_appSettings.AtlasOfLivingAustralia.WebSitePath,
-                   _appSettings.AtlasOfLivingAustralia.WebSiteDomain,
-                   _appSettings.AtlasOfLivingAustralia.WebSiteUser,
-                   _appSettings.AtlasOfLivingAustralia.WebSitePassword))
         {
             // Cache Irns
             var cachedIrns = new List<long>();
@@ -76,28 +72,33 @@ public class AtlasOfLivingAustraliaTask : ImuTaskBase, ITask
             while (true)
             {
                 stoppingToken.ThrowIfCancellationRequested();
-                
+
                 using var imuSession = new ImuSession("ecatalogue", _appSettings.Imu.Host, _appSettings.Imu.Port);
-                
-                var cachedIrnsBatch = cachedIrns
-                    .Skip(offset)
-                    .Take(Constants.DataBatchSize)
-                    .ToList();
+                using (ConnectToSharedFolder.Access(_appSettings.AtlasOfLivingAustralia.WebSitePath,
+                           _appSettings.AtlasOfLivingAustralia.WebSiteDomain,
+                           _appSettings.AtlasOfLivingAustralia.WebSiteUser,
+                           _appSettings.AtlasOfLivingAustralia.WebSitePassword))
+                {
+                    var cachedIrnsBatch = cachedIrns
+                        .Skip(offset)
+                        .Take(Constants.DataBatchSize)
+                        .ToList();
 
-                if (cachedIrnsBatch.Count == 0)
-                    break;
+                    if (cachedIrnsBatch.Count == 0)
+                        break;
 
-                imuSession.FindKeys(cachedIrnsBatch);
+                    imuSession.FindKeys(cachedIrnsBatch);
 
-                var results = imuSession.Fetch("start", 0, -1, ExportColumns);
+                    var results = imuSession.Fetch("start", 0, -1, ExportColumns);
 
-                Log.Logger.Debug("Fetched {RecordCount} records from IMu", cachedIrnsBatch.Count);
+                    Log.Logger.Debug("Fetched {RecordCount} records from IMu", cachedIrnsBatch.Count);
 
-                occurrences.AddRange(results.Rows.Select(map => _occurrenceFactory.Make(map, stoppingToken)));
+                    occurrences.AddRange(results.Rows.Select(map => _occurrenceFactory.Make(map, stoppingToken)));
 
-                offset += results.Count;
+                    offset += results.Count;
 
-                Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset, cachedIrns.Count);
+                    Log.Logger.Information("Import progress... {Offset}/{TotalResults}", offset, cachedIrns.Count);
+                }
             }
 
             // Save data
